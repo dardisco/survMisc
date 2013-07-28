@@ -2,12 +2,13 @@
 ##' @name Sig
 ##' @S3method Sig coxph
 ##' @method Sig coxph
-##' @export
-Sig <- function(x)
+##' @export Sig
+Sig <- function(x){
     UseMethod(x)
+    }
 ##' @name Sig.coxph
 ##' @aliases Sig
-##' @export
+##' @export Sig
 ##' @title Significiance tests of coefficients in a Coxph model
 ##' @description Significance tests of coefficients in survival model.
 ##' These are: \describe{
@@ -58,7 +59,7 @@ Sig.coxph <- function(x){
 ### p value for Wald tests
     res1[ ,1] <- 1 - pchisq((coef(x)/se1)^2, 1)
 ### log-likelihood for original model
-    pLL <- 1 - pchisq(LRdiff, degf1)
+    pLL <- 1 - pchisq(LR1, degf1)
     for (i in 1:l1){
 ### get names of the coefficients from model.frame
 ### note excluding Surv
