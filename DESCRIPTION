@@ -1,0 +1,19 @@
+Package: survMisc
+Imports:
+    stats,
+    graphics,
+    utils,
+    survival
+Depends:
+    survival
+Maintainer: Chris Dardis <christopherdardis@gmail.com>
+License: GPL-2
+Title: Miscellaneous functions for survival data.
+Type: Package
+Author: Chris Dardis
+Description: A collection of functions for analysis of survival data. These
+    extend the methods available in package survival.
+Version: 0.2
+Date: 2013-03-15
+Collate:
+    'Sig.coxph.R'

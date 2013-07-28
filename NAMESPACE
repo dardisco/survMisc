@@ -1,0 +1,2 @@
+export(Sig.coxph)
+S3method(Sig,coxph)
