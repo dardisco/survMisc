@@ -1,14 +1,16 @@
 \name{Sig}
 \alias{Sig}
 \alias{Sig.coxph}
-\title{Significiance tests of coefficients in a Coxph model}
+\title{Sig}
 \usage{
-  \method{Sig}{coxph} (x)
+  Sig(x, ...)
 
-  Sig.coxph(x)
+  \method{Sig}{coxph} (x, ...)
 }
 \arguments{
   \item{x}{A model of class \code{coxph}}
+
+  \item{...}{Additional arguments}
 }
 \value{
   A \code{data.frame} with one fow for each coefficient in
@@ -17,6 +19,8 @@
   ratio) \item Score }
 }
 \description{
+  Sig
+
   Significance tests of coefficients in survival model.
   These are: \describe{ \item{Wald test}{the statistic is:
   \deqn{ \frac{\hat{B}}{\hat{SE}}}{ Bhat/SE} where

@@ -3,9 +3,12 @@ Imports:
     stats,
     graphics,
     utils,
-    survival
+    survival,
+    KMsurv
 Depends:
-    survival
+    survival,
+    stats,
+    gam
 Maintainer: Chris Dardis <christopherdardis@gmail.com>
 License: GPL-2
 Title: Miscellaneous functions for survival data.
@@ -16,4 +19,13 @@ Description: A collection of functions for analysis of survival data. These
 Version: 0.2
 Date: 2013-03-15
 Collate:
+    'air.R'
+    'tne.Surv.R'
+    'survEst.R'
+    'calcSurv.R'
+    'gamTerms.R'
+    'multPlot.R'
+    'martPlot.R'
+    'profLik.R'
+    'quantile.Surv.R'
     'Sig.coxph.R'

@@ -1,0 +1,2 @@
+c1 <- coxph(Surv(time, status==2) ~ age +pspline(bili, df=4), data=pbc)
+plotTerm(c1)

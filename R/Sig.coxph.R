@@ -1,14 +1,14 @@
-##' @rdname Sig.coxph
-##' @name Sig
+##' Sig
+##' @export Sig
+##' @rdname Sig
+##' @title Sig
+##'
+Sig <- function(x, ...){
+    UseMethod("Sig")
+    }
+##' @rdname Sig
 ##' @S3method Sig coxph
 ##' @method Sig coxph
-##' @export Sig
-Sig <- function(x){
-    UseMethod(x)
-    }
-##' @name Sig.coxph
-##' @aliases Sig
-##' @export Sig
 ##' @title Significiance tests of coefficients in a Coxph model
 ##' @description Significance tests of coefficients in survival model.
 ##' These are: \describe{
@@ -31,6 +31,7 @@ Sig <- function(x){
 ##' All statistics are distributed as chi-square, with degrees of freedom
 ##' = no. of coefficients \eqn{-1}.
 ##' @param x A model of class \code{coxph}
+##' @param ... Additional arguments
 ##' @return A \code{data.frame} with one fow for each coefficient in the
 ##' original model. There are 3 columns, one for each of the tests:
 ##' \itemize{
@@ -38,9 +39,7 @@ Sig <- function(x){
 ##'  \item LR (likelihood ratio)
 ##'  \item Score
 ##'  }
-##'
-##'
-Sig.coxph <- function(x){
+Sig.coxph <- function(x, ...){
     if(!inherits(x, "coxph")) stop
     ("Only applies to objects of class coxph")
     l1 <- length(coefficients(x))
@@ -59,18 +58,14 @@ Sig.coxph <- function(x){
 ### p value for Wald tests
     res1[ ,1] <- 1 - pchisq((coef(x)/se1)^2, 1)
 ### log-likelihood for original model
-    pLL <- 1 - pchisq(LR1, degf1)
-    for (i in 1:l1){
+    pLL <- 1 - stats::pchisq(LR1, degf1)
 ### get names of the coefficients from model.frame
 ### note excluding Surv
-        n1 <- names(
-            model.frame(x)
-            )[!grepl("Surv",names(model.frame(x)) ) ]
+    n1 <- names(model.frame(x) )[!grepl("Surv",names(model.frame(x)) ) ]
+    for (i in 1:l1){
 ### refit with coefficient omitted
         c2 <- update(x,
-                     as.formula(paste(".~",
-                                      n1[-i])
-                                )
+                     as.formula(paste(".~", n1[-i]))
                      )
         degf2 <- findDf(c2)
         LR2 <- -2 * (c2$loglik[1] - c2$loglik[2])
