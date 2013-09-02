@@ -4,8 +4,10 @@
 ##' time, no. at risk and no. events.
 ##' \cr \cr
 ##' For a \code{survfit} object with one predictor
-##' object describing right censored data, gives time, no. at risk
-##' and no. events. Also per-predictor estimates of no. at risk,
+##' describing right censored data, gives time, no. at risk
+##' and no. events.
+##' \cr
+##' Also per-predictor estimates of no. at risk,
 ##' no. expected and no. events - no. expected.
 ##' \cr \cr
 ##' No. events expected (per predictor) is given by:
