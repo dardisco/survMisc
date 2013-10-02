@@ -1,7 +1,7 @@
 \name{Sig}
 \alias{Sig}
 \alias{Sig.coxph}
-\title{Sig}
+\title{Significiance tests of coefficients in a Coxph model}
 \usage{
   Sig(x, ...)
 
@@ -19,9 +19,8 @@
   ratio) \item Score }
 }
 \description{
-  Sig
+  Significiance tests of coefficients in a Coxph model
 
-  Significance tests of coefficients in survival model.
   These are: \describe{ \item{Wald test}{the statistic is:
   \deqn{ \frac{\hat{B}}{\hat{SE}}}{ Bhat/SE} where
   \eqn{\hat{B}}{Bhat} is the estimate of the coefficient

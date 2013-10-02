@@ -1,0 +1,206 @@
+\name{comp}
+\alias{comp}
+\alias{comp.coxph}
+\alias{comp.survfit}
+\title{Compare survival curves}
+\usage{
+  comp(x, ...)
+
+  \method{comp}{survfit} (x, ..., FHp = 1, FHq = 1,
+    scores = "", lim = 10000)
+
+  \method{comp}{coxph} (x, ..., FHp = 1, FHq = 1,
+    scores = "", lim = 10000)
+}
+\arguments{
+  \item{x}{A \code{survfit} or \code{coxph} object}
+
+  \item{...}{Additional arguments}
+
+  \item{FHp}{\eqn{p} for Fleming-Harrington test}
+
+  \item{FHq}{\eqn{q} for Fleming-Harrington test}
+
+  \item{scores}{scores}
+
+  \item{lim}{limit}
+}
+\value{
+  A list with two elements, \code{tne} and \code{tests}.
+  \cr \cr The first is a \code{data.table} with one row for
+  each time at which an event occurred. Columns show time,
+  no. at risk and no. events (by stratum and overall). \cr
+  \cr The second contains the tests, as a list. \cr \cr The
+  first element is the log-rank family of tests. \cr The
+  following additional tests depend on the no. of strata:
+  \cr For a \code{survfit} or a \code{coxph} object with 2
+  strata, these are the Supremum (Renyi) family of tests.
+  \cr For a \code{survfit} or \code{coxph} object with at
+  least 3 strata, there are tests for trend. \cr
+}
+\description{
+  Compare survival curves
+}
+\details{
+  The \bold{log-rank} tests are given by the general
+  expression: \deqn{ Q = \sum{ W_i (e_i - \hat{e}_i)}^T
+  \sum{ W_i \hat{V_i} W_i^{-1}} \sum{ W_i (e_i -
+  \hat{e}_i)} }{ Q = [sum W(e-E)]^T [sum WVW]^-1 [sum
+  W(e-E)] } Where \eqn{W} is the weight, given below,
+  \eqn{e} is the no. of events, \eqn{\hat{e}}{E} is the no.
+  of expected events for that time and \eqn{\hat{V}}{V} is
+  the variance-covariance matrix given by
+  \code{\link{covMatSurv}}.
+
+  The sum is taken to the largest observed survival time
+  (i.e. censored observations are excluded). \cr If there
+  are \eqn{K} groups, then \eqn{K-1} are selected
+  (arbitrary). Likewise the corresponding
+  variance-covariance matrix is reduced to the appropriate
+  \eqn{K-1 \times K-1}{K-1 * K-1} dimensions. \eqn{Q} is
+  distributed as chi-square with \eqn{K-1} degrees of
+  freedom. \cr \cr For 2 strata this simplifies to: \deqn{
+  Q = \frac{ \sum{ W_i [e1_i - n1_i (\frac{e_i}{n_i})]} }{
+  \sqrt{ \sum{ W_i^2 \frac{n1_i}{n_i} ( 1- \frac{n1_i}{n_i}
+  ) ( \frac{n_i - e_i}{n_i-1}) e_i }}}}{ Q = SUM W [e1 -
+  n1.(e/n)] / (SUM W^2.e1/e.(1-(n1/n)).(n-e/n-1).e)^0.5 }
+  Here \eqn{e} and \eqn{n} refer to the no. events and no.
+  at risk overall and \eqn{e1} and \eqn{n1} refer to the
+  no. events and no. at risk in group \eqn{1}. \cr \cr The
+  weights are given as follows: \describe{
+  \item{Log-rank}{weight = 1} \item{Gehan-Breslow
+  generalized Wilcoxon}{weight = \eqn{n}, the no. at risk}
+  \item{Tarone-Ware}{weight = \eqn{\sqrt{n}}{n^0.5}}
+  \item{Peto-Peto}{weight = \eqn{\bar{S}(t)}{S(t)}, a
+  modified estimator of survival function given by
+  \deqn{\bar{S}(t)=\prod{1 - \frac{e_i}{n_i+1}}}{ S(t) =
+  cumprod( 1- e/(n+1))} } \item{modified Peto-Peto (by
+  Andersen)}{ weight = \eqn{\bar{S}(t) \frac{n}{n+1} }{S(t)
+  n/n+1}} \item{Fleming-Harrington}{weight at \eqn{t_0 = 1}
+  and thereafter is: \deqn{ \hat{S}(t_{i-1})^p
+  [1-\hat{S}(t_{i-1})^q]} Here \eqn{\hat{S}} is the
+  Kaplan-Meier (product-limit) estimator. Note that both
+  \eqn{p} and \eqn{q} need to be \eqn{ \geq 0}{>=0} } } The
+  \bold{Supremum (Renyi)} family of tests are designed to
+  detect differences in survival curves which cross. \cr
+  That is, an early difference in survival in favor of one
+  group is balanced by a later reversal. \cr The same
+  weights as above are used. \cr They are calculated by
+  finding \deqn{ Z(t_i) = \sum_{t_k \leq t_i} W(t_k)[e1_k -
+  n1_k\frac{e_k}{n_k}], \quad i=1,2,...,k}{ Z(t[i]) = SUM
+  W(t[k]) [ e1[k] - n1[k]e[k]/n[k] ]} (which is similar to
+  the numerator used to find \eqn{Q} in the log-rank test
+  for 2 groups above). \cr and it's variance: \deqn{
+  \sigma^2(\tau) = \sum_{t_k \leq \tau} W(t_k)^2 \frac{n1_k
+  n2_k (n_k-e_k) e_k}{n_k^2 (n_k-1)} }{ simga^2(tau) =
+  SUM(k=1,2,...,tau) W(t[k]) [ n1[k].n2[k].(n[k]-e[k]).e[k]
+  / n[k]^2.(n[k]-1) ] } where \eqn{\tau}{tau} is the
+  largest \eqn{t} where both groups have at least one
+  subject at risk. \cr \cr Then calculate: \deqn{ Q =
+  \frac{ \sup{|Z(t)|}}{\sigma(\tau)} ,t<\tau }{ Q = sup(
+  |Z(t)| ) / sigma(tau), t<tau} When the null hypothesis is
+  true, the distribution of \eqn{Q} is approximately
+  \deqn{Q \sim \sup{|B(x)|, \quad 0 \leq x \leq 1}}{ Q ~
+  sup( |B(x)|, 0 <= x <= 1)} And for a standard Brownian
+  motion (Wiener) process: \deqn{ Pr[\sup|B(t)|>x] =
+  1-\frac{4}{\pi} \sum_{k=0}^{\infty} \frac{(-1)^k}{2k+1}
+  \exp{ \frac{-\pi^2(2k+1)^2}{8x^2}}}{ Pr[sup|B(t)|>x] = 1
+  - 4/pi SUM (-1)^k/2k+1 exp(-pi^2 (2k+1)^2/x^2)}
+  \bold{Tests for trend} are designed to detect ordered
+  differences in survival curves. That is, for at least one
+  group: \deqn{S_1(t) \geq S_2(t) \geq ... \geq S_K(t)
+  \quad t \leq \tau}{ S1(t) >= S2(t) >= ... >= SK(t) for t
+  <= tau} where \eqn{\tau}{tau} is the largest \eqn{t}
+  where all groups have at least one subject at risk. The
+  null hypothesis is that \deqn{S_1(t) = S_2(t) = ... =
+  S_K(t) \quad t \leq \tau}{ S1(t) = S2(t) = ... = SK(t)
+  for t <= tau} Scores used to construct the test are
+  typically \eqn{s = 1,2,...,K}, but may be given as a
+  vector representing a numeric characteristic of the
+  group. They are calculated by finding \deqn{ Z_j(t_i) =
+  \sum_{t_i \leq \tau} W(t_i)[e_{ji} - n_{ji}
+  \frac{e_i}{n_i}], \quad j=1,2,...,K}{ Z[t(i)] = SUM
+  W[t(i)] [e[j](i) - n[j](i).e(i)/n(i) ]} The test
+  statistic is \deqn{Z = \frac{ \sum_{j=1}^K
+  s_jZ_j(\tau)}{\sqrt{\sum_{j=1}^K \sum_{g=1}^K s_js_g
+  \sigma_{jg}}} }{ Z = SUM(j=1...K) s[j]Z[j] / SUM(j=1..K)
+  SUM(g=1..K) s[j]s[g]sigma[jg]} where \eqn{\sigma}{sigma}
+  is the the appropriate element in the variance-covariance
+  matrix (as in \code{\link{covMatSurv}}). \cr If ordering
+  is present, the statistic \eqn{Z} will be greater than
+  the upper \eqn{\alpha}{alpha}th percentile of a standard
+  normal distribution.
+}
+\note{
+  Regarding the Fleming-Harrington weights: \itemize{ \item
+  \eqn{p = q = 0} gives the log-rank test, i.e. \eqn{W=1}
+  \item \eqn{p=1, q=0} gives a version of the
+  Mann-Whitney-Wilcoxon test (tests if populations
+  distributions are identical) \item \eqn{p=0, q>0} gives
+  more weight to differences later on \item \eqn{p>0, q=0}
+  gives more weight to differences early on } The example
+  using \code{alloauto} data illustrates this. Here the
+  log-rank statistic has a p-value of around 0.5 as the
+  late advantage of allogenic transplants is offset by the
+  high early mortality. However using Fleming-Harrington
+  weights of \eqn{p=0, q=0.5}, emphasising differences
+  later in time, gives a p-value of 0.04.
+}
+\examples{
+### 2 curves
+data(kidney,package="KMsurv")
+s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney )
+comp(s1)
+### 3 curves
+data(bmt, package="KMsurv")
+s2 <- survfit(Surv(time=t2, event=d3) ~ group, data=bmt)
+comp(s2)
+### see effect of F-H test
+data(alloauto, package="KMsurv")
+s3 <- survfit(Surv(time, delta) ~ type, data=alloauto)
+comp(s3, FHp=0, FHq=1)
+### see trend tests
+data(larynx, package="KMsurv")
+s4 <- survfit(Surv(time, delta) ~ stage, data=larynx)
+comp(s4)
+### Renyi tests
+\dontrun{
+data(gastric)
+s5 <- survfit(Surv(time, event) ~ group, data=gastric)
+comp(s5)
+}
+c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney )
+comp(s1)
+}
+\references{
+  Gehan A. A Generalized Wilcoxon Test for Comparing
+  Arbitrarily Singly-Censored Samples. Biometrika 1965 Jun.
+  52(1/2):203--23.
+  \href{http://www.jstor.org/stable/2333825}{JSTOR}
+
+  Tarone RE, Ware J 1977 On Distribution-Free Tests for
+  Equality of Survival Distributions.
+  \emph{Biometrika};\bold{64}(1):156--60.
+  \href{http://www.jstor.org/stable/2335790}{JSTOR}
+
+  Peto R, Peto J 1972 Asymptotically Efficient Rank
+  Invariant Test Procedures. \emph{J Royal Statistical
+  Society} \bold{135}(2):186--207.
+  \href{http://www.jstor.org/stable/2344317}{JSTOR}
+
+  Fleming TR, Harrington DP, O'Sullivan M 1987 Supremum
+  Versions of the Log-Rank and Generalized Wilcoxon
+  Statistics. \emph{J American Statistical Association}
+  \bold{82}(397):312--20.
+  \href{http://www.jstor.org/stable/2289169}{JSTOR}
+
+  Billingsly P 2009 \emph{Convergence of Probability
+  Measures.} New York: John Wiley & Sons.
+  \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{Google
+  Books}
+
+  Examples are from Klein J, Moeschberger M 2003
+  \emph{Survival Analysis}, 2nd edition. New York:
+  Springer. Examples 7.2, 7.4, 7.5, 7.6, 7.9, pp 210-225.
+}
+

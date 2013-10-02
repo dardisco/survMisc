@@ -1,4 +1,5 @@
-##' Sig
+##' @name Sig
+##' @title Significiance tests of coefficients in a Coxph model
 ##' @export Sig
 ##' @rdname Sig
 ##' @title Sig
@@ -7,10 +8,11 @@ Sig <- function(x, ...){
     UseMethod("Sig")
     }
 ##' @rdname Sig
+##' @aliases Sig.coxph
 ##' @S3method Sig coxph
 ##' @method Sig coxph
-##' @title Significiance tests of coefficients in a Coxph model
-##' @description Significance tests of coefficients in survival model.
+##'
+##' @description
 ##' These are: \describe{
 ##' \item{Wald test}{the statistic is:
 ##'  \deqn{ \frac{\hat{B}}{\hat{SE}}}{

@@ -3,28 +3,26 @@
 \title{Profile likelihood for coefficients in Coxph model}
 \usage{
   profLik(x, CI = 0.95, interval = 50, mult = c(0.1, 2),
-    noPerPage = 2, width = 1500, height = 800)
+    noPerPage = 2, width = NULL, height = NULL)
 }
 \arguments{
   \item{x}{A \code{coxph} model}
 
   \item{CI}{Confidence Interval}
 
-  \item{interval}{No. of points over which to evaluate
-  coefficient.}
+  \item{interval}{Number of points over which to evaluate
+  coefficient}
 
   \item{mult}{Multiplier. Coefficent will be multiplied by
   lower and upper value and evaluated across this range}
 
-  \item{noPerPage}{Number of plots per page (for initial
-  plots). Will be used as guidance and optimised for ease
-  of display}
+  \item{noPerPage}{Number of plots per page}
 
-  \item{width}{Width of screen(display device) in pixels.
+  \item{width}{Width of screen (display device) in pixels.
   Set to \code{NULL} for default plot size}
 
-  \item{height}{Height of screen(display device) in pixels.
-  Set to \code{NULL} for default plot size}
+  \item{height}{Height of screen (display device) in
+  pixels. Set to \code{NULL} for default plot size}
 }
 \value{
   One plot for each coefficient in the model
@@ -54,7 +52,7 @@
 \examples{
 c1 <- coxph(formula = Surv(time, status == 2) ~ age + edema + log(bili) +
 log(albumin) + log(protime), data = pbc)
-profLik(c1)
+profLik(c1, noPerPage=4)
 }
 \references{
   Example is from: Therneau T, Grambsch P 2000.

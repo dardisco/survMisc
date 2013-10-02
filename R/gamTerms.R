@@ -5,11 +5,12 @@
 ##' @description
 ##' Returns the individual terms of a \code{gam} or \code{coxph} object,
 ##' along with the standard errors, in a way useful for plotting.
-##' @param fit The result of a Generalized Additive Model (\code{gam}).
-##' @param se.fit if \code{TRUE}, return the standard errors as well.
+##' @param fit The result of a Generalized Additive Model (\code{gam})
+##' or a Cox proportional hazards model (\code{coxph})
+##' @param se.fit if \code{TRUE}, also return the standard errors
 ##' @param link if \code{TRUE}, then the individual terms are centered so that
 ##' the average of the inverse-link of the data,
-##' i.e., the data on the original scale, has mean zero.
+##' i.e., the data on the original scale, has mean zero
 ##' @param weights a vector of case weights, data is centered so that the
 ##' weighted mean is zero
 ##' @return A list with one element per term. Each element is a matrix
@@ -17,48 +18,40 @@
 ##' with one row per unique x value, sorted by the first column.
 ##' (This makes it easy to plot the results).
 ##' The first element of the list, \code{constant},
-##' contains an overall mean for the decomposition.
+##' contains an overall mean for the decomposition
 ##' @seealso \code{gam}, \code{plot.gam}
 ##' @examples
 ##' data(air)
-##' gfit <- gam::gam(ozone ~ s(temperature) + s(wind), data=air)
+##' gfit <- gam::gam(ozone ~ gam::s(temperature) + gam::s(wind), data=air)
 ##' temp <- gamTerms(gfit)
 ##' identical( names(temp), c("constant", "temperature", "wind") )
-##' dim(temp$wind)    # air has 111 rows, but only 28 unique wind speeds
+##' ### air has 111 rows, but only 28 unique wind speeds:
+##' dim(temp$wind)
 ##' ### plot the fit versus square root of wind speed
-##' yy <- cbind(temp$wind[,2], temp$wind[,2] - 1.96*temp$wind[,3], temp$wind[,2] + 1.96*temp$wind[,3])
-##' ### Adding the constant makes this a plot of actual y (ozone) at
-##' ### the mean temp
+##' yy <- cbind(temp$wind[, 2], temp$wind[, 2] - 1.96*temp$wind[, 3], temp$wind[, 2] + 1.96*temp$wind[, 3])
+##' ### Adding the constant makes this a plot of actual y (ozone)
+##' ### at the mean temp
 ##' yy <- yy + temp$constant
-##' graphics::matplot(sqrt(temp$wind[,1]), yy, lty=c(1,2,2),
+##' graphics::matplot(sqrt(temp$wind[, 1]), yy, lty=c(1, 2, 2),
 ##' type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
-##' temp <- seq(3,19,2)
+##' temp <- seq(3, 19, 2)
 ##' graphics::axis(1, sqrt(temp), format(temp))
 ##' @author Terry Therneau, Dirk Larson, updated from S-plus by Chris Dardis
 ##' @keywords plot
-gamTerms <- function(fit, se.fit = TRUE, link=FALSE, weights) {
+gamTerms <- function(fit,
+                     se.fit=TRUE,
+                     link=FALSE,
+                     weights) {
 ### reconstruct the data, without transformations
     Terms <- all.vars(delete.response(terms(formula(fit))))
     keep <- match(c("", "formula", "data", "subset", "na.action"),
                   names(fit$call), nomatch = 0)
-###     m <- fit$call[keep]
-### reconstruct formula
-###     f1 <- as.formula(paste(fit$formula[[2]],"~",
-###                        paste0(Terms, collapse="+") ))
-###
-###     data <- eval(m, envir=eval(fit$call[[3]]) )
-###    m$formula <- do.call(as.formula, list(f1, env=fit$call$data))
-###    m[[1]] <- as.name("model.frame")
-###     data <- eval(m, envir=eval(fit$call[[3]]) )
-###     model.frame(f1)
-### get name of dataset
-###     eval(Terms, list2env(list()))
+### get original dataset
     data <- eval(fit$call$data)
 ### Now get the terms, and match them
     fit$na.action <- NULL
 ### predicted values
     termp <- predict(fit, type = "terms", se.fit = se.fit)
-survival:::predict.coxph
 ### vnames <- attr(terms(fit$formula), "term.labels")
     vnames <- Terms
 ### We need to remove any offset from the vnames list
@@ -120,7 +113,7 @@ survival:::predict.coxph
         tfit <- tfit - rep(tmean, each=nrow(tfit))
 ###
 ### Now walk through the columns one by one, and construct
-###  a data frame for each one
+### a data frame for each one
     nterm <- length(tname2)
     outlist <- list(constant = attr(termp$fit, "constant") + sum(tmean) )
     for(i in 1:nterm) {

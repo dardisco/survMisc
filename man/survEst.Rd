@@ -50,8 +50,8 @@
   by:
 
   \deqn{Var[\hat{S}(t)] = [\hat{S}(t)]^2 \sum_{t_i \leq t}
-  \frac{ \frac{e_i}{n_i}}{n_i(1- \frac{e_i}{n_i}) } }{
-  Var[S](t) = S(t)^2 SUM (e/n) / n(1-n) }
+  \frac{e_i}{n_i (n_i-e_i)} }{ Var[S](t) = S(t)^2 SUM (e) /
+  n(n-e) }
 
   \code{NelA} gives the Nelson Aalen estimator of hazard
   function. Value is \eqn{\hat{H}=0}{H=0} at \eqn{t=0} and
@@ -71,24 +71,36 @@ data(bmt, package="KMsurv")
 b1 <- bmt[bmt$group==1, ] # ALL patients
 s1 <- Surv(time=b1$t2, event=b1$d3)
 t1 <- tne(s1)
-KM(n=t1$n,e=t1$e)
+KM(n=t1$n, e=t1$e)
 ###
 data(bmt, package="KMsurv")
 b1 <- bmt[bmt$group==1, ] # ALL patients
 s1 <- Surv(time=b1$t2, event=b1$d3)
 t1 <- tne(s1)
-Gw(n=t1$n,e=t1$e)
+Gw(n=t1$n, e=t1$e)
+data(drug6mp, package="KMsurv")
+s1 <- Surv(time=drug6mp$t2, event=drug6mp$relapse) # 6MP patients
+t1 <- tne(s1)
+Gw(n=t1$n, e=t1$e)
 ###
 data(bmt, package="KMsurv")
 b1 <- bmt[bmt$group==1, ] # ALL patients
 s1 <- Surv(time=b1$t2, event=b1$d3)
 t1 <- tne(s1)
-NelA(e=t1$e,n=t1$n)
+NelA(e=t1$e, n=t1$n)
 ###
-data(bmt, package="KMsurv")
-b1 <- bmt[bmt$group==1, ] # ALL patients
-s1 <- Surv(time=b1$t2, event=b1$d3)
+data(drug6mp, package="KMsurv")
+s1 <- Surv(time=drug6mp$t2, event=drug6mp$relapse) # 6MP patients
 t1 <- tne(s1)
-NelAVar(n=t1$n,e=t1$e)
+NelAVar(n=t1$n, e=t1$e)
+}
+\references{
+  Last example for \code{Gw} is from: Klein J, Moeschberger
+  M 2003 \emph{Survival Analysis}, 2nd edition. New York:
+  Springer. Table 4.1A, pg 93.
+
+  Example for \code{NelAVar} is from: Klein J, Moeschberger
+  M 2003 \emph{Survival Analysis}, 2nd edition. New York:
+  Springer. Table 4.2, pg 94.
 }
 

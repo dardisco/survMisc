@@ -1,4 +1,4 @@
-.multPlot <- function(noPerPage=2,width=NULL,height=NULL){
+.multiPlot <- function(noPerPage=2, width=NULL, height=NULL){
 ##' @name multPlot
 ##' @title Multiple plots
 ##' @details
@@ -26,5 +26,5 @@
     windows(record=TRUE, width=width, height=height)
     p <- graphics::par
 ### oma=outer margins, mar=margins, bottom,left,top,right
-    graphics::par( mfrow=c(nrow1,ncol1), oma=c(0,0,4,0))
+    graphics::par( mfrow=c(nrow1, ncol1), oma=c(0, 0, 4, 0) )
 }
