@@ -5,9 +5,10 @@
 \usage{
   \method{autoplot}{survfit} (object, ..., alpha = 0.5,
     shape = 3, xlab = "Time", ylab = "Survival",
-    title = "Marks show times with censoring", CI = FALSE,
-    bands = FALSE, pval = FALSE, plotTable = FALSE,
-    divideTime = 1, returnTable = FALSE)
+    title = "Marks show times with censoring",
+    legendLabs = NULL, CI = FALSE, bands = FALSE,
+    pval = FALSE, plotTable = FALSE, divideTime = 1,
+    returnTable = FALSE)
 }
 \arguments{
   \item{object}{An object of class \code{survfit}}
@@ -26,6 +27,10 @@
   \item{ylab}{Label for y axis}
 
   \item{title}{Title for graph}
+
+  \item{legendLabs}{Legend labels. These can be used to
+  replace the names of the strata from the fit. Should be
+  given in the same order as those strata.}
 
   \item{CI}{Include confidence intervals (plotted as
   lines). \cr These are taken from the \code{survfit}
@@ -61,7 +66,10 @@
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 autoplot(s1)
-autoplot(s1, CI=TRUE, pval=TRUE, plotTable=TRUE, divideTime=5)
+autoplot(s1, CI=TRUE, pval=TRUE, plotTable=TRUE, divideTime=5,
+ legendLabs=c("surgical", "percutaneous"),
+ title="Time to infection following catheter placement \\n
+   by type of catheter, for dialysis patients")
 s1 <- survfit(Surv(time=time, event=delta) ~ 1, data=kidney)
 autoplot(s1)
 data(rectum.dat, package="km.ci")

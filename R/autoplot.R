@@ -13,6 +13,8 @@
 ##' @param xlab Label for x axis
 ##' @param ylab Label for y axis
 ##' @param title Title for graph
+##' @param legendLabs Legend labels. These can be used to replace the names
+##' of the strata from the fit. Should be given in the same order as those strata.
 ##' @param CI Include confidence intervals (plotted as lines).
 ##' \cr These are taken from the \code{survfit} object.
 ##' @param bands Include confidence bands (plotted as ribbons i.e.
@@ -32,7 +34,10 @@
 ##' data(kidney, package="KMsurv")
 ##' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 ##' autoplot(s1)
-##' autoplot(s1, CI=TRUE, pval=TRUE, plotTable=TRUE, divideTime=5)
+##' autoplot(s1, CI=TRUE, pval=TRUE, plotTable=TRUE, divideTime=5,
+##'  legendLabs=c("surgical", "percutaneous"),
+##'  title="Time to infection following catheter placement \n
+##'    by type of catheter, for dialysis patients")
 ##' s1 <- survfit(Surv(time=time, event=delta) ~ 1, data=kidney)
 ##' autoplot(s1)
 ##' data(rectum.dat, package="km.ci")
@@ -46,25 +51,34 @@ autoplot.survfit <- function(object, ...,
                              xlab="Time",
                              ylab="Survival",
                              title="Marks show times with censoring",
+                             legendLabs=NULL,
                              CI=FALSE,
                              bands=FALSE,
                              pval=FALSE,
                              plotTable=FALSE,
                              divideTime=1,
                              returnTable=FALSE){
-    if (!inherits(object, "survfit")) stop("Only applies to survfit objects")
+    stopifnot(inherits(object, "survfit"))
+    if(!is.null(legendLabs)) stopifnot(
+        length(legendLabs)==length(object$strata))
 ### generate data to plot
 ### declare variables (for R CMD check)
 ### st1 is vector for strata identification
-    st1 <- surv <- n.risk <- n.censor <- upper <- lower <- NULL
-    for(i in 1:length(object$strata)){
-### add vector for one strata according to number of rows of strata
-        st1 <- c(st1, rep(names(object$strata)[i], object$strata[i]))
+    st1 <- stNames <- surv <- n.risk <- n.censor <- upper <- lower <- NULL
+### change names for strata to legendLabs if required
+    if(is.null(legendLabs)){
+        stNames <- names(object$strata)
+    } else {
+        stNames <- legendLabs
     }
+### add vector for one strata according to number of rows of strata
+    st1 <- unlist(sapply( 1:length(object$strata),
+                         function (i) rep(stNames[i], object$strata[i]) ))
 ### if only one strata (intercept only model)
     if (is.null(object$strata)) st1 <- as.factor(rep(1, length(object$time)))
-### create data.table with data from survfit (create column for strata)
-### (using data.table as avoids duplication when adding rows later)
+### create data.table with data from survfit
+### add column for strata
+### (using data.table here as avoids duplication when adding rows later)
     dt1 <- data.table(time=object$time,
                       n.risk=object$n.risk,
                       n.event=object$n.event,
@@ -172,21 +186,25 @@ autoplot.survfit <- function(object, ...,
         n.risk = summary(object, times = times1, extend = TRUE)$n.risk
         )
     } else {
-    df1 <- data.frame(
-        strata = summary(object, times = times1, extend = TRUE)$strata,
-        time = summary(object, times = times1, extend = TRUE)$time,
-        n.risk = summary(object, times = times1, extend = TRUE)$n.risk
-        )
+        df1 <- data.frame(
+            strata = summary(object, times=times1, extend=TRUE)$strata,
+            time = summary(object, times=times1, extend=TRUE)$time,
+            n.risk = summary(object, times=times1, extend=TRUE)$n.risk
+            )
+        if(!is.null(legendLabs))
+### change names of strata to legend labels
+            df1$strata <- factor(df1$strata, labels=legendLabs)
     }
     if(plotTable) {
 ### table grob (graphical object)
         tg1 <- ggplot(df1, aes(x=time, y=strata,
                                label = format(n.risk, nsmall = 0))) +
                 geom_text(size = 3.5) +
-                scale_y_discrete(breaks=as.character(levels(df1$strata) ),
-                                 labels = levels(df1$strata) ) +
-                scale_x_continuous(limits=c(0, max(object$time)),breaks=times1) +
-                ggtitle( "Number at risk by time") +
+                scale_y_discrete(breaks=as.character(levels(df1$strata)),
+                                 labels=levels(df1$strata)) +
+                scale_x_continuous(limits=c(0, max(object$time)),
+                                   breaks=times1) +
+                ggtitle("Number at risk by time") +
                 theme_grey() +
                 theme(
                     plot.background = element_blank(),

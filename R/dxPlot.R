@@ -161,7 +161,8 @@ dxPlot.coxph <- function(x, ...,
                          defCont=2,
                          noQuantiles=5,
                          noPerPage=2,
-                         height=NULL, width=NULL
+                         height=NULL,
+                         width=NULL
                          ){
     stopifnot(inherits(x, "coxph"))
 ### set up plotting params
@@ -341,6 +342,7 @@ If >0 shows survival advantage for reference stratum"
 ### one line per difference
         matplot(m1$t, diffs1,
                 type="s",
+                lty=1,
                 xlab="Time",
                 ylab="Difference in log cumulative hazard rates",
                 col=rainbow(length(ns1), start=0.7, end=1),
@@ -375,6 +377,7 @@ If convex (towards top left) shows ratio of hazards is increasing over time"
         m1 <- m1l[[i-1]]
         ns1 <- ns1l[[i-1]]
         matplot(m1[, 2], m1[, -c(1,2)],
+                lty=1,
                 xlim=c(0,1),
                 xlab=paste0("Cumulative hazard (reference): \n", ns1[1]),
                 ylim=c(0,1),
