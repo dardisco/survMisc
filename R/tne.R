@@ -134,6 +134,15 @@ tne.Surv <- function(x, ..., onlyEvents=FALSE){
 tne.survfit <- function(x, ..., onlyEvents=FALSE){
     if (!class(x)=="survfit") stop("Only applies to object of class 'survfit'")
 ###
+###----------------------------------------
+###
+### get location to evaluate variables
+### (i.e. environment or data frame)
+    if (is.null(x$call$data)){
+        loc1 <- environment(eval(parse(text=as.character(x$call[2]))))
+    } else {
+        loc1 <- eval(x$call$data)
+    }
 ### create vector for strata identification
     st1 <- NULL
     for(i in 1:length(x$strata)){
@@ -155,7 +164,6 @@ tne.survfit <- function(x, ..., onlyEvents=FALSE){
     if ("pred" %in% names(el1)){
         pred <- el1$pred
     }
-
     if ("asList" %in% names(el1)){
         asList <- el1$asList
     }
@@ -166,13 +174,6 @@ tne.survfit <- function(x, ..., onlyEvents=FALSE){
 ###
 ###----------------------------------------
 ###
-### get location to evaluate variables
-### (i.e. environment or data frame)
-    if (is.null(x$call$data)){
-        loc1 <- environment(eval(parse(text=as.character(x$call[2]))))
-    } else {
-        loc1 <- eval(x$call$data)
-    }
 ### length of original data frame (no. rows)
     l1 <- length(get(ls(loc1),loc1))
 ### hold results:
@@ -192,7 +193,7 @@ tne.survfit <- function(x, ..., onlyEvents=FALSE){
     t1 <- as.character(eval(x$call[[2]])[2][[1]][2])
     df2$t <- get(t1, loc1)
     e1 <- as.character(eval(x$call[[2]])[2][[1]][3])
-    df2$e <- with(loc1, get(e1))
+    df2$e <- get(e1, loc1)
 ### strata
      if (!is.null(x$strata)) {
          s1 <- names(x$strata)
@@ -260,20 +261,27 @@ tne.survfit <- function(x, ..., onlyEvents=FALSE){
             stats::aggregate(
                 sub1, by=list(sub1$t),
                 FUN=identity)[2:4])
+### check if need fill in missing values
         if (is.list(res1)){
 ### no names yet, so refer to columns by no.
 ### take max for t and np
             res1[,1:2] <- lapply(res1[,1:2], FUN=max)
 ### take sum for e
             res1[,3] <- lapply(res1[,3], FUN=sum)
-            res1 <- matrix(unlist(res1),nrow=nrow(res1),ncol=3)
+            res1 <- matrix(unlist(res1), nrow=nrow(res1), ncol=3)
+            colnames(res1) <- c("t", "n", "e")
+            if (onlyEvents) res1 <- res1[!res1[, 3]==0, ]
+            return(res1)
+        } else {
+### if not list then one subject per time point so use sub1
+### i.e. no need to aggregate
+            colnames(sub1) <- c("t", "n", "e")
+            if (onlyEvents) sub1 <- sub1[!sub1[, 3]==0, ]
+            return(sub1)
         }
-        colnames(res1) <- c("t", "n", "e")
-        if (onlyEvents) res1 <- res1[!res1[, 3]==0, ]
-        return(res1)
     }
-    res <- sapply(X=1:length(s1), FUN=subAgg)
-   ###  names(res) <- paste("pred_", p1, sep="")
+    res <- lapply(as.list(1:length(s1)), subAgg)
+###  names(res) <- paste("pred_", p1, sep="")
     names(res) <- s1
     return(res)
 }

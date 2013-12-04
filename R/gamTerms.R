@@ -28,7 +28,9 @@
 ##' ### air has 111 rows, but only 28 unique wind speeds:
 ##' dim(temp$wind)
 ##' ### plot the fit versus square root of wind speed
-##' yy <- cbind(temp$wind[, 2], temp$wind[, 2] - 1.96*temp$wind[, 3], temp$wind[, 2] + 1.96*temp$wind[, 3])
+##' yy <- cbind(temp$wind[, 2],
+##'             temp$wind[, 2] - 1.96*temp$wind[, 3],
+##'             temp$wind[, 2] + 1.96*temp$wind[, 3])
 ##' ### Adding the constant makes this a plot of actual y (ozone)
 ##' ### at the mean temp
 ##' yy <- yy + temp$constant

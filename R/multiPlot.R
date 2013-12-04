@@ -23,7 +23,9 @@
         }
 ### open plot window + save parameters before altering
 ### (best defaults are width=1500, height=800)
-    windows(record=TRUE, width=width, height=height)
+    dev.new(record=TRUE, width=width, height=height)
+### above ins plaform independent; alternative on windows os:
+### windows(record=TRUE, width=width, height=height)
     p <- graphics::par
 ### oma=outer margins, mar=margins, bottom,left,top,right
     graphics::par( mfrow=c(nrow1, ncol1), oma=c(0, 0, 4, 0) )
