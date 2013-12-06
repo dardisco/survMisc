@@ -45,9 +45,26 @@ Sig.coxph <- function(x, ...){
     if(!inherits(x, "coxph")) stop
     ("Only applies to objects of class coxph")
     l1 <- length(coefficients(x))
+    if (l1==0) stop
+    ("No coefficients; this is an intercept-only model")
     res1 <- data.frame(matrix(NA, nrow=l1, ncol=3))
+### std. errors
+    se1 <- sqrt(diag(x$var))
+### p value for Wald tests
+    res1[ ,1] <- 1 - pchisq((coef(x)/se1)^2, 1)
 ### likelihood ratio test statistic
     LR1 <- -2 * (x$loglik[1] - x$loglik[2])
+### get names of the coefficients from model.frame
+### note excluding Surv
+    n1 <- names(model.frame(x) )[!grepl("Surv",names(model.frame(x)) ) ]
+### if only one coefficient then will be vs intercent-only model
+    if (l1==1){
+        res1[i, 2] <- 1 - pchisq(LR1, 1)
+        res1[i, 3] <- 1 - pchisq(x$score, 1)
+        rownames(res1) <- n1
+        colnames(res1) <- c("Wald", "LR", "score")
+        return(res1)
+    }
 ### find degrees of freedom ( taken from survival:::print.coxph() )
     findDf <- function(x){
         if (is.null(x$df)) {
@@ -55,15 +72,8 @@ Sig.coxph <- function(x, ...){
         } else {df <- round(sum(x$df), 2)}
     }
     degf1 <- findDf(x)
-### std. errors
-    se1 <- sqrt(diag(x$var))
-### p value for Wald tests
-    res1[ ,1] <- 1 - pchisq((coef(x)/se1)^2, 1)
 ### log-likelihood for original model
     pLL <- 1 - stats::pchisq(LR1, degf1)
-### get names of the coefficients from model.frame
-### note excluding Surv
-    n1 <- names(model.frame(x) )[!grepl("Surv",names(model.frame(x)) ) ]
     for (i in 1:l1){
 ### refit with coefficient omitted
         c2 <- update(x,
@@ -84,6 +94,6 @@ Sig.coxph <- function(x, ...){
         res1 [i,3] <- pchisq(c3$score, dfDiff)
     }
     rownames(res1) <- n1
-    colnames(res1) <- c("Wald","LR","score")
+    colnames(res1) <- c("Wald", "LR", "score")
     return(res1)
 }
