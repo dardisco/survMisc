@@ -280,7 +280,18 @@ comp2Surv <- function(n, e, n1, e1,
 ### make observed - expected for group 1
     eME1 <- e1-(n1*e/n)
 ### variance (2 groups)
-    var1 <- (n1/n)*(1-(n1/n))*((n-e)/(n-1))*e
+    var1 <- as.matrix( (n1/n)*(1-(n1/n))*((n-e)/(n-1))*e )
+### remove NaNs - first or last no.s may not be possible to calculate
+    if (any(is.nan(var1))){
+### index
+        in1 <- which(is.nan(var1))
+        var1 <- var1[-in1]
+        eME1 <- eME1[-in1]
+        e <- e[-in1]
+        n <- n[-in1]
+        e1 <- e1[-in1]
+        n1 <- n1[-in1]
+    }
 ### display chisq, degrees of freedom and rounded result
     dis1 <- function(chi1,df1=1,rounded=round1){
         c(chi1,df1, round(1-stats::pchisq(chi1,df1),digits=rounded))
