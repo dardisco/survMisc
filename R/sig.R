@@ -59,8 +59,8 @@ Sig.coxph <- function(x, ...){
     n1 <- names(model.frame(x) )[!grepl("Surv",names(model.frame(x)) ) ]
 ### if only one coefficient then will be vs intercent-only model
     if (l1==1){
-        res1[i, 2] <- 1 - pchisq(LR1, 1)
-        res1[i, 3] <- 1 - pchisq(x$score, 1)
+        res1[1, 2] <- 1 - pchisq(LR1, 1)
+        res1[1, 3] <- 1 - pchisq(x$score, 1)
         rownames(res1) <- n1
         colnames(res1) <- c("Wald", "LR", "score")
         return(res1)
