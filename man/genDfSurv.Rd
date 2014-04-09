@@ -2,9 +2,9 @@
 \alias{genDfSurv}
 \title{Generate data frame for survival analysis}
 \usage{
-  genDfSurv(f = 0, b = 2, c = 1, n = 100, pb = 0.5, nf = 3,
-    rc = 0.8, pe = 0.5, t0 = 1, tmax = 100,
-    asFactor = FALSE, model = TRUE, timelim = 5)
+genDfSurv(f = 0, b = 2, c = 1, n = 100, pb = 0.5, nf = 3,
+  rc = 0.8, pe = 0.5, t0 = 1, tmax = 100, asFactor = FALSE,
+  model = TRUE, timelim = 5)
 }
 \arguments{
   \item{b}{\dfn{binomial predictors}, the number of
@@ -47,23 +47,22 @@
   \item{model}{If \code{TRUE} will return fitted model}
 }
 \value{
-  A list with the following values: \item{df}{data frame
-  with predictors (labelled \eqn{x1,x2, ..., xn}) and
-  outcome (y), with \emph{n} rows (observations)}
-  \item{model}{if \code{model = TRUE} model fit with \code{
-  survival::coxph()} }
+A list with the following values: \item{df}{data frame with
+predictors (labelled \eqn{x1,x2, ..., xn}) and outcome (y),
+with \emph{n} rows (observations)} \item{model}{if
+\code{model = TRUE} model fit with \code{
+survival::coxph()} }
 }
 \description{
-  Generates a data frame with a binary outcome (events),
-  times and optional predictor variables. An optional coxph
-  model is fitted to the data. Model is fitted with
-  \code{survival::coxph()}
+Generates a data frame with a binary outcome (events),
+times and optional predictor variables. An optional coxph
+model is fitted to the data. Model is fitted with
+\code{survival::coxph()}
 }
 \note{
-  Using \code{asFactor=TRUE} with factors which have a
-  large number of levels (e.g. \code{nf >30}) on large
-  datasets (e.g. \eqn{n >1000}) can cause fitting to be
-  slow.
+Using \code{asFactor=TRUE} with factors which have a large
+number of levels (e.g. \code{nf >30}) on large datasets
+(e.g. \eqn{n >1000}) can cause fitting to be slow.
 }
 \examples{
 set.seed(1)

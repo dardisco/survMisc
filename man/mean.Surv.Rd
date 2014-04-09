@@ -2,8 +2,8 @@
 \alias{mean.Surv}
 \title{Mean for \code{Surv} object}
 \usage{
-  \method{mean}{Surv} (x, alpha = 0.05, method = "Efron",
-    tEnd = "", by = 1, dfm = FALSE, ...)
+\method{mean}{Surv}(x, alpha = 0.05, method = "Efron", tEnd = "",
+  by = 1, dfm = FALSE, ...)
 }
 \arguments{
   \item{x}{A \code{Surv} object}
@@ -37,17 +37,17 @@
   \item{...}{Additional arguments}
 }
 \value{
-  A list with the following elements: \item{mean}{Mean of
-  the \code{Surv} object} \item{variance}{The variance}
-  \item{CI}{The confidence level (from \eqn{alpha}{alpha}
-  above)} \item{upper}{Upper value for confidence interval}
-  \item{lower}{Lower value for the confidence interval} If
-  the last observation is censored at time \eqn{t_k}{t_k},
-  two values are returned, one calculated up to
-  \eqn{t_k}{t_k}, the other to \code{tEnd}.
+A list with the following elements: \item{mean}{Mean of the
+\code{Surv} object} \item{variance}{The variance}
+\item{CI}{The confidence level (from \eqn{alpha}{alpha}
+above)} \item{upper}{Upper value for confidence interval}
+\item{lower}{Lower value for the confidence interval} If
+the last observation is censored at time \eqn{t_k}{t_k},
+two values are returned, one calculated up to
+\eqn{t_k}{t_k}, the other to \code{tEnd}.
 }
 \description{
-  Mean for \code{Surv} object
+Mean for \code{Surv} object
 }
 \examples{
 data(bmt, package="KMsurv")

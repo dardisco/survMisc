@@ -1,3 +1,4 @@
+###
 ##' @name genDfSurv
 ##' @export
 ##' @title Generate data frame for survival analysis
@@ -46,7 +47,6 @@
 ##' genDfSurv(b=0, c=2, n=100, pe=0.7)
 ##' genDfSurv(b=1, c=0, n=1000)
 ##' genDfSurv(f=1, nf=4, b=1, c=0, asFactor=TRUE)
-##'
 genDfSurv <- function(f=0, b=2, c=1, n=100,
                       pb=0.5, nf=3, rc=0.8, pe=0.5,
                       t0=1, tmax=100,
@@ -105,4 +105,3 @@ genDfSurv <- function(f=0, b=2, c=1, n=100,
                 model=c1)
     return(res)
 }
-###

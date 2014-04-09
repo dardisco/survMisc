@@ -3,7 +3,7 @@
 \title{Individual terms of a Generalized Additive or Cox Proportional
 Hazard Model}
 \usage{
-  gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
+gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
 }
 \arguments{
   \item{fit}{The result of a Generalized Additive Model
@@ -22,17 +22,17 @@ Hazard Model}
   so that the weighted mean is zero}
 }
 \value{
-  A list with one element per term. Each element is a
-  matrix whose columns are x, y, and (optionally) se(y),
-  with one row per unique x value, sorted by the first
-  column. (This makes it easy to plot the results). The
-  first element of the list, \code{constant}, contains an
-  overall mean for the decomposition
+A list with one element per term. Each element is a matrix
+whose columns are x, y, and (optionally) se(y), with one
+row per unique x value, sorted by the first column. (This
+makes it easy to plot the results). The first element of
+the list, \code{constant}, contains an overall mean for the
+decomposition
 }
 \description{
-  Returns the individual terms of a \code{gam} or
-  \code{coxph} object, along with the standard errors, in a
-  way useful for plotting.
+Returns the individual terms of a \code{gam} or
+\code{coxph} object, along with the standard errors, in a
+way useful for plotting.
 }
 \examples{
 data(air)
@@ -42,7 +42,9 @@ identical( names(temp), c("constant", "temperature", "wind") )
 ### air has 111 rows, but only 28 unique wind speeds:
 dim(temp$wind)
 ### plot the fit versus square root of wind speed
-yy <- cbind(temp$wind[, 2], temp$wind[, 2] - 1.96*temp$wind[, 3], temp$wind[, 2] + 1.96*temp$wind[, 3])
+yy <- cbind(temp$wind[, 2],
+            temp$wind[, 2] - 1.96*temp$wind[, 3],
+            temp$wind[, 2] + 1.96*temp$wind[, 3])
 ### Adding the constant makes this a plot of actual y (ozone)
 ### at the mean temp
 yy <- yy + temp$constant
@@ -52,11 +54,11 @@ temp <- seq(3, 19, 2)
 graphics::axis(1, sqrt(temp), format(temp))
 }
 \author{
-  Terry Therneau, Dirk Larson, updated from S-plus by Chris
-  Dardis
+Terry Therneau, Dirk Larson, updated from S-plus by Chris
+Dardis
 }
 \seealso{
-  \code{gam}, \code{plot.gam}
+\code{gam}, \code{plot.gam}
 }
 \keyword{plot}
 

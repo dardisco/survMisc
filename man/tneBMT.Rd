@@ -16,27 +16,24 @@ Columns are:
  \item{e}{no. events overall}
 }}
 \source{
-  Klein J, Moeschberger 2003 \emph{Survival Analysis}, 2nd
-  edition. New York: Springer. Example 7.9, pg 224.
+Klein J, Moeschberger 2003 \emph{Survival Analysis}, 2nd
+edition. New York: Springer. Example 7.9, pg 224.
 }
 \description{
-  Data on the survival time following bone-marrow
-  transplant. Generated from
-  \code{data("bmt",package="KMsurv")}. Time (bmt$t2) is
-  disease free survival time. Event (bmt$d3) is death or
-  relapse.
+Data on the survival time following bone-marrow transplant.
+Generated from \code{data("bmt",package="KMsurv")}. Time
+(bmt$t2) is disease free survival time. Event (bmt$d3) is
+death or relapse.
 }
 \references{
-  Copelan EA, Biggs JC, Thompson JM, Crilley P, Szer J,
-  Klein JP, Kapoor N, Avalos BR, Cunningham I, Atkinson K,
-  et al 1991 Treatment for acute myelocytic leukemia with
-  allogeneic bone marrow transplantation following
-  preparation with BuCy2. \emph{Blood}.
-  \bold{78}(3):838-43.
-  \href{http://bloodjournal.hematologylibrary.org/content/78/3/838.full.pdf}{Blood}
+Copelan EA, Biggs JC, Thompson JM, Crilley P, Szer J, Klein
+JP, Kapoor N, Avalos BR, Cunningham I, Atkinson K, et al
+1991 Treatment for acute myelocytic leukemia with
+allogeneic bone marrow transplantation following
+preparation with BuCy2. \emph{Blood}. \bold{78}(3):838-43.
+\href{http://bloodjournal.hematologylibrary.org/content/78/3/838.full.pdf}{Blood}
 }
 \seealso{
-  \code{bmt} in package {KMsurv}
+\code{bmt} in package {KMsurv}
 }
-\keyword{datasets}
 
