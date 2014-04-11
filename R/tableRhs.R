@@ -1,6 +1,6 @@
-##' @name tableAll
-##' @export tableAll
-##' @title Table all predictors in a formula with the outcome
+##' @name tableRhs
+##' @export tableRhs
+##' @title Table the outcome against all predictors in a formula
 ##' @param formula A formula. Also works with formulas where the
 ##' left-hand side is a \code{Surv} object describing right-censored data
 ##' @param data A \code{data.frame}
@@ -9,7 +9,7 @@
 ##' \eqn{>nlf} levels are considered continuous and are not tabulated.
 ##' Needs to be less than the number of rows in the \code{data.frame}
 ##' @return \itemize{
-##'  \item If \code{return="summary"} (the default), a table with
+##'  \item If \code{return="summary"} (the default), a \code{table} with
 ##'  one row per predictor and three columns:
 ##' \describe{
 ##'   \item{zeros}{at least one zero present}
@@ -17,21 +17,21 @@
 ##'   \item{allEq}{outcomes equal for \emph{all} levels of the predictor}
 ##'   }
 ##' }
-##' Other values return a list of tables. Each element is
+##' Other values return a \code{list} of \code{table}s. Each element is
 ##' named after the predictor.
 ##' \itemize{
-##'  \item If \code{return="zeros"}, one table for each predictor
+##'  \item If \code{return="zeros"}, one \code{table} for each predictor
 ##' with a least one zero present.
 ##' \cr
-##' Each table shows only those levels
+##' Each \code{table} shows only those levels
 ##' of the predictor for which one level of the outcome is zero.
-##'  \item If \code{return="zEq"}, one table for each predictor
+##'  \item If \code{return="zEq"}, one \code{table} for each predictor
 ##' with a least one zero present or one level which has equal outcomes.
 ##' \cr
-##' Each table shows only those levels where one of the above apply.
-##'  \item If \code{return="counts"}, each tables gives the total
+##' Each \code{table} shows only those levels where one of the above apply.
+##'  \item If \code{return="counts"}, each \code{table} gives the total
 ##' number of levels where zeros and equal outcomes are present and absent.
-##'  \item If \code{return="all"}, a list of tables of
+##'  \item If \code{return="all"}, a list of \code{table}s of
 ##' outcomes for \emph{all} levels of each predictor.
 ##' }
 ##' @details Cross-tabulation of outcomes against levels of a predictor
@@ -40,8 +40,8 @@
 ##' @examples
 ##' set.seed(1)
 ##' d1 <- genDfSurv(c=3, rc=0.5)$df
-##' tableAll(Surv(t1, e) ~ ., data=d1, return="summary", nlf=99)
-##' t1 <- tableAll(Surv(t1, e) ~ ., data=d1, return="c", nlf=99)
+##' tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=99)
+##' t1 <- tableRhs(Surv(t1, e) ~ ., data=d1, return="c", nlf=99)
 ##' ### simple graph
 ##' p <- par()
 ##' par( mfrow=c(2, 2))
@@ -52,11 +52,11 @@
 ##' par <- p
 ##' set.seed(2)
 ##' d1 <- genDfSurv(f=1, n=10)$df
-##' t1 <- tableAll(Surv(t1, e) ~ x1, nlf=9, data=d1)
-##' tableAll(e ~ x1, nlf=9, r="zEq", data=d1)
-##' tableAll(e ~ ., nlf=3, r="c", data=d1)
+##' t1 <- tableRhs(Surv(t1, e) ~ x1, nlf=9, data=d1)
+##' tableRhs(e ~ x1, nlf=9, r="zEq", data=d1)
+##' tableRhs(e ~ ., nlf=3, r="c", data=d1)
 ##'
-tableAll <- function(formula = y ~ . , data=parent.frame(),
+tableRhs <- function(formula = y ~ . , data=parent.frame(),
                      return=c("summary", "zeros", "zEq", "counts", "all"),
                      nlf=2){
 ### this part taken from stats:lm
@@ -67,7 +67,8 @@ tableAll <- function(formula = y ~ . , data=parent.frame(),
     mf$drop.unused.levels <- TRUE
     mf[[1L]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
-    stopifnot(nlf < nrow(mf))
+    if(nrow(mf) == 0) stop("No observations to return")
+    if(nlf < nrow(mf)) stop("No. levels specified for factor is > no. observations")
 ### model terms
     mt <- attr(mf, "terms")
 ### no intercept required for tables
