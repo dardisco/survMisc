@@ -3,7 +3,7 @@
 \title{Individual terms of a Generalized Additive or Cox Proportional
 Hazard Model}
 \usage{
-gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
+  gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
 }
 \arguments{
   \item{fit}{The result of a Generalized Additive Model
@@ -22,17 +22,17 @@ gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
   so that the weighted mean is zero}
 }
 \value{
-A list with one element per term. Each element is a matrix
-whose columns are x, y, and (optionally) se(y), with one
-row per unique x value, sorted by the first column. (This
-makes it easy to plot the results). The first element of
-the list, \code{constant}, contains an overall mean for the
-decomposition
+  A list with one element per term. Each element is a
+  matrix whose columns are x, y, and (optionally) se(y),
+  with one row per unique x value, sorted by the first
+  column. (This makes it easy to plot the results). The
+  first element of the list, \code{constant}, contains an
+  overall mean for the decomposition
 }
 \description{
-Returns the individual terms of a \code{gam} or
-\code{coxph} object, along with the standard errors, in a
-way useful for plotting.
+  Returns the individual terms of a \code{gam} or
+  \code{coxph} object, along with the standard errors, in a
+  way useful for plotting.
 }
 \examples{
 data(air)
@@ -54,11 +54,11 @@ temp <- seq(3, 19, 2)
 graphics::axis(1, sqrt(temp), format(temp))
 }
 \author{
-Terry Therneau, Dirk Larson, updated from S-plus by Chris
-Dardis
+  Terry Therneau, Dirk Larson, updated from S-plus by Chris
+  Dardis
 }
 \seealso{
-\code{gam}, \code{plot.gam}
+  \code{gam}, \code{plot.gam}
 }
 \keyword{plot}
 

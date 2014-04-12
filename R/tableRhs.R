@@ -40,7 +40,7 @@
 ##' @examples
 ##' set.seed(1)
 ##' d1 <- genDfSurv(c=3, rc=0.5)$df
-##' tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=99)
+##' tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=2)
 ##' t1 <- tableRhs(Surv(t1, e) ~ ., data=d1, return="c", nlf=99)
 ##' ### simple graph
 ##' p <- par()
@@ -55,7 +55,6 @@
 ##' t1 <- tableRhs(Surv(t1, e) ~ x1, nlf=9, data=d1)
 ##' tableRhs(e ~ x1, nlf=9, r="zEq", data=d1)
 ##' tableRhs(e ~ ., nlf=3, r="c", data=d1)
-##'
 tableRhs <- function(formula = y ~ . , data=parent.frame(),
                      return=c("summary", "zeros", "zEq", "counts", "all"),
                      nlf=2){
@@ -68,7 +67,7 @@ tableRhs <- function(formula = y ~ . , data=parent.frame(),
     mf[[1L]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
     if(nrow(mf) == 0) stop("No observations to return")
-    if(nlf < nrow(mf)) stop("No. levels specified for factor is > no. observations")
+    if(nlf > nrow(mf)) stop("No. levels specified for factor is > no. observations")
 ### model terms
     mt <- attr(mf, "terms")
 ### no intercept required for tables

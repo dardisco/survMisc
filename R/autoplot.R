@@ -82,7 +82,7 @@
 ##' data(kidney, package="KMsurv")
 ##' s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
 ##' autoplot(s1)
-##' autoplot(s1, type="CI", pval=TRUE, pX=0.3, plotTable=TRUE, divideTime=5,
+##' autoplot(s1, type="CI", pval=TRUE, pX=0.3,
 ##'  legLabs=c("surgical", "percutaneous"),
 ##'  title="Time to infection following catheter placement \n
 ##'    by type of catheter, for dialysis patients")$plot
@@ -110,7 +110,7 @@ autoplot.survfit <- function(object, ...,
                              censSize=5,
                              legend=TRUE,
                              legLabs=NULL,
-                             legTitle="strata",
+                             legTitle="Strata",
                              legTextSize=10,
                              legSize=2,
                              alpha=0.05,
@@ -252,7 +252,8 @@ autoplot.survfit <- function(object, ...,
         scale_x_continuous(xlab) +
         scale_y_continuous(ylab) +
         ggtitle(title) +
-        theme(legend.text=element_text(size=legTextSize),
+        theme(title = element_text(size=titTextSize),
+              legend.text=element_text(size=legTextSize),
               legend.title=element_text(size=legTextSize),
               axis.text = element_text(size = axisLabSize),
               axis.title = element_text(size = axisTitSize)
@@ -265,21 +266,22 @@ autoplot.survfit <- function(object, ...,
     }
 ### remove legend if required
     if(!legend) g1 <- g1 + theme(legend.position = "none")
-### p value for log-rank test
-    if(pval) {
+### p value for log-rank test (only if >=2 groups)
+    if(pval & !is.null(object$strata)) {
         sd1 <- survival::survdiff(eval(object$call$formula),
                                   data=eval(object$call$data))
         p1 <- stats::pchisq(sd1$chisq,
                             length(sd1$n) - 1,
                             lower.tail=FALSE)
         p1txt <- ifelse(p1 < 0.0001,
-                        "p < 0.0001",
+                        "Log-rank test \n p < 0.0001",
                         paste("Log-rank test \n p =", signif(p1, sigP))
                         )
         g1 <- g1 + annotate("text",
                             x = pX * max(dt1$time),
                             y = pY,
-                            label = p1txt)
+                            label = p1txt,
+                            size =  element_text(size=legTextSize))
     }
 ### times to show on table
     tabTime <- match.arg(tabTime)
@@ -307,7 +309,7 @@ autoplot.survfit <- function(object, ...,
     g2 <- ggplot(data=dt3, aes(x=time, y=rev(st), shape=rev(st))) +
           geom_point(size=0) +
           geom_text(aes(label=n.risk), colour=1, size=nRiskSize) +
-          scale_x_continuous(limits=c(0, max(object$time)),
+          scale_x_continuous(name=xlab, limits=c(0, max(object$time)),
                              breaks=times1) +
 ### reverse here to plot in same order as in main plot
           scale_y_discrete(name=legTitle, breaks=as.character(levels(dt3$st)),

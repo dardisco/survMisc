@@ -1,17 +1,17 @@
 \name{tne}
 \alias{tne}
-\alias{tne.Surv}
 \alias{tne.coxph}
+\alias{tne.Surv}
 \alias{tne.survfit}
 \title{Time, No. at risk, No. events}
 \usage{
-tne(x, ...)
+  tne(x, ...)
 
-\method{tne}{Surv}(x, ..., onlyEvents = FALSE)
+  \method{tne}{Surv} (x, ..., onlyEvents = FALSE)
 
-\method{tne}{survfit}(x, ..., onlyEvents = FALSE)
+  \method{tne}{survfit} (x, ..., onlyEvents = FALSE)
 
-\method{tne}{coxph}(x, ..., onlyEvents = FALSE)
+  \method{tne}{coxph} (x, ..., onlyEvents = FALSE)
 }
 \arguments{
   \item{x}{A object of class \code{Surv} or \code{survfit}}
@@ -27,31 +27,32 @@ tne(x, ...)
   \emph{all} times recorded (including those censored).}
 }
 \value{
-For a \code{Surv} object: A data frame with columns:
-\item{t}{time} \item{n}{no. at risk} \item{e}{no. events}
-\cr \cr For a \code{survfit} or \code{coxph} object: A data
-frame with columns: \item{t}{time} \item{n}{no. at risk (by
-strata)} \item{e}{no. events (by strata)} \item{s}{strata}
-\cr \cr If \code{asList} = \code{TRUE} then instead a
-\code{list} with one element for each stratum, where each
-elements is a \code{data.frame} with columns \strong{t},
-\strong{n} and \strong{e} as above. \cr \cr If \code{pred}
-= \code{TRUE} then instead a \code{data.frame} with
-columns: \item{t}{time} \item{n}{no. at risk (total)}
-\item{e}{no. events (total)} \item{s}{strata} \item{ns}{no.
-at risk (by strata)} \item{Es}{no. events expected (by
-strata)} \item{e_Es}{no. events minus no. events expected}
+  For a \code{Surv} object: A data frame with columns:
+  \item{t}{time} \item{n}{no. at risk} \item{e}{no. events}
+  \cr \cr For a \code{survfit} or \code{coxph} object: A
+  data frame with columns: \item{t}{time} \item{n}{no. at
+  risk (by strata)} \item{e}{no. events (by strata)}
+  \item{s}{strata} \cr \cr If \code{asList} = \code{TRUE}
+  then instead a \code{list} with one element for each
+  stratum, where each elements is a \code{data.frame} with
+  columns \strong{t}, \strong{n} and \strong{e} as above.
+  \cr \cr If \code{pred} = \code{TRUE} then instead a
+  \code{data.frame} with columns: \item{t}{time}
+  \item{n}{no. at risk (total)} \item{e}{no. events
+  (total)} \item{s}{strata} \item{ns}{no. at risk (by
+  strata)} \item{Es}{no. events expected (by strata)}
+  \item{e_Es}{no. events minus no. events expected}
 }
 \description{
-For a \code{Surv} object, gives time, no. at risk and no.
-events. \cr \cr For a \code{survfit} or \code{coxph} object
-describing right censored data, gives time, no. at risk and
-no. events by strata. \cr Also (optionally) per-stratum
-estimates of no. at risk, no. expected and no. events - no.
-expected. \cr \cr No. events expected (per predictor) is
-given by: \deqn{\frac{e_i(n[p]_i)}{n_i}}{ e(i)n[p](i) /
-n(i)} where \eqn{n[p]_i} is the no. at risk for the
-predictor.
+  For a \code{Surv} object, gives time, no. at risk and no.
+  events. \cr \cr For a \code{survfit} or \code{coxph}
+  object describing right censored data, gives time, no. at
+  risk and no. events by strata. \cr Also (optionally)
+  per-stratum estimates of no. at risk, no. expected and
+  no. events - no. expected. \cr \cr No. events expected
+  (per predictor) is given by:
+  \deqn{\frac{e_i(n[p]_i)}{n_i}}{ e(i)n[p](i) / n(i)} where
+  \eqn{n[p]_i} is the no. at risk for the predictor.
 }
 \examples{
 ### Surv object
@@ -83,8 +84,8 @@ tne(c1)
 tne(c1, asList=TRUE)
 }
 \references{
-Example using \code{kidney} data is from: Klein J,
-Moeschberger M 2003 \emph{Survival Analysis}, 2nd edition.
-New York: Springer. Example 7.2, pg 210.
+  Example using \code{kidney} data is from: Klein J,
+  Moeschberger M 2003 \emph{Survival Analysis}, 2nd
+  edition. New York: Springer. Example 7.2, pg 210.
 }
 

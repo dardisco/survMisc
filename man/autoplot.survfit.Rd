@@ -2,17 +2,20 @@
 \alias{autoplot.survfit}
 \title{Generate a ggplot for \code{survfit} object}
 \usage{
-\method{autoplot}{survfit}(object, ..., xlab = "Time", ylab = "Survival",
-  title = "Marks show times with censoring", titTextSize = 15,
-  axisTitSize = 15, axisLabSize = 10, survSize = 0.5, type = c("single",
-  "CI", "fill"), palette = c("Dark2", "Set2", "Accent", "Paired", "Pastel1",
-  "Pastel2", "Set1", "Set3"), jitter = c("none", "noEvents", "all"),
-  censShape = 3, censSize = 5, legend = TRUE, legLabs = NULL,
-  legTitle = "strata", legTextSize = 10, legSize = 2, alpha = 0.05,
-  CIline = 10, fillLineSize = 0.05, pval = FALSE, sigP = 1, pX = 0.1,
-  pY = 0.1, tabTime = c("major", "minor"),
-  tabTitle = "Number at risk by time", tabTitTextSize = 15,
-  tabLegTextSize = 5, nRiskSize = 5)
+  \method{autoplot}{survfit} (object, ..., xlab = "Time",
+    ylab = "Survival",
+    title = "Marks show times with censoring",
+    titTextSize = 15, axisTitSize = 15, axisLabSize = 10,
+    survSize = 0.5, type = c("single", "CI", "fill"),
+    palette = c("Dark2", "Set2", "Accent", "Paired", "Pastel1", "Pastel2", "Set1", "Set3"),
+    jitter = c("none", "noEvents", "all"), censShape = 3,
+    censSize = 5, legend = TRUE, legLabs = NULL,
+    legTitle = "Strata", legTextSize = 10, legSize = 2,
+    alpha = 0.05, CIline = 10, fillLineSize = 0.05,
+    pval = FALSE, sigP = 1, pX = 0.1, pY = 0.1,
+    tabTime = c("major", "minor"),
+    tabTitle = "Number at risk by time",
+    tabTitTextSize = 15, tabLegTextSize = 5, nRiskSize = 5)
 }
 \arguments{
   \item{object}{An object of class \code{survfit}}
@@ -113,23 +116,23 @@
   \item{nRiskSize}{No. at risk - text size}
 }
 \value{
-A \code{list} of \code{ggplot} objects, with elments
-\code{plot}, the survial plot and \code{table} the table of
-events per time. This \code{list} has the additional
-\code{class} of \code{tableAndPlot}, allowing methods from
-\code{autoplot.tableAndPlot}. Further modifications may be
-made to the objects in the list if desired.
+  A \code{list} of \code{ggplot} objects, with elments
+  \code{plot}, the survial plot and \code{table} the table
+  of events per time. This \code{list} has the additional
+  \code{class} of \code{tableAndPlot}, allowing methods
+  from \code{autoplot.tableAndPlot}. Further modifications
+  may be made to the objects in the list if desired.
 }
 \description{
-Uses \code{ggplot2} to generate survival curves
-(Kaplan-Meier plot) and a table showing no. of events per
-time period
+  Uses \code{ggplot2} to generate survival curves
+  (Kaplan-Meier plot) and a table showing no. of events per
+  time period
 }
 \examples{
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
 autoplot(s1)
-autoplot(s1, type="CI", pval=TRUE, pX=0.3, plotTable=TRUE, divideTime=5,
+autoplot(s1, type="CI", pval=TRUE, pX=0.3,
  legLabs=c("surgical", "percutaneous"),
  title="Time to infection following catheter placement \\n
    by type of catheter, for dialysis patients")$plot
@@ -143,7 +146,7 @@ km.ci::km.ci(s1, method="logep")
 autoplot(s1, type="fill", legend=FALSE)$plot
 }
 \author{
-Chris Dardis. Based on existing work by R. Saccilotto,
-Abhijit Dasgupta, Gil Tomas and Mark Cowley.
+  Chris Dardis. Based on existing work by R. Saccilotto,
+  Abhijit Dasgupta, Gil Tomas and Mark Cowley.
 }
 

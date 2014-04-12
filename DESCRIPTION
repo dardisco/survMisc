@@ -50,7 +50,7 @@ Collate:
     'quantile.R'
     'sig.R'
     'survMisc_package.R'
-    'tableAll.R'
     'tneBMT.R'
     'tneKidney.R'
     'whas100.R'
+    'tableRhs.R'
