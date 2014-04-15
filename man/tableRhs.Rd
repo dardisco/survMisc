@@ -54,7 +54,7 @@
 \examples{
 set.seed(1)
 d1 <- genDfSurv(c=3, rc=0.5)$df
-tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=99)
+tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=2)
 t1 <- tableRhs(Surv(t1, e) ~ ., data=d1, return="c", nlf=99)
 ### simple graph
 p <- par()
