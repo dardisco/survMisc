@@ -1,3 +1,4 @@
+export(autoplot.rpart)
 export(autoplot.survfit)
 export(autoplot.tableAndPlot)
 export(calcSurv)

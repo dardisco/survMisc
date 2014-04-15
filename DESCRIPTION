@@ -14,7 +14,8 @@ Depends:
     stats,
     ggplot2,
     data.table,
-    gridExtra
+    gridExtra,
+    rpart
 Maintainer: Chris Dardis <christopherdardis@gmail.com>
 License: GPL-2
 Title: Miscellaneous functions for survival data.
@@ -54,3 +55,4 @@ Collate:
     'tneKidney.R'
     'whas100.R'
     'tableRhs.R'
+    'autoplotRpart.R'
