@@ -23,8 +23,8 @@ Type: Package
 Author: Chris Dardis
 Description: A collection of functions for analysis of survival data. These
     extend the methods available in package survival.
-Version: 0.4
-Date: 2013-03-15
+Version: 0.41
+Date: 2014-03-15
 Collate:
     'air.R'
     'autoplot.R'
@@ -36,13 +36,10 @@ Collate:
     'covMatSurv.R'
     'comp.R'
     'cutp.R'
-    'renameFact.R'
     'multiPlot.R'
-    'getSurvNames.R'
     'dxPlot.R'
     'gamTerms.R'
     'gastric.R'
-    'genDfSurv.R'
     'local.R'
     'lrSS.R'
     'meanSurv.R'
@@ -54,5 +51,9 @@ Collate:
     'tneBMT.R'
     'tneKidney.R'
     'whas100.R'
+    'genSurv.R'
     'tableRhs.R'
     'autoplotRpart.R'
+    'ic.R'
+    'multiCoxph.R'
+    'plotMultiCoxph.R'
