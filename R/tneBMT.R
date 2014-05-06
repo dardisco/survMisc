@@ -3,7 +3,8 @@
 ##' @title Time, no. at risk, no. events for BMT data
 ##' @description Data on the survival time following bone-marrow transplant.
 ##' Generated from \code{data("bmt",package="KMsurv")}. Time (bmt$t2) is disease free survival time. Event (bmt$d3) is death or relapse.
-##' @format A data frame with 76 rows and 9 columns
+##' @format A data frame with 76 rows and 9 columns.
+##' \cr
 ##' Columns are:
 ##' \describe{
 ##'  \item{t}{time}
@@ -16,7 +17,7 @@
 ##'  \item{n}{no. at risk overall}
 ##'  \item{e}{no. events overall}
 ##' }
-##' @seealso \code{bmt} in package {KMsurv}
+##' @seealso \code{bmt} in package \code{KMsurv}
 ##' @source Klein J, Moeschberger 2003
 ##' \emph{Survival Analysis}, 2nd edition.
 ##' New York: Springer.

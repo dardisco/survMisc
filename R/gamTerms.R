@@ -1,6 +1,7 @@
 ##' @name gamTerms
 ##' @export
-##' @title Individual terms of a Generalized Additive or Cox Proportional
+##' @title Individual terms of a Generalized Additive
+##' or Cox Proportional
 ##' Hazard Model
 ##' @description
 ##' Returns the individual terms of a \code{gam} or \code{coxph} object,

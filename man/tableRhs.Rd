@@ -53,7 +53,7 @@
 }
 \examples{
 set.seed(1)
-d1 <- genDfSurv(c=3, rc=0.5)$df
+d1 <- genSurvDf(c=3, rc=0.5, model=FALSE)
 tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=2)
 t1 <- tableRhs(Surv(t1, e) ~ ., data=d1, return="c", nlf=99)
 ### simple graph
@@ -65,12 +65,9 @@ for (i in 1:length(t1)){
 }
 par <- p
 set.seed(2)
-d1 <- genDfSurv(f=1, n=10)$df
+d1 <- genSurvDf(f=1, n=10, model=FALSE)
 t1 <- tableRhs(Surv(t1, e) ~ x1, nlf=9, data=d1)
 tableRhs(e ~ x1, nlf=9, r="zEq", data=d1)
 tableRhs(e ~ ., nlf=3, r="c", data=d1)
-}
-\author{
-  Chris Dardis
 }
 

@@ -11,11 +11,9 @@ dxPlot <- function(x, ...){
 ##' @S3method dxPlot coxph
 ##'
 ##' @include multiPlot.R
-##' @include renameFact.R
-##' @include getSurvNames.R
 ##'
 ##' @param x An object of class \code{coxph}
-##' @param ... Additional arguments
+##' @param ... Additional arguments (not implemented)
 ##' @param ties  Method of handling ties when refitting model. Must be
 ##' one of \code{breslow} or \code{efron}
 ##' @param defCont Definition of continuous variable.
@@ -264,7 +262,6 @@ If not linear, suggests discretised version of covariate preferable \n (note no 
         if (length(unique(mf1)) > defCont){
             mf1 <- Hmisc::cut2(mf1, g=noQuantiles)
         }
-        y1 <- .getSurvNames(x)
 ### put original time + events into data.frame
         df1 <- data.frame(t1=unclass(model.frame(x)[[1]])[, 1],
                           e1=unclass(model.frame(x)[[1]])[, 2],

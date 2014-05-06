@@ -14,8 +14,8 @@
   Data from a trial of locally unresectable gastic cancer.
   \cr Patients (45 in each group) were randomized to one of
   two groups: chemotheapy vs chemotherapy + radiotherapy.
-  \cr Columns are: \describe{ \item{time}{time in days}
-  \item{event}{death} \item{group}{\describe{
+  \cr Columns are: \describe{ \item{time}{Time in days}
+  \item{event}{Death} \item{group}{Treatment \describe{
   \item{0}{chemotherapy} \item{1}{chemotherapy +
   radiotherapy} }} }
 }

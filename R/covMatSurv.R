@@ -34,9 +34,9 @@
 ##'  v[k,l,i] = - n[k](i).n[l](i).e(i).[n(i)-e(i)] / n(i)^2.[n(i)-1]}
 ##' @seealso Called by \code{\link{comp}}
 ##' @examples
-##' \dontrun{data(tneKidney)
-##' covMatSurv(t=tneKidney$t,n=tneKidney$n,e=tneKidney$e,n1=tneKidney$n_1)
-##' }
+##' data(tneKidney)
+##' covMatSurv(t=tneKidney$t, n=tneKidney$n, e=tneKidney$e, n1=tneKidney$n_1)
+##'
 covMatSurv <- function(t,n,e,n1){
     if(!isTRUE( all(length(t)==length(n),
                     length(t)==length(e),

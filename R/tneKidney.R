@@ -1,8 +1,8 @@
 #' @name tneKidney
 #' @docType data
 #' @title Time, no. at risk, no. events for kidney
-#' @description Data from
-#'
+#' @description Data from Klein J and Moeschberger.
+#' \cr
 #' Columns are:
 #' \describe{
 #'  \item{t}{time}

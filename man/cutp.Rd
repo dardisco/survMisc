@@ -13,7 +13,7 @@
 \arguments{
   \item{x}{A \code{survfit} or \code{coxph} object}
 
-  \item{...}{Additional arguments}
+  \item{...}{Additional arguments (not implemented)}
 
   \item{var}{Variable to test. Must be continuous (i.e. >2
   unique values)}

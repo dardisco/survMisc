@@ -16,8 +16,8 @@ comp <- function(x, ...){
 ##' @param ... Additional arguments
 ##' @param FHp \eqn{p} for Fleming-Harrington test
 ##' @param FHq \eqn{q} for Fleming-Harrington test
-##' @param scores scores
-##' @param lim limit
+##' @param lim limit used for Renyi tests when generating supremum of absolute value of Brownian motion
+##' @param scores scores for tests for trend
 ##' @return A list with two elements, \code{tne} and \code{tests}.
 ##' \cr \cr
 ##' The first is a \code{data.table} with one row for each time at
@@ -145,12 +145,11 @@ comp <- function(x, ...){
 ##' @examples
 ##' ### 2 curves
 ##' data(kidney,package="KMsurv")
-##' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney )
+##' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 ##' comp(s1)
 ##' ### 3 curves
 ##' data(bmt, package="KMsurv")
-##' s2 <- survfit(Surv(time=t2, event=d3) ~ group, data=bmt)
-##' comp(s2)
+##' comp(survfit(Surv(time=t2, event=d3) ~ group, data=bmt))
 ##' ### see effect of F-H test
 ##' data(alloauto, package="KMsurv")
 ##' s3 <- survfit(Surv(time, delta) ~ type, data=alloauto)
@@ -161,7 +160,7 @@ comp <- function(x, ...){
 ##' comp(s4)
 ##' ### Renyi tests
 ##' \dontrun{
-##' data(gastric)
+##' data("gastric", package="survMisc")
 ##' s5 <- survfit(Surv(time, event) ~ group, data=gastric)
 ##' comp(s5)
 ##' }
@@ -185,66 +184,33 @@ comp <- function(x, ...){
 ##' @references Billingsly P 2009
 ##' \emph{Convergence of Probability Measures.}
 ##' New York: John Wiley & Sons.
-##' \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{Google Books}
+##' \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{
+##' Google Books}
 ##' @references Examples are from
 ##' Klein J, Moeschberger M 2003
 ##' \emph{Survival Analysis}, 2nd edition.
 ##' New York: Springer.
 ##' Examples 7.2, 7.4, 7.5, 7.6, 7.9, pp 210-225.
-comp.survfit <- function(x, ..., FHp=1, FHq=1, scores="", lim=1e4) {
+comp.survfit <- function(x, ..., FHp=1, FHq=1, lim=1e4, scores=NULL) {
     if (!class(x)=="survfit") stop("Only applies to object of class 'survfit'")
-    if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
+    m1 <- "Values for p and q for Fleming-Harrington tests must be >=0"
+    if (FHp<0 | FHq<0) stop(m1)
 ###
-    s1 <- names(x$strata)
-    l1 <- tne(x, asList=TRUE, onlyEvents=FALSE)
-### rename 'n' and 'e' columns to avoid duplicate column names
-### needed if merging >3 data.frames
-    dupVars1 <- which(!colnames(l1[[1]]) %in% c("t"))
-    for(i in seq_along(l1)) {
-        colnames(l1[[i]])[dupVars1] <- paste0(colnames(l1[[i]])[dupVars1], i)
-    }
-### merge list based on time
-    m1 <- data.table::data.table(Reduce(function(...)
-                                        merge(..., by="t",
-                                              all=TRUE), l1))
-### for 'n' carry last observation back
-### (to fill in missing values in first rows)
-    data.table::set(m1, j=grep("n",colnames(m1)),
-                    value=zoo::na.locf(m1[, grep("n", colnames(m1)),
-                    with=FALSE],
-                    fromLast=TRUE))
-### for remaining 'n' and 'e', replace NA with zero
-### for 'n' this will be elements in the tail of the vector
-    for (j in seq_len(ncol(m1))){
-        data.table::set(m1, which(is.na(m1[[j]])), j, as.integer(0))
-    }
-### names
-    n1 <- c("n_", "e_")
-    n1 <- as.vector(outer(n1, s1, paste, sep=""))
-    data.table::setnames(m1, old=names(m1), new=c("t", n1))
-### remove times (rows) with no events
-    m1 <- m1[!rowSums(m1[, grep("e_", colnames(m1)), with=FALSE])==0, ]
-### initialise new constants (for R CMD check)
-    n <- e <- NULL
-### make no. at risk (total) per time period
-### *inefficient method*
-    m1[, n := rowSums(m1[, grep("n_", colnames(m1)), with=FALSE]) ]
-### total events per time period
-    m1[, e := rowSums(m1[, grep("e_", colnames(m1)), with=FALSE]) ]
+    m1 <- tne(x, return="merged", eventsOnly=TRUE)
 ###
 ### 2 groups only:
-    if (length(s1)==2){
+    if (length(x$strata)==2){
         res1 <- comp2Surv(n=m1$n, e=m1$e,
                           n1=m1[, grep("n_", colnames(m1))[1], with=FALSE],
                           e1=m1[, grep("e_", colnames(m1))[1], with=FALSE],
-                          FHp=FHp, FHq=FHq, round1=5)
+                          FHp=FHp, FHq=FHq, lim=lim)
     } else {
         res1 <- compNSurv(t=m1$t, n=m1$n, e=m1$e,
                           n1=as.matrix(m1[, grep("n_",colnames(m1)),
                           with=FALSE]),
                           e1=as.matrix(m1[, grep("e_",colnames(m1)),
                           with=FALSE]),
-                          FHp=FHp, FHq=FHq)
+                          FHp=FHp, FHq=FHq, scores=scores)
     }
 ###
     res <- list(
@@ -258,12 +224,31 @@ comp.survfit <- function(x, ..., FHp=1, FHq=1, scores="", lim=1e4) {
 ##' @S3method comp coxph
 ##' @examples
 ##' c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney )
-##' comp(s1)
-comp.coxph <- function(x, ..., FHp=1, FHq=1, scores="", lim=1e4){
-    f1 <- deparse(x$call)
-    f1 <- sub("coxph", "survfit", f1)
-    s1 <- eval(parse(text=f1))
-    comp(s1, FHp=FHp, FHq=FHq, scores=scores, lim=lim)
+##' comp(c1)
+comp.coxph <- function(x, ..., FHp=1, FHq=1, scores=NULL, lim=1e4){
+     if (!class(x)=="coxph") stop("Only applies to object of class 'coxph'")
+     if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
+###
+    m1 <- tne(x, return="merged", eventsOnly=TRUE)
+###
+### 2 groups only:
+    if (ncol(m1)==7){
+        res1 <- comp2Surv(n=m1$n, e=m1$e,
+                          n1=m1[, grep("n_", colnames(m1))[1], with=FALSE],
+                          e1=m1[, grep("e_", colnames(m1))[1], with=FALSE],
+                          FHp=FHp, FHq=FHq, round1=5)
+    } else {
+        res1 <- compNSurv(t=m1$t, n=m1$n, e=m1$e,
+                          n1=as.matrix(m1[, grep("n_",colnames(m1)),
+                          with=FALSE]),
+                          e1=as.matrix(m1[, grep("e_",colnames(m1)),
+                          with=FALSE]),
+                          FHp=FHp, FHq=FHq, scores=scores)
+    }
+     res <- list(
+         tne = m1,
+         tests = res1)
+     return(res)
 }
 ###
 ###----------------------------------------
@@ -273,9 +258,13 @@ comp.coxph <- function(x, ..., FHp=1, FHq=1, scores="", lim=1e4){
 comp2Surv <- function(n, e, n1, e1,
                       FHp=1,FHq=1,
                       lim=1e4,round1=5){
-    if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
-    if(!isTRUE( all.equal(length(n),length(e),length(n1),length(e1)) )) stop ("All vectors must be of equal length")
-    if(!isTRUE(all(vapply(c(n,e,n1,e1),FUN=is.numeric,FUN.VALUE=TRUE)==TRUE))) stop("All vectors must be numeric")
+    if (FHp<0|FHq<0) stop
+    ("Values for p and q for Fleming-Harrington tests must be >=0")
+    stopifnot( all.equal(length(n),length(e),length(n1),length(e1)) )
+    if(!isTRUE(all(vapply(c(n,e,n1,e1),
+                          FUN=is.numeric,
+                          FUN.VALUE=TRUE)==TRUE))) stop
+    ("All vectors must be numeric")
 ###
 ### make observed - expected for group 1
     eME1 <- e1-(n1*e/n)
@@ -293,8 +282,8 @@ comp2Surv <- function(n, e, n1, e1,
         n1 <- n1[-in1]
     }
 ### display chisq, degrees of freedom and rounded result
-    dis1 <- function(chi1,df1=1,rounded=round1){
-        c(chi1,df1, round(1-stats::pchisq(chi1,df1),digits=rounded))
+    dis1 <- function(chi1, df1=1, rounded=round1){
+        c(chi1,df1, round(1-stats::pchisq(chi1,df1), digits=rounded))
     }
 ###
 ### WEIGHTS
@@ -396,7 +385,7 @@ comp2Surv <- function(n, e, n1, e1,
 ###
 compNSurv <- function (t, n, e, n1, e1,
                        FHp=FHp, FHq=FHq,
-                       scores="", round1=5){
+                       scores=NULL, round1=5){
 ### events observed minus expected
     eME <- e1-(n1*e/n)
 ### degrees of freedom
@@ -461,7 +450,7 @@ compNSurv <- function (t, n, e, n1, e1,
             "ChiSq", "df", "p"))
 ###
 ### Trend tests
-    suppressWarnings(if (scores=="") scores <- 1:(df1+1) )
+    if (is.null(scores)) scores <- 1:(df1+1)
 ### no. predictors (from degrees of freedom, above)
     lp1 <- df1+1
 ### display chisq, degrees of freedom and rounded result

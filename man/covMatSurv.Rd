@@ -43,9 +43,8 @@
   column corresponding to a group.
 }
 \examples{
-\dontrun{data(tneKidney)
-covMatSurv(t=tneKidney$t,n=tneKidney$n,e=tneKidney$e,n1=tneKidney$n_1)
-}
+data(tneKidney)
+covMatSurv(t=tneKidney$t, n=tneKidney$n, e=tneKidney$e, n1=tneKidney$n_1)
 }
 \seealso{
   Called by \code{\link{comp}}

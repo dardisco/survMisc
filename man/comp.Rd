@@ -7,10 +7,10 @@
   comp(x, ...)
 
   \method{comp}{survfit} (x, ..., FHp = 1, FHq = 1,
-    scores = "", lim = 10000)
+    lim = 10000, scores = NULL)
 
   \method{comp}{coxph} (x, ..., FHp = 1, FHq = 1,
-    scores = "", lim = 10000)
+    scores = NULL, lim = 10000)
 }
 \arguments{
   \item{x}{A \code{survfit} or \code{coxph} object}
@@ -21,9 +21,10 @@
 
   \item{FHq}{\eqn{q} for Fleming-Harrington test}
 
-  \item{scores}{scores}
+  \item{lim}{limit used for Renyi tests when generating
+  supremum of absolute value of Brownian motion}
 
-  \item{lim}{limit}
+  \item{scores}{scores for tests for trend}
 }
 \value{
   A list with two elements, \code{tne} and \code{tests}.
@@ -149,12 +150,11 @@
 \examples{
 ### 2 curves
 data(kidney,package="KMsurv")
-s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney )
+s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 comp(s1)
 ### 3 curves
 data(bmt, package="KMsurv")
-s2 <- survfit(Surv(time=t2, event=d3) ~ group, data=bmt)
-comp(s2)
+comp(survfit(Surv(time=t2, event=d3) ~ group, data=bmt))
 ### see effect of F-H test
 data(alloauto, package="KMsurv")
 s3 <- survfit(Surv(time, delta) ~ type, data=alloauto)
@@ -165,12 +165,12 @@ s4 <- survfit(Surv(time, delta) ~ stage, data=larynx)
 comp(s4)
 ### Renyi tests
 \dontrun{
-data(gastric)
+data("gastric", package="survMisc")
 s5 <- survfit(Surv(time, event) ~ group, data=gastric)
 comp(s5)
 }
 c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney )
-comp(s1)
+comp(c1)
 }
 \references{
   Gehan A. A Generalized Wilcoxon Test for Comparing
@@ -196,8 +196,8 @@ comp(s1)
 
   Billingsly P 2009 \emph{Convergence of Probability
   Measures.} New York: John Wiley & Sons.
-  \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{Google
-  Books}
+  \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{
+  Google Books}
 
   Examples are from Klein J, Moeschberger M 2003
   \emph{Survival Analysis}, 2nd edition. New York:

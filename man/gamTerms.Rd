@@ -1,6 +1,7 @@
 \name{gamTerms}
 \alias{gamTerms}
-\title{Individual terms of a Generalized Additive or Cox Proportional
+\title{Individual terms of a Generalized Additive
+or Cox Proportional
 Hazard Model}
 \usage{
   gamTerms(fit, se.fit = TRUE, link = FALSE, weights)

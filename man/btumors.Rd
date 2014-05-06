@@ -1,7 +1,7 @@
 \docType{data}
 \name{btumors}
 \alias{btumors}
-\title{brain tumors trial data}
+\title{Brain tumors trial data}
 \format{A data frame with 6 rows and 4 columns}
 \source{
   Schoenfeld D. Sample-size formula for the
@@ -10,7 +10,7 @@
   \href{http://www.jstor.org/stable/2531021}{JSTOR}
 }
 \description{
-  brain tumors trial data
+  Brain tumors trial data
 }
 \details{
   Data from a trial of primary brain tumors performed by
@@ -18,11 +18,13 @@
   patients in total were enrolled in a trial comparing
   chemotherapy to chemotherapy + radiotherapy. Prognostic
   factors are illustrated. \cr \cr Columns are: \describe{
-  \item{age}{\describe{ \item{1}{age <40} \item{2}{age
-  40-60} \item{3}{age >60} }} \item{nec}{\describe{
-  \item{0}{necrosis absent} \item{1}{necrosis present} }}
-  \item{n}{no. of patients} \item{ms}{median survival
-  (months)} }
+  \item{age}{Age \describe{ \item{1}{ < 40} \item{2}{ 40 -
+  60} \item{3}{ > 60} }} \item{nec}{Necrosis \describe{
+  \item{0}{absent} \item{1}{present} }} \item{n}{Number of
+  patients} \item{ms}{Median survival (months)} }
+}
+\seealso{
+  \code{\link{lrSS}}
 }
 \keyword{datasets}
 

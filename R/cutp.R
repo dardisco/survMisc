@@ -13,7 +13,7 @@ cutp <- function(x, ...){
 ##'
 ##' @include tne.R
 ##' @param x A \code{survfit} or \code{coxph} object
-##' @param ... Additional arguments
+##' @param ... Additional arguments (not implemented)
 ##' @param var Variable to test. Must be continuous (i.e. >2 unique values)
 ##' @param plot If \code{TRUE} will plot cut points against the statistic \eqn{S}
 ##' @return A \code{data.frame} with columns:

@@ -6,20 +6,22 @@
 #' @title Mean for \code{Surv} object
 #' @param x A \code{Surv} object
 #' @param alpha Significance level \eqn{\alpha}{alpha}
-#' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival time from then until \code{tEnd} is used:
+#' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival time from then until \code{tMax} is used:
 #' \describe{
 #' \item{Effron}{ \eqn{\hat{S}=0}{S=0}}
-#' \item{Gill}{ \eqn{\hat{S}=\hat{S}(t_k)}{S = S(t_k)}. I.e. \eqn{\hat{S}}{S} is the equal to the last recorded value of \eqn{\hat{S}}{S}}.
+#' \item{Gill}{ \eqn{\hat{S}=\hat{S}(t_k)}{S = S(t_k)} i.e. \eqn{\hat{S}}{S} is equal to the
+#' last recorded value of \eqn{\hat{S}}{S}}.
 #' \item{Brown}{ \eqn{\hat{S}= e^{\frac{t_i}{t_k} \log{\hat{S}(t_k)}} }{
 #'  e^[ (t_i/t_k) log S(t_k) ]}
-#' for \eqn{ t_k \le t_i \le \code{tEnd}}{
-#'  t(k) <= t(i) <= tEnd}
+#' for \eqn{ t_k \le t_i \le \code{tMax}}{
+#'  t(k) <= t(i) <= tMax}
 #' }}
 #'
-#' @param tEnd If the last observation is censored at time \eqn{t_k}{t_k}, an estimate of \eqn{\hat{S}}{S} will be generated from \eqn{t_k}{t_k} to \code{tEnd}.
+#' @param tMax If the last observation is censored at time \eqn{t_k}{t_k}, an estimate of
+#' \eqn{\hat{S}}{S} will be generated from \eqn{t_k}{t_k} to \code{tMax}.
 #' \cr
-#' If \code{tEnd=""} a value of \eqn{2t_{max}}{2*tMax}, twice the longest time recorded, is used.
-#' @param by Increments (units of time) between \eqn{t_k}{t_k} and \code{tEnd}
+#' If \code{tMax=NULL} a value of \eqn{2 \times t_{max}}{2*tMax}, twice the longest time recorded, is used.
+#' @param by Increments (units of time) between \eqn{t_k}{t_k} and \code{tMax}
 #' @param dfm If \code{TRUE}, will return the dataframe used to calculate the statistics
 #' @param ... Additional arguments
 #' @return A list with the following elements:
@@ -28,28 +30,36 @@
 #' \item{CI}{The confidence level (from \eqn{alpha}{alpha} above)}
 #' \item{upper}{Upper value for confidence interval}
 #' \item{lower}{Lower value for the confidence interval}
-#' If the last observation is censored at time \eqn{t_k}{t_k}, two values are returned, one calculated up to \eqn{t_k}{t_k}, the other to \code{tEnd}.
+#' If the last observation is censored at time \eqn{t_k}{t_k},
+#' two values are returned, one calculated up to \eqn{t_k}{t_k}, the other to \code{tMax}.
 #' @examples
 #' data(bmt, package="KMsurv")
 #' b1 <- bmt[bmt$group==1, ] # ALL patients
 #' s1 <- Surv(time=b1$t2, event=b1$d3)
 #' mean(s1)
-#' s1 <- Surv(time=c(6,14,21,44,62),event=c(1,1,0,1,1))
-#' mean(s1)
-#' s2 <- Surv(time=c(6,14,21,44,62),event=c(1,1,0,1,0))
-#' mean(s1)
-mean.Surv <- function(x,alpha=0.05,method="Efron",tEnd="",by=1,dfm=FALSE,...){
+#' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 1)))
+#' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 0)))
+#'
+mean.Surv <- function(x, alpha=0.05,
+                      method=c("Efron", "Gill", "Brown"),
+                      tMax=NULL,
+                      by=1,
+                      dfm=FALSE, ...){
     if(!class(x)=="Surv") stop("Only applies to class 'Surv'")
     if(!attr(x,which="type")=="right") warning("Applies to right censored data")
+    method <- match.arg(method)
 ### makes debugging easier
-    s2 <- x[order(x[,"time"]), ]
+    s2 <- x[order(x[, "time"]), ]
 ### longest time
-    t1 <- max(s2[,1])
+    t1 <- max(s2[, 1])
 ### longest observed time with an event
-    t2 <- max(s2[,1][s2[,2]==1])
+    t2 <- max(s2[, 1][s2[, 2]==1])
+### calcSurv returns data.table by default
+    c1 <- calcSurv(x)
+    set(c1, j=5:9, value=NULL)
+    class(c1) <- "data.frame"
 ### first row is t=0
-    c1 <- rbind(c(0,NA,0,1),
-                calcSurv(x)[,c("t","n","e","SKM")])
+    c1 <- rbind(c(0, NA, 0, 1), c1)
 ### no. at risk at t=0
     c1[1,"n"] <- c1[2,"n"]
 ###
@@ -59,14 +69,14 @@ mean.Surv <- function(x,alpha=0.05,method="Efron",tEnd="",by=1,dfm=FALSE,...){
         SKMmin <- min(c1[,"SKM"])
 ### function for tail by method 'Brown' below
         BrownTail <- function(t) exp( (t/t1)*log(SKMmin) )
-### extend to tEnd
-        if (tEnd=="") tEnd <- t1*2
-        t3 <- seq(from=t1,to=tEnd,by=by)
+### extend to tMax
+        if (is.null(tMax)) tMax <- t1*2
+        t3 <- seq(from=t1,to=tMax,by=by)
 ### no. at risk at last observation
         nR <- sum(x[,"time"]==t1)
         tail1 <- switch(method,
-                        Efron = matrix(c(t1,nR,0,0),nrow=1),
-                        Gill = rbind(c(t1,nR,0,SKMmin),c(tEnd,nR,0,SKMmin)),
+                        Efron = matrix(c(t1, nR, 0, 0), nrow=1),
+                        Gill = rbind(c(t1, nR, 0, SKMmin), c(tMax, nR, 0, SKMmin)),
                         Brown = cbind(t3,
                         rep(nR,length(t3)),
                         rep(0,length(t3)),

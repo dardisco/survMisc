@@ -38,11 +38,13 @@ KM <- function(n,e){
 }
 ##' @rdname survEst
 ##' @include tne.R
-##' @details \code{Gw} gives Greenwoods estimtor of the Kaplan-Meier (product-limit) estimator of survival function is given by:
+##' @details \code{Gw} gives Greenwoods estimtor of the Kaplan-Meier (product-limit)
+##' estimator of survival function is given by:
 ##'
 ##' \deqn{Var[\hat{S}(t)] = [\hat{S}(t)]^2 \sum_{t_i \leq t} \frac{e_i}{n_i (n_i-e_i)} }{
 ##' Var[S](t) = S(t)^2 SUM (e) / n(n-e) }
-##' @return \code{Gw} returns \eqn{Var [\hat{S}(t)]}, the variance of the Kaplan-Meier estimator
+##' @return \code{Gw} returns \eqn{Var [\hat{S}(t)]},
+##' the variance of the Kaplan-Meier estimator
 ##' \cr
 ##' @examples
 ##' data(bmt, package="KMsurv")

@@ -12,7 +12,7 @@
 \arguments{
   \item{x}{An object of class \code{coxph}}
 
-  \item{...}{Additional arguments}
+  \item{...}{Additional arguments (not implemented)}
 
   \item{ties}{Method of handling ties when refitting model.
   Must be one of \code{breslow} or \code{efron}}

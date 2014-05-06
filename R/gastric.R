@@ -7,9 +7,9 @@
 #' \cr
 #' Columns are:
 #' \describe{
-#'  \item{time}{time in days}
-#'  \item{event}{death}
-#'  \item{group}{\describe{
+#'  \item{time}{Time in days}
+#'  \item{event}{Death}
+#'  \item{group}{Treatment \describe{
 #'    \item{0}{chemotherapy}
 #'    \item{1}{chemotherapy + radiotherapy}
 #'    }}

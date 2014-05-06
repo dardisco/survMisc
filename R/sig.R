@@ -1,17 +1,8 @@
-##' @name Sig
+##' @name sig
+##' @rdname sig
 ##' @title Significiance tests of coefficients in a Coxph model
-##' @export Sig
-##' @rdname Sig
-##' @title Sig
-##'
-Sig <- function(x, ...){
-    UseMethod("Sig")
-    }
-##' @rdname Sig
-##' @aliases Sig.coxph
-##' @S3method Sig coxph
-##' @method Sig coxph
-##'
+##' @param x A model of class \code{coxph}
+##' @param ... Additional arguments (not implemented)
 ##' @description
 ##' These are: \describe{
 ##' \item{Wald test}{the statistic is:
@@ -24,16 +15,14 @@ Sig <- function(x, ...){
 ##' likelihood ratio of the original model and that with the coefficient
 ##' omitted.
 ##'  }
-##' \item{Score test}{Null hypothesis is that \eqn{\hat{B}=0}{Bhat=0}.
+##' \item{Score test}{Aka the \bold{log-rank} test. Null hypothesis is that \eqn{\hat{B}=0}{Bhat=0}.
 ##' The statistic is cacluated by refitting the model with the coefficient
 ##' omitted to generate initial values. It is then fitted again with all
 ##' covariates, using these values and setting \eqn{\hat{B}=0}{Bhat=0}.
 ##'  }
 ##' }
 ##' All statistics are distributed as chi-square, with degrees of freedom
-##' = no. of coefficients \eqn{-1}.
-##' @param x A model of class \code{coxph}
-##' @param ... Additional arguments
+##' \eqn{=} no. of coefficients \eqn{-1}.
 ##' @return A \code{data.frame} with one fow for each coefficient in the
 ##' original model. There are 3 columns, one for each of the tests:
 ##' \itemize{
@@ -41,7 +30,23 @@ Sig <- function(x, ...){
 ##'  \item LR (likelihood ratio)
 ##'  \item Score
 ##'  }
-Sig.coxph <- function(x, ...){
+NULL
+##' @rdname sig
+##' @export
+Sig <- function(x, ...){
+    UseMethod("sig")
+    }
+##' @rdname sig
+##' @export
+sig <- function(x, ...){
+    UseMethod("sig")
+    }
+##' @rdname sig
+##' @aliases sig.coxph
+##' @S3method sig coxph
+##' @method sig coxph
+##' @export
+sig.coxph <- function(x, ...){
     if(!inherits(x, "coxph")) stop
     ("Only applies to objects of class coxph")
     l1 <- length(coefficients(x))
@@ -91,7 +96,7 @@ Sig.coxph <- function(x, ...){
         inits1[i] <- 0
 ### refit with coeffi
         c3 <- update(x, init=c(inits1), iter=0)
-        res1 [i,3] <- pchisq(c3$score, dfDiff)
+        res1[i, 3] <- pchisq(c3$score, dfDiff)
     }
     rownames(res1) <- n1
     colnames(res1) <- c("Wald", "LR", "score")

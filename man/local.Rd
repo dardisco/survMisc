@@ -10,39 +10,45 @@
 \usage{
   locScore(x, ...)
 
-  \method{locScore}{coxph} (x, ..., all = FALSE, hypo = "",
-    ties = "breslow")
+  \method{locScore}{coxph} (x, ..., all = FALSE,
+    hypo = NULL, ties = c("breslow", "efron", "exact"))
 
   locLR(x, ...)
 
-  \method{locLR}{coxph} (x, ..., all = FALSE, hypo = "",
-    ties = "breslow")
+  \method{locLR}{coxph} (x, ..., all = FALSE, hypo = NULL,
+    ties = c("breslow", "efron", "exact"))
 
   locWald(x, ...)
 
-  \method{locWald}{coxph} (x, ..., all = FALSE, hypo = "")
+  \method{locWald}{coxph} (x, ..., all = FALSE,
+    hypo = NULL)
 }
 \arguments{
   \item{x}{A model of class \code{coxph}}
 
-  \item{...}{Additional arguments}
-
-  \item{ties}{Method of handling ties when refitting model.
-  Must be one of \code{breslow} or \code{efron}}
+  \item{...}{Additional arguments (not implemented)}
 
   \item{all}{Fit \emph{all} combinations of predictors}
 
-  \item{hypo}{Hypothesis to test. This should be a vector
-  of \eqn{0}s and \eqn{1}s of the same length as the no. of
-  coefficients in the model (with at least one 0 and one
-  1). Zeros indicate coefficients to exclude, ones indicate
-  coefficients to keep. \cr}
+  \item{hypo}{Hypothesis to test. \cr There should be at
+  least one coefficient to exclude and one to keep. \cr
+  This is a specified as vector of the same length as the
+  no. of coefficients in the model. This should be a
+  logical vector (i.e. composed of \code{TRUE} and
+  \code{FALSE} or a vector of \eqn{0}s and \eqn{1}s.
+  \code{FALSE} or zeros indicate coefficients to exclude,
+  \code{TRUE} or ones indicate coefficients to keep. \cr}
+
+  \item{ties}{Method of handling ties when refitting model.
+  Must be one of \code{breslow}, \code{efron} or
+  \code{exact}}
 }
 \value{
   For \code{locScore} a \code{list} with the following
-  items: \cr \item{coefficients}{coefficients from refitted
-  model(s)} \item{test}{test for hypothesis} \cr \cr For
-  \code{locLR} and \code{locWald}, a \code{data.frame}
+  elements, which are \code{data.table}s: \cr
+  \item{coef}{coefficients from refitted model(s)}
+  \item{score}{hypothesis and chi-square test} \cr \cr For
+  \code{locLR} and \code{locWald}, a \code{data.table}
   showing the hypothesis being tested and the results of
   the test.
 }
@@ -54,7 +60,7 @@
   the model are zero (\eqn{H_0 : \hat{B}_i=0, \quad i \geq
   1}{H0: Bi=0}) vs. the alternative that at least one of
   them is nonzero. \cr \cr All of these tests are
-  distributed as chi-square with degrees of freedom =
+  distributed as chi-square with degrees of freedom \eqn{=}
   number of excluded coefficients. \cr \cr For the
   \bold{score} test, the model is fitted again with the
   coefficients of interest excluded. \cr A value for the
@@ -88,18 +94,18 @@
 data(larynx, package="KMsurv")
 c1 <- coxph(Surv(time, delta) ~ factor(stage) + age, data=larynx)
 locScore(c1, all=TRUE)
-locScore(c1, hypo=c(0,0,0,1))
+locScore(c1, hypo=c(0, 0, 0, 1))
+locScore(coxph(Surv(time, delta) ~ stage + age, data=larynx))
 ###
 data(larynx, package="KMsurv")
 c1 <- coxph(Surv(time, delta) ~ factor(stage) + age, data=larynx, method="breslow")
 locLR(c1, all=TRUE)
-locLR(c1, hypo=c(0,0,0,1))
+locLR(c1, hypo=c(FALSE, FALSE, FALSE, TRUE))
 ###
 data(larynx, package="KMsurv")
-c1 <- coxph(Surv(time, delta) ~ factor(stage) + age, data=larynx,
-method="breslow")
+c1 <- coxph(Surv(time, delta) ~ factor(stage) + age, data=larynx, method="breslow")
 locWald(c1, all=TRUE)
-locWald(c1, hypo=c(0,0,0,1))
+locWald(c1, hypo=c(0, 0, 0, 1))
 }
 \references{
   Examples are from: Klein J, Moeschberger M 2003

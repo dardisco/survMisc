@@ -92,12 +92,16 @@ quantile <- function(x, ...){
 ##' @aliases quantile.Surv
 ##' @method quantile Surv
 ##'
-quantile.Surv <- function(x, ..., q=c(25,50,75), alpha=0.05){
+quantile.Surv <- function(x, ...,
+                          q=c(25, 50, 75),
+                          alpha=0.05){
     if(!inherits(x, "Surv")) stop("Only applies to class 'Surv'")
     if(!attr(x,which="type")=="right") warning("Applies to right censored data")
-###
-    s2 <- calcSurv(x)[ ,c("t","SKM","SKMV")]
-    s2 <- s2[order(s2[ ,"t"]),]
+### calcSurv returns data.table by default
+    s2 <- calcSurv(x)
+    set(s2, j=6:9, value=NULL)
+    class(s2) <- "data.frame"
+    s2 <- s2[order(s2[ ,"t"]), ]
 ### express as percentage
     p1 <- q/100
 ### find time corresponding to quantile
@@ -249,12 +253,15 @@ median <- function(x, ...){
 ##' s1 <- Surv(time=b1$t2, event=b1$d3)
 ##' median(s1)
 ##' median(s1, CI=TRUE)
-median.Surv <- function(x, ..., CI=FALSE,
+median.Surv <- function(x, ...,
+                        CI=FALSE,
                         alpha=0.05,
-                        method=c("log","lin","asr")) {
+                        method=c("log", "lin", "asr")) {
     if(!inherits(x, "Surv")) stop("Only applies to Surv objects")
-###
-    s2 <- calcSurv(x)[,c("t", "SKM", "SKMV")]
+### calcSurv returns data.table by default
+    s2 <- calcSurv(x)
+    set(s2, j=6:9, value=NULL)
+    class(s2) <- "data.frame"
     s2 <- s2[order(s2[, "t"]),]
 ### find time corresponding to 50th percentile
     t1 <- .findT(0.5, s2)
@@ -290,9 +297,10 @@ median.Surv <- function(x, ..., CI=FALSE,
 ##' median(s1)
 ##' median(s1, CI=TRUE, method="asr")
 ##'
-median.survfit <- function(x, ..., CI=FALSE,
+median.survfit <- function(x, ...,
+                           CI=FALSE,
                            alpha=0.05,
-                           method=c("log","lin","asr")) {
+                           method=c("log", "lin", "asr")) {
     if(!inherits(x, "survfit")) stop("Only applies to survfit objects")
 ### get printout of survival:::print.survfit(x)
     m1 <- read.table(textConnection(capture.output(x)),

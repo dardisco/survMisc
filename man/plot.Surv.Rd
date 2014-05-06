@@ -14,7 +14,7 @@
 \value{
   A graph (base graphics). \cr The type of graph depends on
   the \code{type} of the \code{Surv} object. \cr This is
-  given by \code{attr(s,which="type")} : \cr
+  given by \code{attr(s, which="type")} : \cr
   \item{counting}{Lines with an arrow pointing right if
   right censored} \item{right}{Lines with an arrow pointing
   right if right censored} \item{left}{Lines with an arrow
@@ -31,9 +31,9 @@
   methods apply to different types of \code{Surv} objects.
 }
 \examples{
-df0 <- data.frame(t1=c(0,2,4,6,NA,NA,12,14),
-                  t2=c(NA,NA,4,6,8,10,16,18))
-s5 <- Surv(df0$t1,df0$t2,type="interval2")
+df0 <- data.frame(t1=c(0, 2, 4, 6, NA, NA, 12, 14),
+                  t2=c(NA, NA, 4, 6, 8, 10, 16, 18))
+s5 <- Surv(df0$t1, df0$t2, type="interval2")
 plot(s5)
 }
 
