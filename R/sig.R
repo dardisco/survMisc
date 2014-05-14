@@ -56,12 +56,12 @@ sig.coxph <- function(x, ...){
 ### std. errors
     se1 <- sqrt(diag(x$var))
 ### p value for Wald tests
-    res1[ ,1] <- 1 - pchisq((coef(x)/se1)^2, 1)
+    res1[ ,1] <- 1 - pchisq((coef(x)/se1) ^ 2, 1)
 ### likelihood ratio test statistic
     LR1 <- -2 * (x$loglik[1] - x$loglik[2])
 ### get names of the coefficients from model.frame
 ### note excluding Surv
-    n1 <- names(model.frame(x) )[!grepl("Surv",names(model.frame(x)) ) ]
+    n1 <- colnames(model.matrix(x))
 ### if only one coefficient then will be vs intercent-only model
     if (l1==1){
         res1[1, 2] <- 1 - pchisq(LR1, 1)
@@ -79,17 +79,17 @@ sig.coxph <- function(x, ...){
     degf1 <- findDf(x)
 ### log-likelihood for original model
     pLL <- 1 - stats::pchisq(LR1, degf1)
-    for (i in 1:l1){
+    for (i in 1:length(n1)){
 ### refit with coefficient omitted
-        c2 <- update(x,
-                     as.formula(paste(".~", n1[-i]))
-                     )
+        y1 <- model.response(model.frame(x))
+        x1 <- model.matrix(x)[, -i]
+        c2 <- coxph(y1 ~ x1)
         degf2 <- findDf(c2)
         LR2 <- -2 * (c2$loglik[1] - c2$loglik[2])
         LRdiff <- LR1 - LR2
         dfDiff <- degf1 - degf2
         pLL <- 1 - pchisq(LRdiff, dfDiff)
-        res1[i,2] <- pLL
+        res1[i, 2] <- pLL
         if(!x$n==c2$n) warning
         ("Need same no. observations to compare models; check for missing data ")
         inits1 <- coef(x)
