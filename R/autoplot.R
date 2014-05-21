@@ -223,7 +223,7 @@ autoplot.survfit <- function(object, ...,
                              ymax=u, ymin=surv,
                              xmax=maxT, xmin=minT,
                              colour=st, group=st, fill=st),
-                             alpha=0.05, size=fillLineSize)
+                             alpha=alpha, size=fillLineSize)
     }
 ### add lines to show times where subjects censored
     if (any(dt1$n.censor >= 1)){

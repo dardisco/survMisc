@@ -75,27 +75,23 @@ cutp.coxph <- function(x, ..., var="", plot=FALSE){
     stopifnot(!identical(var, ""))
 ### get location to evaluate variables
 ### (i.e. environment if no data frame specified)
-    if (is.null(x$call$data)){
-        loc1 <- environment(eval(parse(text=as.character(x$call[2]))))
-    } else {
-        loc1 <- eval(x$call$data)
-    }
-    v1 <- get(var, loc1)
+    v1 <- get(var, model.frame(x))
 ### check >2 levels
-    stopifnot(length(unique(v1))>2)
+    stopifnot(length(unique(v1)) > 2)
 ### get original Surv object
     s1 <- Surv(unclass(model.frame(x)[, 1]))
 ### need [, 1:2] to remove extra column of all 1's which Surv adds
     s1 <- Surv(s1[,1], s1[,2])
 ### time, no. events, no. at risk, where deaths occur
     t1 <- tne(s1, onlyEvents=TRUE)
+    class(t1) <- "data.frame"
 ### now check subsets (one for each unique value of variable)
 ### R1 hold results
-    R1 <- cbind(sort(unique(v1)), NA)
+    R1 <- cbind(sort(unique(v1)),  NA)
 ### get log-rank statistic U for each variable
     R1 [, 2] <- sapply(1:nrow(R1), function (j) {
         s2 <- Surv(s1[, "time"][v1 >= R1[j, 1]], s1[, "status"][v1 >= R1[j, 1]])
-        t2 <- rbind(c(0, 0, 0), tne(s2))
+        t2 <- rbind(c(0, 0, 0), as.data.frame(tne(s2)))
 ###  fill in first row
         t2[1, ] <- c(0, max(t2$n), 0)
 ### hold results

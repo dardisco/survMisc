@@ -270,7 +270,8 @@ comp2Surv <- function(n, e, n1, e1,
     eME1 <- e1-(n1*e/n)
 ### variance (2 groups)
     var1 <- as.matrix( (n1/n)*(1-(n1/n))*((n-e)/(n-1))*e )
-### remove NaNs - first or last no.s may not be possible to calculate
+### remove NaNs -
+### first or last no.s may not be possible to calculate
     if (any(is.nan(var1))){
 ### index
         in1 <- which(is.nan(var1))
@@ -392,6 +393,20 @@ compNSurv <- function (t, n, e, n1, e1,
     df1 <- ifelse(is.null(dim(eME)),1,ncol(eME))-1
 ### make covariance matrix (n groups)
     v1 <- covMatSurv(t, n, e, n1)
+### remove NaNs -
+### last no.s may not be possible to calculate
+    if (any(is.nan(v1))){
+### index
+        in1 <- which(is.nan(v1))
+        dim1 <- dim(v1)
+        v1 <- v1[-in1]
+        dim(v1) <- c(dim1[1], dim1[2], (dim1[3]-1))
+        eME <- eME[-nrow(eME), ]
+        e <- e[-length(e)]
+        n <- n[-length(n)]
+        e1 <- e1[-nrow(e1), ]
+        n1 <- n1[-nrow(n1), ]
+    }
     cov1 <- rowSums(v1, dims=2)
 ### display chisq, degrees of freedom and rounded result
     dis <- function(chi1, df=df1, rounded=round1){
