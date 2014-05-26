@@ -284,7 +284,7 @@ tne.formula <- function(x, ...,
                                         l1))
 ### for 'n' carry last observation back
 ### (to fill in missing values in first rows)
-    data.table::set(m1, j=grep("n",colnames(m1)),
+    data.table::set(m1, j=grep("n", colnames(m1)),
                     value=zoo::na.locf(m1[, grep("n", colnames(m1)),
                     with=FALSE],
                     fromLast=TRUE))
@@ -295,18 +295,20 @@ tne.formula <- function(x, ...,
     }
 ### names
     s1 <- levels(dt1$s)
+###
 ### initialise new constants (for R CMD check)
     n <- e <- NULL
 ### make no. at risk (total) per time period
-    m1[, n := rowSums(.SD), .SDcols = seq(2, (length(s1)*2), by=2)]
+    m1[, n := rowSums(.SD), .SDcols = seq(2, ncol(m1), by=2)]
 ### total events per time period
-    m1[, e := rowSums(.SD), .SDcols = seq(3, (length(s1)*2+1), by=2)]
+    m1[, e := rowSums(.SD), .SDcols = seq(3, ncol(m1), by=2)]
     setcolorder(m1,
                 c(1, ncol(m1)-1, ncol(m1), 2:(ncol(m1)-2))
                 )
     if (nameStrata){
         n1 <- c("n_", "e_")
         n1 <- as.vector(outer(n1, s1, paste, sep=""))
+        n1 <- n1[1:(ncol(m1)-3)]
         data.table::setnames(m1, c("t", "n", "e", n1))
         return(m1)
     }

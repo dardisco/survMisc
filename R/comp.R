@@ -229,7 +229,7 @@ comp.coxph <- function(x, ..., FHp=1, FHq=1, scores=NULL, lim=1e4){
      if (!class(x)=="coxph") stop("Only applies to object of class 'coxph'")
      if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
 ###
-    m1 <- tne(x, return="merged", eventsOnly=TRUE)
+    m1 <- tne.coxph(x, return="merged", eventsOnly=TRUE)
 ###
 ### 2 groups only:
     if (ncol(m1)==7){
