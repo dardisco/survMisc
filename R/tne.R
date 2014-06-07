@@ -75,7 +75,7 @@ tne.Surv <- function(x, ..., eventsOnly=FALSE){
     if(!attr(x, which="type")=="right") warning
     "Only applies to right censored data"
     dt1 <- data.table(unclass(x))
-    dt1 <- dt1[, list(n=length(status), e=sum(status)) , by=time]
+    dt1 <- dt1[, list(n=length(status), e=sum(status)), by=time]
     dt1 <- dt1[, "n" := c(sum(n), sum(n)-cumsum(n)[-length(n)]) ]
     if(eventsOnly) dt1 <- dt1[e==1, ]
     setnames(dt1, c("t", "n", "e"))
@@ -93,8 +93,8 @@ tne.Surv <- function(x, ..., eventsOnly=FALSE){
 ##' data(kidney, package="KMsurv")
 ##' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 ##' tne(s1)
-##' tne(s1, return="list")
-##' tne(s1, eventsOnly=TRUE)
+##' tne(s1, return="merged")
+##' tne(s1, return="merged", eventsOnly=TRUE)
 ##' tne(survfit(Surv(time=time, event=delta) ~ 1, data=kidney))
 ##' data(larynx, package="KMsurv")
 ##' tne(survfit(Surv(time, delta) ~ factor(stage) + age, data=larynx))
@@ -156,7 +156,7 @@ tne.coxph <- function(x, ...,
     }
 ### get model matrix
     dt1 <- data.table(model.matrix(mt, mf, contrasts))
-    return( .getTne(dt1, mf, eventsOnly=eventsOnly, return=return) )
+    return(.getTne(dt1, mf, eventsOnly=eventsOnly, return=return))
 }
 ##' @rdname tne
 ##' @aliases tne.formula
@@ -241,14 +241,14 @@ tne.formula <- function(x, ...,
     nc1 <- ncol(dt1)
     setcolorder(dt1,
                 c(nc1-3, nc1-1, nc1-2, nc1, nc1-4, 1:(nc1-5)))
-    if(eventsOnly) {
-        dt1 <- dt1[e==1, ]
-    }
 ###
     return <- match.arg(return)
     if(return=="table"){
 ### otherwise
 ### make no. expected events (per predictor)
+        if(eventsOnly) {
+            dt1 <- dt1[e==1, ]
+        }
         dt1[, "Es" := (e * ns) / n]
 ### make events - expected
         dt1[, "e_Es" := e - Es ]
@@ -262,6 +262,9 @@ tne.formula <- function(x, ...,
 ### need call to .SD to make 2nd list work
     l1 <- dt1[, list(t, "n"=ns, e, s) ][, list(list(.SD)), by=s]$V1
     if(return=="list") {
+        if(eventsOnly) {
+            dt1 <- dt1[e==1, ]
+        }
         if(nameStrata) {
             names(l1) <- unique(dt1$s)
             return(l1)
@@ -270,16 +273,18 @@ tne.formula <- function(x, ...,
         }
     }
 ### else return=="merged"
+    for (i in seq_along(l1)){
+### get no. at risk and no. events per time
+        l1[[i]] <- l1[[i]][, list(n=max(n), e=sum(e)), by=t]
 ### rename 'n' and 'e' columns to avoid duplicate column names
 ### needed if merging >3 data.frames
-    for(i in seq_along(l1)) {
-        setnames(l1[[i]], c("t", paste0("n",i), paste0("e",i)))
+        setnames(l1[[i]], c("t", paste0("n", i), paste0("e", i)))
     }
 ### merge all elements in list (rather inefficient)
 ### need allow.cartesian to prevent error
 ### if new no. rows > no. rows in longest element in list
     m1 <- data.table::data.table(Reduce(function(...)
-                                        merge(..., by="t", j=c(2,3),
+                                        merge(..., by="t",
                                               all=TRUE, allow.cartesian=TRUE),
                                         l1))
 ### for 'n' carry last observation back
@@ -293,22 +298,24 @@ tne.formula <- function(x, ...,
     for (j in seq_len(ncol(m1))){
         data.table::set(m1, which(is.na(m1[[j]])), j, as.integer(0))
     }
-### names
-    s1 <- levels(dt1$s)
-###
 ### initialise new constants (for R CMD check)
     n <- e <- NULL
 ### make no. at risk (total) per time period
-    m1[, n := rowSums(.SD), .SDcols = seq(2, ncol(m1), by=2)]
+    m1[, n := rowSums(.SD), .SDcols = grep("n", colnames(m1))]
 ### total events per time period
-    m1[, e := rowSums(.SD), .SDcols = seq(3, ncol(m1), by=2)]
+    m1[, e := rowSums(.SD), .SDcols = grep("e", colnames(m1))]
     setcolorder(m1,
                 c(1, ncol(m1)-1, ncol(m1), 2:(ncol(m1)-2))
                 )
+###
+    if(eventsOnly) {
+        m1 <- m1[e >= 1, ]
+    }
     if (nameStrata){
+### names
+        s1 <- levels(dt1$s)
         n1 <- c("n_", "e_")
         n1 <- as.vector(outer(n1, s1, paste, sep=""))
-        n1 <- n1[1:(ncol(m1)-3)]
         data.table::setnames(m1, c("t", "n", "e", n1))
         return(m1)
     }

@@ -23,7 +23,7 @@ Type: Package
 Author: Chris Dardis
 Description: A collection of functions for analysis of survival data. These
     extend the methods available in package survival.
-Version: 0.41
+Version: 0.4.2.1
 Date: 2014-03-15
 Collate:
     'air.R'
