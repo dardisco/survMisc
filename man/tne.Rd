@@ -66,6 +66,9 @@
   e for each stratum.
 }
 \description{
+  Time, No. at risk, No. events
+}
+\details{
   No. of events expected (per stratum) is given by:
   \deqn{\frac{e_i(n[s]_i)}{n_i}}{ e(i)n[s](i) / n(i)} where
   \eqn{n[s]_i} is the no. at risk for the stratum. \cr \cr
@@ -84,8 +87,8 @@ tne(s1, eventsOnly=TRUE)
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 tne(s1)
-tne(s1, return="list")
-tne(s1, eventsOnly=TRUE)
+tne(s1, return="merged")
+tne(s1, return="merged", eventsOnly=TRUE)
 tne(survfit(Surv(time=time, event=delta) ~ 1, data=kidney))
 data(larynx, package="KMsurv")
 tne(survfit(Surv(time, delta) ~ factor(stage) + age, data=larynx))

@@ -2,9 +2,9 @@
 \alias{lrSS}
 \title{Sample size required to show difference in survival by log-rank test given prior information about Kaplan-Meier estimate}
 \source{
-  Schoenfeld D. Sample-size formula for the
-  proportional-hazards regression model. Biometrics 1983
-  June; 39:499-503.
+  Schoenfeld D, 1983. Sample-size formula for the
+  proportional-hazards regression model. \emph{Biometrics}.
+  (39):499-503.
   \href{http://www.jstor.org/stable/2531021}{JSTOR}
 }
 \usage{
@@ -89,5 +89,8 @@
 data(btumors)
 m1 <- mean(rep(btumors[,"ms"],btumors[,"n"]))
 lrSS(HR=1.5,Sp=c(0.43,0.2,0.11),tp=c(1,2,3),mtp=m1,a=2,f=1,alpha=0.1,beta=0.2,p=0.5)
+}
+\seealso{
+  \code{\link{btumors}}
 }
 

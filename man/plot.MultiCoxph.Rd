@@ -1,6 +1,6 @@
-\name{plotMultiCoxph}
+\name{plot.MultiCoxph}
 \alias{plot.multi.coxph}
-\alias{plotMultiCoxph}
+\alias{plot.MultiCoxph}
 \title{Plot \code{multi.coxph} object}
 \usage{
   \method{plot}{multi.coxph} (x, ...,

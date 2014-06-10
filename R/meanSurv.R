@@ -6,7 +6,9 @@
 #' @title Mean for \code{Surv} object
 #' @param x A \code{Surv} object
 #' @param alpha Significance level \eqn{\alpha}{alpha}
-#' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival time from then until \code{tMax} is used:
+#' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the
+#' following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival
+#' time from then until \code{tMax} is used:
 #' \describe{
 #' \item{Effron}{ \eqn{\hat{S}=0}{S=0}}
 #' \item{Gill}{ \eqn{\hat{S}=\hat{S}(t_k)}{S = S(t_k)} i.e. \eqn{\hat{S}}{S} is equal to the

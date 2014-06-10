@@ -131,7 +131,7 @@
 \examples{
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
-autoplot(s1)
+autoplot(s1, type="fill", survSize=2)
 autoplot(s1, type="CI", pval=TRUE, pX=0.3,
  legLabs=c("surgical", "percutaneous"),
  title="Time to infection following catheter placement \\n

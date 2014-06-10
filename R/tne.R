@@ -35,7 +35,7 @@
 ##' \cr \cr
 ##' If \code{return="merged"}, a \code{data.table} with a columns t, n, e as above
 ##' and additional columns for n and e for each stratum.
-##' @description
+##' @note
 ##' No. of events expected (per stratum) is given by:
 ##' \deqn{\frac{e_i(n[s]_i)}{n_i}}{
 ##'  e(i)n[s](i) / n(i)}
@@ -43,7 +43,7 @@
 ##' \cr \cr
 ##' If the formula is 'intercept-only', the strata \code{I=1} is returned.
 ##' \cr \cr
-##' \code{survfit} object do not currently support interaction terms.
+##' \code{survfit} objects do not currently support interaction terms.
 ##' @references Example using \code{kidney} data is from:
 ##' Klein J, Moeschberger M 2003
 ##' \emph{Survival Analysis}, 2nd edition.

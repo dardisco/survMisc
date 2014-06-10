@@ -114,6 +114,6 @@ plot.Surv <- function(x, l=3, ...){
                    "\n point = exactly observed event time",
                    "")
     text1 <- " censored survival data\n arrow = censored observation"
-    tit1 <- paste(type1,text1,int1,sep="")
+    tit1 <- paste(type1,text1, int1, sep="")
     graphics::title(tit1)
 }

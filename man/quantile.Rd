@@ -65,38 +65,8 @@
   objects
 }
 \details{
-  Confidence intervals are calculated from
-  \eqn{\sigma}{sigma} which is: \deqn{\sigma (t) = \sqrt{
-  \frac{Var[\hat{S}(t)]}{\hat{S}^2(t)}} }{ ( Var[S(t)] /
-  (S(t)^2) )^0.5} The intervals are: \cr
-
-  \itemize{
-
-  \item linear \deqn{ \hat{S}(t) \pm Z_{1- \alpha} \sigma
-  (t) \hat{S}(t)}{ S(t)+- Z(1-alpha) sigma(t) S(t)} Where
-  \eqn{\hat{S}(t) }{S(t)} is the Kaplan-Meier survival
-  estimate. \cr \cr
-
-  \item log transform \deqn{ [
-  \hat{S}(t)^{\frac{1}{\theta}}, \hat{S}(t)^{\theta} ] }{
-  [S(t)^(1/theta), S(t)^theta]} Where \eqn{\theta}{theta}
-  is: \deqn{ \exp{ \frac{Z_{1- \alpha} \sigma (t)}{
-  \log{\hat{S}(t)}}} }{ exp ( Z(1-alpha)sigma(t) /
-  log(S(t)) )} \cr \cr
-
-  \item Arcsine-square root transform. \cr Upper: \deqn{
-  \sin^2(\max[0, \arcsin{\sqrt{\hat{S}(t)}} - \frac{Z_{1-
-  \alpha}\sigma(t)}{2} \sqrt{
-  \frac{\hat{S}(t)}{1-\hat{S}(t)}}]) }{ sin^2( max[0,
-  arcsin S(t)^0.5 - Z(1-alpha)sigma(t)/2
-  (S(t)/1-S(t))^0.5])} Lower: \deqn{
-  \sin^2(\min[\frac{\pi}{2}, \arcsin{\sqrt{\hat{S}(t)}} +
-  \frac{Z_{1- \alpha}\sigma(t)}{2} \sqrt{
-  \frac{\hat{S}(t)}{1-\hat{S}(t)}}]) }{ sin^2( min[pi/2,
-  arcsin S(t)^0.5 + Z(1-alpha)sigma(t)/2
-  (S(t)/1-S(t))^0.5])}
-
-  }
+  Confidence intervals are calculated as shown in the
+  pointwise confidence intervals in \code{link{ci}}
 }
 \examples{
 data(bmt, package="KMsurv")
@@ -131,5 +101,8 @@ median(c1)
   Examples for quantiles are from: Klein J, Moeschberger M
   2003 \emph{Survival Analysis}, 2nd edition. New York:
   Springer. Example 4.2, pg 121.
+}
+\seealso{
+  \code{\link{ci}}
 }
 

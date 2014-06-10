@@ -8,7 +8,7 @@
 #' LazyLoad: \tab yes
 #' }
 #' A collection of functions for analysis of survival data. These
-#' extend the methods available in package survival.
+#' extend the methods available in \code{package:survival}.
 #' \cr
 #' The intent is to generate a workspace for some of the common tasks
 #' arising in survival analysis.

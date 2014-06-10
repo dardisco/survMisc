@@ -57,3 +57,4 @@ Collate:
     'ic.R'
     'multiCoxph.R'
     'plotMultiCoxph.R'
+    'ci.R'

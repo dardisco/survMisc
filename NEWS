@@ -6,3 +6,7 @@ fixed cutp() - need to convert data.table to data.frame in function body for now
 Fixed autoplot.survfit(): arbitrary alpha now works with upper box in filled survival lines
 6/6/2014:
 Fixed .getTne(), was not calculating values correctly; comp() now works correctly
+6/9/2014:
+Improve autoplot.survfit; coloring now consistent for line and fill
+Add ci method
+Move documentation from quantile to ci

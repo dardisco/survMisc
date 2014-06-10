@@ -53,11 +53,5 @@ calcSurv(s1)
   \code{\link{tne}}
 
   \code{\link{KM}}
-
-  \code{\link{Gw}}
-
-  \code{\link{NelA}}
-
-  \code{\link{NelAVar}}
 }
 

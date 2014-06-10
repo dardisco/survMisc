@@ -27,9 +27,6 @@
 ##'   }
 ##' @seealso \code{\link{tne}}
 ##' @seealso \code{\link{KM}}
-##' @seealso \code{\link{Gw}}
-##' @seealso \code{\link{NelA}}
-##' @seealso \code{\link{NelAVar}}
 ##' @examples
 ##' data(bmt, package="KMsurv")
 ##' b1 <- bmt[bmt$group==1, ] # ALL patients

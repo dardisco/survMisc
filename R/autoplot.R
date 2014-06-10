@@ -3,8 +3,9 @@
 ##' @aliases autoplot.survfit
 ##' @method autoplot survfit
 ##' @description Uses \code{ggplot2} to generate survival curves
-##' (Kaplan-Meier plot) and a table showing no. of events per time period
-##' @title Generate a ggplot for \code{survfit} object
+##' (Kaplan-Meier plot) and a table showing no. of subjects
+##' at risk per time period
+##' @title Generate a \code{ggplot} for a \code{survfit} object
 ##' @param object An object of class \code{survfit}
 ##' @param ... Additional arguments (not implemented)
 ##' @param xlab Label for x axis on survival plot
@@ -25,16 +26,16 @@
 ##' the confidence intervals above.
 ##' @param palette Options are taken from
 ##' \href{http://colorbrewer2.org/}{color_brewer}.
-##' \cr \cr
+##' \cr
 ##' \code{palette="Dark2"} (the default) is recommended for
-##' ##' \code{single} or \code{CI} plots.
-##' \cr \cr
+##' \code{single} or \code{CI} plots.
+##' \cr
 ##' \code{palette="Set2"} is recommended for \code{fill} plots.
 ##' @param jitter If \code{jitter="noEvents"}, adds some random, positive noise
 ##' to survival lines with no events (i.e. all observations censored).
 ##' This will bring them just above 1 on the y-axis, making them easier
 ##' to see separately.
-##' \cr \cr
+##' \cr
 ##' If \code{jitter="all"} add some vertical noise to all survival lines
 ##' @param legend If \code{legend=FALSE}, no legends will be produced
 ##' for the plot or table
@@ -81,7 +82,7 @@
 ##' @examples
 ##' data(kidney, package="KMsurv")
 ##' s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
-##' autoplot(s1)
+##' autoplot(s1, type="fill", survSize=2)
 ##' autoplot(s1, type="CI", pval=TRUE, pX=0.3,
 ##'  legLabs=c("surgical", "percutaneous"),
 ##'  title="Time to infection following catheter placement \n
@@ -149,7 +150,7 @@ autoplot.survfit <- function(object, ...,
         }
     } else {
 ### add vector for one strata according to number of rows of strata
-        st1 <- unlist(sapply( 1:length(object$strata),
+        st1 <- unlist(sapply(1:length(object$strata),
                              function (i) rep(stNames[i], object$strata[i]) ))
     }
 ### create data.table with data from survfit
@@ -159,7 +160,7 @@ autoplot.survfit <- function(object, ...,
     dt1 <- data.table(time=object$time,
                       n.risk=object$n.risk,
                       n.event=object$n.event,
-                      n.censor = object$n.censor,
+                      n.censor=object$n.censor,
                       surv=object$surv,
                       upper=object$upper,
                       lower=object$lower,
@@ -192,7 +193,7 @@ autoplot.survfit <- function(object, ...,
 ###
     dt1 <- dt1[order(st)]
 ### plot single lines only
-    g1 <- ggplot(data=dt1, aes(group=st, colour=st)) +
+    g1 <- ggplot(data=dt1, aes(group=st, colour=st, fill=st)) +
         geom_step(aes(x=time, y=surv), direction="hv", size=survSize)
 ###
     type <- match.arg(type)
@@ -204,7 +205,7 @@ autoplot.survfit <- function(object, ...,
                       direction="hv", linetype=CIline, alpha=alpha)
     }
     if (type=="fill"){
-### copy dt1 to work allow further work
+ ### copy dt1 to work allow further work
         dt2 <- dt1[, list(l=unique(lower),
                           u=unique(upper),
                           minT=as.numeric(min(time)),
@@ -212,14 +213,16 @@ autoplot.survfit <- function(object, ...,
                           ), by=list(surv, st)]
 ### make max. time column
         dt2[, "maxT" := c(minT[2:length(minT)], NA), by=st]
-        dt2 <- na.omit(dt2)
+### merge columns
+        dt1 <- merge(dt1, dt2, by=c("time", "surv", "st"), all.y=TRUE)
+        dt1 <- dt1[order(st)]
 ### add shading
-        g1 <- g1 + geom_rect(data=dt2, aes(x=NULL, y=NULL,
+        g1 <- g1 + geom_rect(data=dt1, aes(x=NULL, y=NULL,
                              ymax=surv, ymin=l,
                              xmax=maxT, xmin=minT,
                              colour=st, group=st, fill=st),
                              alpha=alpha, size=fillLineSize) +
-                   geom_rect(data=dt2, aes(x=NULL, y=NULL,
+                   geom_rect(data=dt1, aes(x=NULL, y=NULL,
                              ymax=u, ymin=surv,
                              xmax=maxT, xmin=minT,
                              colour=st, group=st, fill=st),
@@ -237,16 +240,15 @@ autoplot.survfit <- function(object, ...,
 ### use palette Set2 for lighter shades as large fill area
     palette <- match.arg(palette)
     if(type=="fill"){
-        g1 <- g1 +  scale_fill_brewer(type="qual", palette=palette,
-                                          guide=guide_legend(
-                                          keywidth=legSize,
-                                          keyheight=legSize))
-        } else {
-        g1 <- g1 +  scale_colour_brewer(type="qual", palette=palette,
+        g1 <- g1 + scale_fill_brewer(type="qual", palette=palette,
                                         guide=guide_legend(
                                         keywidth=legSize,
                                         keyheight=legSize))
     }
+    g1 <- g1 +  scale_colour_brewer(type="qual", palette=palette,
+                                    guide=guide_legend(
+                                    keywidth=legSize,
+                                    keyheight=legSize))
 ### scales
     g1 <- g1 +
         scale_x_continuous(xlab) +
@@ -331,3 +333,4 @@ autoplot.survfit <- function(object, ...,
     class(res) <- c("tableAndPlot", "list")
     return(res)
 }
+###----------------------------------------

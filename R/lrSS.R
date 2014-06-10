@@ -45,9 +45,13 @@
 ##'   \item{n}{no. subjects required}
 ##'   }}
 ##' }
-##' @source Schoenfeld D. Sample-size formula for the proportional-hazards regression model. Biometrics 1983 June; 39:499-503. \href{http://www.jstor.org/stable/2531021}{JSTOR}
+##' @source Schoenfeld D, 1983. Sample-size formula for the proportional-hazards regression model.
+##' \emph{Biometrics}. (39):499-503. \href{http://www.jstor.org/stable/2531021}{JSTOR}
 ##' @note
-##' Assumes there are two groups and one intervention (covariate) which is present or absent. The values for the example are taken from Schoenfelds paper, except for \code{mtp}.
+##' Assumes there are two groups and one intervention (covariate) which is present or absent.
+##' The values for the example are taken from Schoenfelds paper, except for \code{mtp}.
+##' @seealso
+##' \code{\link{btumors}}
 ##' @examples
 ##' data(btumors)
 ##' m1 <- mean(rep(btumors[,"ms"],btumors[,"n"]))

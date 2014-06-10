@@ -35,40 +35,8 @@ quantile <- function(x, ...){
 ##' intervals with one method (default is \code{log}).
 ##' @details
 ##'
-##' Confidence intervals are calculated from \eqn{\sigma}{sigma} which is:
-##' \deqn{\sigma (t) = \sqrt{ \frac{Var[\hat{S}(t)]}{\hat{S}^2(t)}} }{
-##' ( Var[S(t)] / (S(t)^2) )^0.5}
-##' The intervals are:
-##' \cr
-##'
-##' \itemize{
-##'
-##' \item linear
-##' \deqn{ \hat{S}(t) \pm Z_{1- \alpha} \sigma (t) \hat{S}(t)}{
-##' S(t)+- Z(1-alpha) sigma(t) S(t)}
-##' Where \eqn{\hat{S}(t) }{S(t)} is the Kaplan-Meier survival estimate.
-##' \cr \cr
-##'
-##' \item log transform
-##' \deqn{ [ \hat{S}(t)^{\frac{1}{\theta}}, \hat{S}(t)^{\theta} ] }{
-##' [S(t)^(1/theta), S(t)^theta]}
-##' Where \eqn{\theta}{theta} is:
-##' \deqn{ \exp{ \frac{Z_{1- \alpha} \sigma (t)}{ \log{\hat{S}(t)}}} }{
-##' exp ( Z(1-alpha)sigma(t) / log(S(t)) )}
-##' \cr \cr
-##'
-##' \item Arcsine-square root transform.
-##' \cr
-##' Upper:
-##' \deqn{ \sin^2(\max[0, \arcsin{\sqrt{\hat{S}(t)}} - \frac{Z_{1- \alpha}\sigma(t)}{2}
-##' \sqrt{ \frac{\hat{S}(t)}{1-\hat{S}(t)}}]) }{
-##' sin^2( max[0, arcsin S(t)^0.5 - Z(1-alpha)sigma(t)/2 (S(t)/1-S(t))^0.5])}
-##' Lower:
-##' \deqn{ \sin^2(\min[\frac{\pi}{2}, \arcsin{\sqrt{\hat{S}(t)}} +
-##' \frac{Z_{1- \alpha}\sigma(t)}{2} \sqrt{ \frac{\hat{S}(t)}{1-\hat{S}(t)}}]) }{
-##'  sin^2( min[pi/2, arcsin S(t)^0.5  + Z(1-alpha)sigma(t)/2 (S(t)/1-S(t))^0.5])}
-##'
-##' }
+##' Confidence intervals are calculated as shown in the pointwise confidence intervals
+##' in \code{link{ci}}
 ##'
 ##' @examples
 ##' data(bmt, package="KMsurv")
@@ -87,6 +55,8 @@ quantile <- function(x, ...){
 ##' \emph{Survival Analysis}, 2nd edition.
 ##' New York: Springer.
 ##' Example 4.2, pg 121.
+##' @seealso
+##' \code{\link{ci}}
 ##'
 ##' @export quantile.Surv
 ##' @aliases quantile.Surv
@@ -107,7 +77,7 @@ quantile.Surv <- function(x, ...,
 ### find time corresponding to quantile
     t1 <- sapply(p1, .findT, s=s2)
 ### convert alpha to z value
-    z1 <- stats::qnorm(1-alpha/2)
+    z1 <- stats::qnorm(1 - alpha / 2)
 ### get ranges for methods
     Lin1 <- sapply(p1, .findLin, s=s2)
     Log1 <- sapply(p1, .findLog, s=s2)
@@ -273,6 +243,7 @@ median.Surv <- function(x, ...,
 ### convert alpha to z value
     z1 <- stats::qnorm(1-alpha/2)
 ### CI based on method
+    method <- match.arg(method)
     range1 <- as.matrix(switch(method,
                                log = .findLog(0.5, s=s2),
                                lin = .findLin(0.5, s=s2),

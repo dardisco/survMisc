@@ -110,7 +110,7 @@
 #' \cr \cr
 #' Note that the algorithm will tend to slow as the population of fitted models expands.
 #' @seealso \code{\link{Information criterion}}
-#' @seealso \code{\link{plotMultiCoxph}}
+#' @seealso \code{\link{plot.MultiCoxph}}
 #' @references Calgano V, de Mazancourt C, 2010.
 #' glmulti: An R Package for Easy Automated Model Selection with (Generalized) Linear Models.
 #' \emph{Journal of Statistical Software}. \bold{34}(12):1-29.

@@ -164,6 +164,6 @@ maxCoef=8, crit="bic", how="evolve", deltaM=1, deltaB=1, conseq=10)
 \seealso{
   \code{\link{Information criterion}}
 
-  \code{\link{plotMultiCoxph}}
+  \code{\link{plot.MultiCoxph}}
 }
 

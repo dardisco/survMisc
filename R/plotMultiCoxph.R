@@ -1,4 +1,4 @@
-##' @name plotMultiCoxph
+##' @name plot.MultiCoxph
 ##' @aliases plot.multi.coxph
 ##' @method plot multi.coxph
 ##' @S3method plot multi.coxph
