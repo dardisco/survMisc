@@ -1,4 +1,4 @@
-﻿##' @name tne
+##' @name tne
 ##' @title Time, No. at risk, No. events
 ##' @param x A object of class \code{Surv}, \code{survfit},
 ##' \code{coxph} or \code{formula}.
