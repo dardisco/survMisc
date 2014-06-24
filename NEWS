@@ -10,3 +10,5 @@ Fixed .getTne(), was not calculating values correctly; comp() now works correctl
 Improve autoplot.survfit; coloring now consistent for line and fill
 Add ci method
 Move documentation from quantile to ci
+6/21/2014:
+Change name of autoplot and push new version to github

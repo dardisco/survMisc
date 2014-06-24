@@ -68,12 +68,12 @@
 \description{
   Time, No. at risk, No. events
 }
-\details{
+\note{
   No. of events expected (per stratum) is given by:
   \deqn{\frac{e_i(n[s]_i)}{n_i}}{ e(i)n[s](i) / n(i)} where
   \eqn{n[s]_i} is the no. at risk for the stratum. \cr \cr
   If the formula is 'intercept-only', the strata \code{I=1}
-  is returned. \cr \cr \code{survfit} object do not
+  is returned. \cr \cr \code{survfit} objects do not
   currently support interaction terms.
 }
 \examples{

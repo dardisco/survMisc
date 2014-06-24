@@ -27,7 +27,7 @@ Version: 0.4.2.1
 Date: 2014-03-15
 Collate:
     'air.R'
-    'autoplot.R'
+    'autoplotSurvfit.R'
     'autoplotTAP.R'
     'btumors.R'
     'tne.R'

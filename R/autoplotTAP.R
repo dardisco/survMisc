@@ -2,7 +2,7 @@
 ##' @export autoplot.tableAndPlot
 ##' @aliases autoplot.tableAndPlot
 ##' @method autoplot tableAndPlot
-##' @include autoplot.R
+##' @include autoplotSurvfit.R
 ##' @description Uses \code{gridExtra::gridArrange}
 ##' to arrange a plot, it's legend and a table.
 ##' @title Arrange and plot a survival plot, it's legend and a table.

@@ -1,19 +1,19 @@
 \name{autoplot.survfit}
 \alias{autoplot.survfit}
-\title{Generate a ggplot for \code{survfit} object}
+\title{Generate a \code{ggplot} for a \code{survfit} object}
 \usage{
-  \method{autoplot}{survfit} (object, ..., xlab = "Time",
-    ylab = "Survival",
+  \method{autoplot}{survfit} (object, ..., xLab = "Time",
+    yLab = "Survival",
     title = "Marks show times with censoring",
     titTextSize = 15, axisTitSize = 15, axisLabSize = 10,
-    survSize = 0.5, type = c("single", "CI", "fill"),
+    survLineSize = 0.5, type = c("single", "CI", "fill"),
     palette = c("Dark2", "Set2", "Accent", "Paired", "Pastel1", "Pastel2", "Set1", "Set3"),
     jitter = c("none", "noEvents", "all"), censShape = 3,
     censSize = 5, legend = TRUE, legLabs = NULL,
     legTitle = "Strata", legTextSize = 10, legSize = 2,
     alpha = 0.05, CIline = 10, fillLineSize = 0.05,
-    pval = FALSE, sigP = 1, pX = 0.1, pY = 0.1,
-    tabTime = c("major", "minor"),
+    pVal = FALSE, sigP = 1, pX = 0.1, pY = 0.1,
+    timeTicks = c("major", "minor"),
     tabTitle = "Number at risk by time",
     tabTitTextSize = 15, tabLegTextSize = 5, nRiskSize = 5)
 }
@@ -22,9 +22,9 @@
 
   \item{...}{Additional arguments (not implemented)}
 
-  \item{xlab}{Label for x axis on survival plot}
+  \item{xLab}{Label for x axis on survival plot}
 
-  \item{ylab}{Label for y axis on survival plot}
+  \item{yLab}{Label for y axis on survival plot}
 
   \item{title}{Title for survival plot}
 
@@ -34,7 +34,7 @@
 
   \item{axisLabSize}{Title size for label axes}
 
-  \item{survSize}{Survival line size}
+  \item{survLineSize}{Survival line size}
 
   \item{type}{If \code{type="single"} (the default), plots
   single lines. \cr \cr If \code{type="CI"} will add lines
@@ -46,9 +46,9 @@
   survival lines to the confidence intervals above.}
 
   \item{palette}{Options are taken from
-  \href{http://colorbrewer2.org/}{color_brewer}. \cr \cr
+  \href{http://colorbrewer2.org/}{color_brewer}. \cr
   \code{palette="Dark2"} (the default) is recommended for
-  ##' \code{single} or \code{CI} plots. \cr \cr
+  \code{single} or \code{CI} plots. \cr
   \code{palette="Set2"} is recommended for \code{fill}
   plots.}
 
@@ -56,8 +56,8 @@
   random, positive noise to survival lines with no events
   (i.e. all observations censored). This will bring them
   just above 1 on the y-axis, making them easier to see
-  separately. \cr \cr If \code{jitter="all"} add some
-  vertical noise to all survival lines}
+  separately. \cr If \code{jitter="all"} add some vertical
+  noise to all survival lines}
 
   \item{legend}{If \code{legend=FALSE}, no legends will be
   produced for the plot or table}
@@ -88,7 +88,7 @@
 
   \item{fillLineSize}{Line size surrouding filled boxes}
 
-  \item{pval}{If \code{pval=TRUE}, adds \eqn{p} value from
+  \item{pVal}{If \code{pVal=TRUE}, adds \eqn{p} value from
   log-rank test to plot}
 
   \item{sigP}{No. of significant digits to display in
@@ -102,10 +102,11 @@
   \item{pY}{Location of \eqn{p} value on y axis. Should be
   in range of \eqn{0 - 1}, as above}
 
-  \item{tabTime}{If \code{tabTime="major"} this will use
-  the major x-axis (time) marks from the survival plot. \cr
-  If \code{tabTime="minor"}, minor axis marks are used
-  instead}
+  \item{timeTicks}{Numbers to mark on the survival plot and
+  table. If \code{timeTicks="major"}, only the major x-axis
+  (time) marks from the survival plot are are labelled on
+  the plot and table. \cr If \code{timeTicks="minor"},
+  minor axis marks are labelled instead}
 
   \item{tabTitle}{Table title}
 
@@ -125,14 +126,14 @@
 }
 \description{
   Uses \code{ggplot2} to generate survival curves
-  (Kaplan-Meier plot) and a table showing no. of events per
-  time period
+  (Kaplan-Meier plot) and a table showing no. of subjects
+  at risk per time period
 }
 \examples{
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
-autoplot(s1, type="fill", survSize=2)
-autoplot(s1, type="CI", pval=TRUE, pX=0.3,
+autoplot(s1, type="fill", survLineSize=2)
+autoplot(s1, type="CI", pVal=TRUE, pX=0.3,
  legLabs=c("surgical", "percutaneous"),
  title="Time to infection following catheter placement \\n
    by type of catheter, for dialysis patients")$plot

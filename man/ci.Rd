@@ -204,6 +204,6 @@ ci(s2, CI="0.99", how="point", trans="asin", tL=100, tU=600)
   Springer. Section 4.4, pg 111.
 }
 \seealso{
-  \code{\link{KM}}
+  \code{\link{KM}} \code{\link{quantile}}
 }
 
