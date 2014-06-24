@@ -214,8 +214,12 @@ tne.formula <- function(x, ...,
 ### get names of predictors
 ### use qQuote to preserve quotes in quotes
 ### i.e. change " to \"
+### avoid fancy quotes in UNIX!
+    fq1 <- unname(unlist(options("useFancyQuotes")))
+    options(useFancyQuotes=FALSE)
     f1 <- function(x) paste(dQuote(paste(x, "=", sep="")),
                                    ", get(", dQuote(x), ")", sep="")
+
     t1 <- paste(sapply(n1, f1), sep=",")
 ### if more than one predictor
 ### add space before each name (except for first name)
@@ -226,10 +230,16 @@ tne.formula <- function(x, ...,
     t2 <- paste("paste(", t1, ", sep='')" )
     p1 <- parse(text=t2)
     q <- quote(eval(p1))
+    options(useFancyQuotes=fq1)
 ### make one column indicating strata
 ### (one value for each combination of predictors)
-### need to include SD (subset data.table) to allow eval to work here
-    dt1[, "s" := as.factor(eval(q, envir=.SD))]
+### on older versions of data.table (< 1.9.0 I think)
+### could do this as one step:
+### include SD (subset data.table) to allow eval to work here
+### dt1[, "s" := as.factor(eval(q, envir=.SD))]
+    dt1[, "s" := dt1[, eval(q)]]
+    dt1[, "s" := as.factor(s)]
+### 
     stopifnot(attr(model.response(mf), "type")=="right")
     y <- data.table(unclass(model.response(mf, "numeric")))
     dt1[, c("t", "e") := y]
