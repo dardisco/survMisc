@@ -233,13 +233,12 @@ tne.formula <- function(x, ...,
     options(useFancyQuotes=fq1)
 ### make one column indicating strata
 ### (one value for each combination of predictors)
-### on older versions of data.table (< 1.9.0 I think)
-### could do this as one step:
-### include SD (subset data.table) to allow eval to work here
+### on Linux, argument envir=.SD not necessary
+### include SD (subset data.table) to allow eval to work there
 ### dt1[, "s" := as.factor(eval(q, envir=.SD))]
-    dt1[, "s" := dt1[, eval(q)]]
+    dt1[, "s" := dt1[, eval(q, envir=.SD)]]
     dt1[, "s" := as.factor(s)]
-### 
+###
     stopifnot(attr(model.response(mf), "type")=="right")
     y <- data.table(unclass(model.response(mf, "numeric")))
     dt1[, c("t", "e") := y]

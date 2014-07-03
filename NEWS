@@ -1,14 +1,16 @@
-5/20/14:
-Fixed comp(), compNSurv() for cases where last element in covMatSurv is NaN
-fixed sig() so likelihood-ratio test works for factors (needs call to model.matrix)
-fixed cutp() - need to convert data.table to data.frame in function body for now
-5/21/14:
-Fixed autoplot.survfit(): arbitrary alpha now works with upper box in filled survival lines
-6/6/2014:
-Fixed .getTne(), was not calculating values correctly; comp() now works correctly
+7/2/2014:
+Fix .getTne to work on Win and Linux
+6/21/2014:
+Change name of autoplot and push new version to github
 6/9/2014:
 Improve autoplot.survfit; coloring now consistent for line and fill
 Add ci method
 Move documentation from quantile to ci
-6/21/2014:
-Change name of autoplot and push new version to github
+5/21/14:
+Fixed autoplot.survfit(): arbitrary alpha now works with upper box in filled survival lines
+6/6/2014:
+Fixed .getTne(), was not calculating values correctly; comp() now works correctly
+5/20/14:
+Fixed comp(), compNSurv() for cases where last element in covMatSurv is NaN
+fixed sig() so likelihood-ratio test works for factors (needs call to model.matrix)
+fixed cutp() - need to convert data.table to data.frame in function body for now

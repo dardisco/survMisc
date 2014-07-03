@@ -58,3 +58,5 @@ Collate:
     'multiCoxph.R'
     'plotMultiCoxph.R'
     'ci.R'
+    'mpip.R'
+    'whas500.R'

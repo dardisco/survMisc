@@ -1,0 +1,77 @@
+##' @name whas500
+##' @docType data
+##' @title Worcester Heart Attack Study WHAS500 Data
+##' @details This is a more complete version
+##' of the WHAS100 dataset.
+##' \cr
+##' Columns are:
+##' \describe{
+##'  \item{id}{ID code}
+##'  \item{age}{Age at hospital admission (years)}
+##'  \item{gender}{Gender \describe{
+##'    \item{0}{male}
+##'    \item{1}{female}
+##'    }}
+##'  \item{hr}{Initial heart rate (bpm)}
+##'  \item{sysbp}{Initial systolic blood pressure (mmHg)}
+##'  \item{diasbp}{Initial diastolic blood pressure (mmHg)}
+##'  \item{bmi}{Body mass index (kg/m^2)}
+##'  \item{cvd}{History of cardiovascular disease \describe{
+##'    \item{0}{no}
+##'    \item{1}{yes}
+##'    }}
+##'  \item{afib}{Atrial fibrillation \describe{
+##'    \item{0}{no}
+##'    \item{1}{yes}
+##'    }}
+##'  \item{sho}{Cardiogenic shock \describe{
+##'    \item{0}{no}
+##'    \item{1}{yes}
+##'    }}
+##'  \item{chf}{Congestive heart failure \describe{
+##'    \item{0}{no}
+##'    \item{1}{yes}
+##'    }}
+##'  \item{av3}{3rd degree AV block (complete heart block) disease \describe{
+##'    \item{0}{no}
+##'    \item{1}{yes}
+##'    }}
+##'  \item{miord}{MI order \describe{
+##'    \item{0}{first}
+##'    \item{1}{recurrent}
+##'    }}
+##'  \item{mitype}{MI type \describe{
+##'    \item{0}{non Q-wave}
+##'    \item{1}{Q-wave}
+##'    }}
+##'  \item{year}{Cohort year \describe{
+##'    \item{1}{1997}
+##'    \item{2}{1999}
+##'    \item{3}{2001}
+##'    }}
+##'  \item{admitdate}{Hospital admission date}
+##'  \item{disdate}{Hospital discharge date}
+##'  \item{fdate}{Date of last follow up}
+##'  \item{los}{Length of hospital stay. Days between admission and discharge}
+##'  \item{dstat}{Discharge status \describe{
+##'    \item{0}{alive}
+##'    \item{1}{dead}
+##'    }}
+##'  \item{lenfol}{Length of follow up.
+##'        Days between admission and last follow-up.}
+##' ##'  \item{fstat}{Follow-up status \describe{
+##'    \item{0}{alive}
+##'    \item{1}{dead}
+##'    }}
+##'
+##' }
+##' @format A data frame with 500 rows
+##' and 22 columns.
+##' All columns are \code{integer}, apart from
+##' admitdate, disdate and fdate which are
+##' \code{date} and bmi which is \code{numeric}.
+##' @seealso \code{\link{whas100}}
+##' @source \href{http://www.mmnt.net/db/0/0/ftp.wiley.com/public/sci_tech_med/survival}{Wiley FTP}.
+##' @references Hosmer D, Lemeshow S,  May S 2008 \emph{Applied Survival Analysis: Regression Modeling of Time to Event Data, 2nd edition}. New York: John Wiley and Sons Inc.
+##'
+NULL
