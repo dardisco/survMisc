@@ -8,7 +8,7 @@
 ##' along with the standard errors, in a way useful for plotting.
 ##' @param fit The result of a Generalized Additive Model (\code{gam})
 ##' or a Cox proportional hazards model (\code{coxph})
-##' @param se.fit if \code{TRUE}, also return the standard errors
+##' @param se if \code{TRUE}, also return the standard errors
 ##' @param link if \code{TRUE}, then the individual terms are centered so that
 ##' the average of the inverse-link of the data,
 ##' i.e., the data on the original scale, has mean zero
@@ -36,13 +36,13 @@
 ##' ### at the mean temp
 ##' yy <- yy + temp$constant
 ##' graphics::matplot(sqrt(temp$wind[, 1]), yy, lty=c(1, 2, 2),
-##' type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
+##'                  type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
 ##' temp <- seq(3, 19, 2)
 ##' graphics::axis(1, sqrt(temp), format(temp))
-##' @author Terry Therneau, Dirk Larson, updated from S-plus by Chris Dardis
+##' @author Terry Therneau, Dirk Larson. Updated from S-plus by Chris Dardis
 ##' @keywords plot
 gamTerms <- function(fit,
-                     se.fit=TRUE,
+                     se=TRUE,
                      link=FALSE,
                      weights) {
 ### reconstruct the data, without transformations
@@ -54,7 +54,7 @@ gamTerms <- function(fit,
 ### Now get the terms, and match them
     fit$na.action <- NULL
 ### predicted values
-    termp <- predict(fit, type = "terms", se.fit = se.fit)
+    termp <- predict(fit, type = "terms", se.fit = se)
 ### vnames <- attr(terms(fit$formula), "term.labels")
     vnames <- Terms
 ### We need to remove any offset from the vnames list
@@ -65,7 +65,7 @@ gamTerms <- function(fit,
         }
     tname1 <- attr(Terms2, "term.labels")
 ###
-    if(se.fit){
+    if(se){
         tfit <- termp$fit
     } else {
         tfit <- termp
@@ -124,7 +124,7 @@ gamTerms <- function(fit,
         xx1 <- data[[vnames[k]]]
         xx2 <- sort(unique(xx1))
         keep <- match(xx2, xx1)
-        if(se.fit) {
+        if(se) {
             if(is.matrix(termp$se.fit)){
                  zz <- data.frame(x = xx2, y = tfit[keep, i],
                                   se = termp$se.fit[keep, i])

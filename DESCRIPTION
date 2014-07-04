@@ -60,3 +60,5 @@ Collate:
     'ci.R'
     'mpip.R'
     'whas500.R'
+    'rsq.R'
+    'plotTerm.R'
