@@ -4,14 +4,14 @@
 or Cox Proportional
 Hazard Model}
 \usage{
-  gamTerms(fit, se.fit = TRUE, link = FALSE, weights)
+  gamTerms(fit, se = TRUE, link = FALSE, weights)
 }
 \arguments{
   \item{fit}{The result of a Generalized Additive Model
   (\code{gam}) or a Cox proportional hazards model
   (\code{coxph})}
 
-  \item{se.fit}{if \code{TRUE}, also return the standard
+  \item{se}{if \code{TRUE}, also return the standard
   errors}
 
   \item{link}{if \code{TRUE}, then the individual terms are
@@ -50,12 +50,12 @@ yy <- cbind(temp$wind[, 2],
 ### at the mean temp
 yy <- yy + temp$constant
 graphics::matplot(sqrt(temp$wind[, 1]), yy, lty=c(1, 2, 2),
-type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
+                 type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
 temp <- seq(3, 19, 2)
 graphics::axis(1, sqrt(temp), format(temp))
 }
 \author{
-  Terry Therneau, Dirk Larson, updated from S-plus by Chris
+  Terry Therneau, Dirk Larson. Updated from S-plus by Chris
   Dardis
 }
 \seealso{
