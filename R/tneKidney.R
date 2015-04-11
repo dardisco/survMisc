@@ -1,6 +1,6 @@
 #' @name tneKidney
 #' @docType data
-#' @title Time, no. at risk, no. events for kidney
+#' @title Time, no. at risk, no. events for kidney data.
 #' @description Data from Klein J and Moeschberger.
 #' \cr
 #' Columns are:
@@ -14,6 +14,6 @@
 #'  \item{e}{no. events overall}
 #' }
 #' @format A data frame with 16 rows and 7 columns
-#' @source Klein J, Moeschberger. Survival Analysis, 2nd edition. Springer 2003. Example 7.9, pg 224.
+#' @source \bold{K&M}. Example 7.9, pg 224.
 #'
 NULL

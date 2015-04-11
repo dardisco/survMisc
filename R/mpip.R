@@ -1,6 +1,7 @@
 ##' @name mpip
 ##' @docType data
 ##' @title Multi-center Post-Infarction Project
+##' 
 ##' @details A data frame with 866 observations (rows)
 ##' and 13 variables (columns),
 ##' taken from an environmental study that followed patients admitted to
@@ -67,13 +68,16 @@
 ##'
 ##' }
 ##' @references
-##' The Multicenter Postinfarction Research Group. 1983.
-##' \emph{Risk stratification and survival after myocardial infarction.}
-##' N Engl J Med. 309(6):331-6.
-##' \href{http://www.nejm.org/doi/full/10.1056/NEJM198308113090602}{NEJM}
+##' The Multicenter Postinfarction Research Group 1983.
+##' Risk stratification and survival after myocardial infarction.
+##' \emph{N Engl J Med}. \bold{309}(6):331-6.
+##' \href{http://dx.doi.org/10.1056/NEJM198308113090602}{NEJM (paywall)}
+##'
+##' @seealso \code{\link{plotTerm}}
 ##'
 ##' @source
-##' \href{https://svn.r-project.org/R-packages/trunk/survival/Examples/testreg/data.mpip}{Survival package - Revision 6780}
+##' \href{https://svn.r-project.org/R-packages/trunk/survival/Examples/testreg/data.mpip}{
+##'       Survival package - Revision 6780}
 ##'
 ##'
 NULL

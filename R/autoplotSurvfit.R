@@ -1,85 +1,111 @@
 ##' @name autoplot.survfit
-##' @export autoplot.survfit
+##' @rdname autoplotSurvfit
 ##' @aliases autoplot.survfit
 ##' @method autoplot survfit
-##' @description Uses \code{ggplot2} to generate survival curves
-##' (Kaplan-Meier plot) and a table showing no. of subjects
-##' at risk per time period
+##' @export
+##' 
 ##' @title Generate a \code{ggplot} for a \code{survfit} object
+##' @description Uses \code{ggplot2} to render a table showing the number of subjects
+##' at risk per time period and survival curves (Kaplan-Meier plot) and to render
+##' 
 ##' @param object An object of class \code{survfit}
 ##' @param ... Additional arguments (not implemented)
-##' @param xLab Label for x axis on survival plot
-##' @param yLab Label for y axis on survival plot
+##' @param xLab Label for \eqn{x} axis on survival plot
+##' @param yLab Label for \eqn{y} axis on survival plot
 ##' @param title Title for survival plot
-##' @param titTextSize Title size for survival plot
-##' @param  axisTitSize Title size for axes
+##' @param titleSize Title size for survival plot
+##' @param  axisTitleSize Title size for axes
 ##' @param  axisLabSize Title size for label axes
 ##' @param survLineSize Survival line size
-##' @param type If \code{type="single"} (the default), plots single lines.
-##' \cr \cr
-##' If \code{type="CI"} will add lines indicating confidence intervals
-##' (taken from \code{upper} and \code{lower} values of \code{survfit} object.
-##' Higher values of \code{alpha} (tansparency) are recommended
-##' for this, e.g. \code{alpha=0.8}.
-##' \cr \cr
-##' If \code{type="fill"} will add filled rectangles from the survival lines to
-##' the confidence intervals above.
+##' @param type Type of plot. The default, \code{type="single"}, plots single lines.
+##'  \itemize{
+##'  \item If \code{type="CI"} will add lines indicating
+##'        confidence intervals (taken from \code{upper} and \code{lower}
+##'        values of \code{survfit} object).
+##'        \cr
+##'        Higher values of \code{alpha} (transparency) are recommended for this,
+##'        e.g. \code{alpha=0.8}.
+##'  \item If \code{type="fill"} will add filled rectangles from the survival lines to
+##'        the confidence intervals above.
+##' }
 ##' @param palette Options are taken from
 ##' \href{http://colorbrewer2.org/}{color_brewer}.
-##' \cr
-##' \code{palette="Dark2"} (the default) is recommended for
-##' \code{single} or \code{CI} plots.
-##' \cr
-##' \code{palette="Set2"} is recommended for \code{fill} plots.
-##' @param jitter If \code{jitter="noEvents"}, adds some random, positive noise
+##'   \itemize{
+##'     \item \code{palette="Dark2"} (the default) is recommended for
+##'           \code{single} or \code{CI} plots.
+##'     \item \code{palette="Set2"} is recommended for \code{fill} plots.
+##' }
+##' @param jitter By default, \code{jitter="none"}.
+##' \itemize{
+##'  \item If \code{jitter="noEvents"}, adds some random, positive noise
 ##' to survival lines with no events (i.e. all observations censored).
-##' This will bring them just above 1 on the y-axis, making them easier
-##' to see separately.
-##' \cr
-##' If \code{jitter="all"} add some vertical noise to all survival lines
+##' This will bring them just above 1 on the y-axis, making them easier to see separately.
+##'   \item If \code{jitter="all"} add some vertical noise to all survival lines.
+##' }
 ##' @param legend If \code{legend=FALSE}, no legends will be produced
 ##' for the plot or table
 ##' @param legLabs These can be used to replace the names
 ##' of the strata from the fit. Should be given in the same
 ##' order as those strata
 ##' @param legTitle Title for legend
-##' @param legTextSize Title size for legend
-##' @param legSize Legend (key) width and height
+##' @param legTitleSize Title size for legend
+##' @param legLabSize Legend labels width and height
 ##' @param alpha Alpha, transparency of lines indicating confidence intervals
 ##' or filled rectangles. Should be in range \eqn{0-1}.
+##' \cr
 ##' Larger values e.g. \code{alpha=0.7} are recommended for confidence
 ##' intervals
 ##' @param censShape Shape of marks to indicate censored onservations.
-##' \cr Default is 3 which gives vertical ticks
-##' \cr Use 10 for circular marks
+##' \cr Default is \code{3} which gives vertical ticks.
+##' \cr Use \code{censShape=10} for circular marks.
 ##' @param censSize Size of marks to indicate censored onservations
 ##' @param CIline Confidence interval line type
 ##' @param fillLineSize Line size surrouding filled boxes
 ##' @param pVal If \code{pVal=TRUE}, adds \eqn{p} value from
 ##' log-rank test to plot
 ##' @param sigP No. of significant digits to display in \eqn{p} value.
-##' Typically \eqn{1-3}
-##' @param pX Location of \eqn{p} value on x axis. Should be in range of
-##' \eqn{0 - 1}, where value is to be placed relative to the maximum observed
-##' time. E.g. \code{pX = 0.5} will place it half-way along x-axis
-##' @param pY Location of \eqn{p} value on y axis. Should be in range of
-##' \eqn{0 - 1}, as above
-##' @param timeTicks  Numbers to mark on the survival plot and table.
-##' If \code{timeTicks="major"}, only the major x-axis (time) marks from the
-##' survival plot are are labelled on the plot and table.
+##' Typically \eqn{1} to \eqn{3}.
+##' @param pX Location of \eqn{p} value on \eqn{x} axis.
 ##' \cr
-##' If \code{timeTicks="minor"}, minor axis marks are labelled instead
+##' Should be in the range of \eqn{0 - 1},
+##' where value is to be placed relative to the maximum observed
+##' time.
+##' \cr
+##' E.g. \code{pX = 0.5} will place it half-way along \eqn{x}-axis
+##' @param pY Location of \eqn{p} value on \eqn{y} axis.
+##' \cr
+##' Should be in the range of \eqn{0 - 1}, as above
+##' @param timeTicks  Numbers to mark on the survival plot and table.
+##' \itemize{
+##'   \item If \code{timeTicks="major"} (the default)
+##'         only the major \eqn{x}-axis (time) marks from the
+##'         survival plot are are labelled on the plot and table.
+##'   \item If \code{timeTicks="minor"}, minor axis marks are labelled instead.
+##' }
 ##' @param tabTitle Table title
-##' @param tabTitTextSize Table title text size
-##' @param tabLegTextSize Table legend text size
-##' @param nRiskSize No. at risk - text size
-##' @return A \code{list} of \code{ggplot} objects, with elments \code{plot},
-##' the survial plot and \code{table} the table of events per time.
+##' @param tabTitleSize Table title text size
+##' @param tabLabSize Table legend text size
+##' @param nRiskSize Number at risk - text size
+##' 
+##' @return A \code{list} of \code{ggplot} objects, with elements:
+##' \item{plot}{the survial plot}
+##' \item{table}{the table of events per time}
 ##' This \code{list} has the additional \code{class} of
-##' \code{tableAndPlot}, allowing methods from \code{autoplot.tableAndPlot}.
-##' Further modifications may be made to the objects in the list if desired.
+##' \code{tableAndPlot}, allowing methods from \code{\link{autoplot.tableAndPlot}}.
+##' 
 ##' @author Chris Dardis. Based on existing work by
 ##' R. Saccilotto, Abhijit Dasgupta, Gil Tomas and Mark Cowley.
+##' 
+##' @note The returned \code{list} contains standard \code{ggplot2} objects.
+##' These can be modified further, as in the last example, which changes
+##' to colors to a user-defined sequence. The default color scheme has been chosen
+##' for ease of display and accessibility.
+##' \cr \cr
+##' Size arguments are passed to \code{ggplot2}'s \code{x=element_text(size=)}.
+##'
+##' @keywords plot
+##' @keywords survival
+##' 
 ##' @examples
 ##' data(kidney, package="KMsurv")
 ##' s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
@@ -96,12 +122,22 @@
 ##' ### change confidence intervals to log Equal-Precision confidence bands
 ##' km.ci::km.ci(s1, method="logep")
 ##' autoplot(s1, type="fill", legend=FALSE)$plot
+##' ### 
+##' ### manually changing the output
+##' ### 
+##' s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
+##' g1 <- autoplot(s1, type="CI", alpha=0.8, survLineSize=2)$plot
+##' ### change default colors
+##' g1 + scale_colour_manual(values=c("red", "blue")) +
+##'     scale_fill_manual(values=c("red", "blue"))
+##' ### change limits of y-axis
+##' g1 + scale_y_continuous(limits=c(0, 1))
 autoplot.survfit <- function(object, ...,
                              xLab="Time",
                              yLab="Survival",
                              title="Marks show times with censoring",
-                             titTextSize=15,
-                             axisTitSize=15,
+                             titleSize=15,
+                             axisTitleSize=15,
                              axisLabSize=10,
                              survLineSize=0.5,
                              type=c("single", "CI", "fill"),
@@ -113,8 +149,8 @@ autoplot.survfit <- function(object, ...,
                              legend=TRUE,
                              legLabs=NULL,
                              legTitle="Strata",
-                             legTextSize=10,
-                             legSize=2,
+                             legTitleSize=10,
+                             legLabSize=10,
                              alpha=0.05,
                              CIline=10,
                              fillLineSize=0.05,
@@ -124,8 +160,8 @@ autoplot.survfit <- function(object, ...,
                              pY=0.1,
                              timeTicks=c("major", "minor"),
                              tabTitle="Number at risk by time",
-                             tabTitTextSize=15,
-                             tabLegTextSize=5,
+                             tabTitleSize=15,
+                             tabLabSize=5,
                              nRiskSize=5){
     stopifnot(inherits(object, "survfit"))
     if(!is.null(legLabs) &! length(object$strata)==0) stopifnot(
@@ -179,7 +215,9 @@ autoplot.survfit <- function(object, ...,
 ### reorder to allow binding
     setcolorder(dt2, names(dt1))
     dt1 <- rbindlist(list(dt2, dt1))
+### 
 ### jitter
+### 
     jitter <- match.arg(jitter)
 ### for groups with no events add random no.to survival (by strata)
     if (jitter=="noEvents") {
@@ -193,7 +231,9 @@ autoplot.survfit <- function(object, ...,
     }
 ###
     dt1 <- dt1[order(st)]
+### 
 ### plot single lines only
+### 
     g1 <- ggplot(data=dt1, aes(group=st, colour=st, fill=st)) +
         geom_step(aes(x=time, y=surv), direction="hv", size=survLineSize)
 ###
@@ -206,7 +246,7 @@ autoplot.survfit <- function(object, ...,
                       direction="hv", linetype=CIline, alpha=alpha)
     }
     if (type=="fill"){
- ### copy dt1 to work allow further work
+### copy dt1 to work allow further work
         dt2 <- dt1[, list(l=unique(lower),
                           u=unique(upper),
                           minT=as.numeric(min(time)),
@@ -240,16 +280,17 @@ autoplot.survfit <- function(object, ...,
 ### (suitable for colorblind)
 ### use palette Set2 for lighter shades as large fill area
     palette <- match.arg(palette)
-    if(type=="fill"){
-        g1 <- g1 + scale_fill_brewer(type="qual", palette=palette,
-                                        guide=guide_legend(
-                                        keywidth=legSize,
-                                        keyheight=legSize))
-    }
+    #if(type=="fill"){
+     #   g1 <- g1 + scale_fill_brewer(type="qual", palette=palette,
+      #                               guide=guide_legend(
+       #                                  title=legTitle))
+   # }
     g1 <- g1 +  scale_colour_brewer(type="qual", palette=palette,
                                     guide=guide_legend(
-                                    keywidth=legSize,
-                                    keyheight=legSize))
+                                        title=legTitle))
+    g1 <- g1 +  scale_fill_brewer(type="qual", palette=palette,
+                                    guide=guide_legend(
+                                        title=legTitle))
 ### scales
     g1 <- g1 +
         scale_y_continuous(yLab) +
@@ -268,21 +309,14 @@ autoplot.survfit <- function(object, ...,
                            breaks=times1)
 ### font sizes
     g1 <- g1 +
-        theme(title = element_text(size=titTextSize),
-              legend.text=element_text(size=legTextSize),
-              legend.title=element_text(size=legTextSize),
+        theme(title=element_text(size=titleSize),
+              legend.text=element_text(size=legLabSize),
+              legend.title=element_text(size=legTitleSize),
               axis.text = element_text(size = axisLabSize),
-              axis.title = element_text(size = axisTitSize)
+              axis.title = element_text(size = axisTitleSize)
               )
-
-### legend title
-    if(type=="fill"){
-        g1 <- g1 + labs(group=legTitle, colour=legTitle, fill=legTitle)
-    } else {
-        g1 <- g1 + labs(colour=legTitle)
-    }
 ### remove legend if required
-    if(!legend) g1 <- g1 + theme(legend.position = "none")
+    if(!legend) g1 <- g1 + theme(legend.position="none")
 ### p value for log-rank test (only if >=2 groups)
     if(pVal & !is.null(object$strata)) {
         sd1 <- survival::survdiff(eval(object$call$formula),
@@ -298,7 +332,7 @@ autoplot.survfit <- function(object, ...,
                             x = pX * max(dt1$time),
                             y = pY,
                             label = p1txt,
-                            size =  element_text(size=legTextSize))
+                            size =  element_text(size=legLabSize))
     }
 ### data for table
     dt3 <- data.table(
@@ -325,14 +359,14 @@ autoplot.survfit <- function(object, ...,
                            labels=rev(levels(dt3$st))) +
           ggtitle(tabTitle) +
           theme(axis.text = element_text(size=axisLabSize),
-                axis.title = element_text(size=axisTitSize),
-                plot.title = element_text(size=tabTitTextSize),
-                legend.title = element_text(size=tabLegTextSize),
-                legend.text = element_text(size=tabLegTextSize)
+                axis.title = element_text(size=axisTitleSize),
+                plot.title = element_text(size=tabTitleSize),
+                legend.title = element_text(size=tabLabSize),
+                legend.text = element_text(size=tabLabSize)
                 ) +
          guides(shape = guide_legend(title=legTitle,
-                keywidht=legSize,
-                keyheight=legSize))
+                keywidht=tabLabSize,
+                keyheight=tabLabSize))
 ### remove legend
     if(!legend) g2 <- g2 + theme(legend.position = "none")
     res <- list("table"=g2,
@@ -340,4 +374,3 @@ autoplot.survfit <- function(object, ...,
     class(res) <- c("tableAndPlot", "list")
     return(res)
 }
-###----------------------------------------

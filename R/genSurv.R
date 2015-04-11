@@ -3,6 +3,7 @@
 ##' @aliases genSurvDf
 ##' @aliases genSurvDt
 ##' @title Generate survival data
+##' 
 ##' @param b \dfn{binomial predictors}, the number of predictors which are
 ##' binary, i.e. limited to \eqn{0} or \eqn{1}
 ##' @param f \dfn{factors}, the number of predictors which are factors
@@ -28,29 +29,31 @@
 ##' is fit
 ##' @param timelim function will timeout after \code{timelim} secs.
 ##' This is present to prevent duplication of rows.
-##' @param model If \code{model=TRUE} (the default) will also
+##' @param model If \code{model=TRUE} will also
 ##' return a model fitted with \code{survival::coxph}.
-##' @return If \code{model=TRUE}: a list with the following values:
+##' @return If \code{model=FALSE} (the default) a \code{data.frame} or \code{data.table} as above.
+##' \cr
+##' If \code{model=TRUE}: a list with the following values:
 ##'  \item{df or dt}{A \code{data.frame} (for \code{genSurvDf}) or \code{data.table}
 ##' (for \code{genSurvDt}).
-##' \cr
 ##' Predictors are labelled \eqn{x1, x2, ..., xn}.
-##' \cr
 ##' Outcome is \eqn{t1} (time) and \eqn{e} event (e.g. death).
-##' \cr
 ##' Rows represent to \eqn{n} observations}
 ##'  \item{model}{A model fit with \code{survival::coxph}}
-##' If \code{model=FALSE} a \code{data.frame} or \code{data.table} as above.
+##' 
 ##' @note \code{genSurvDt} is faster and more efficient for larger datasets.
 ##' \cr \cr
 ##' Using \code{asFactor=TRUE} with factors which have a large number of
 ##' levels (e.g. \code{nlf >30}) on large
 ##' datasets (e.g. \eqn{n >1000}) can cause
 ##' fitting to be slow.
+##' 
 ##' @keywords datagen
+##' @keywords survival
+##' 
 ##' @examples
 ##' set.seed(1)
-##' genSurvDf(model=FALSE)
+##' genSurvDf(model=TRUE)
 ##' genSurvDf(b=0, c=2, n=100, pe=0.7)
 ##' genSurvDf(b=1, c=0, n=1000)
 ##' genSurvDf(f=1, nlf=4, b=1, c=0, asFactor=FALSE)
@@ -61,10 +64,13 @@ NULL
 ##'
 ##' @rdname genSurv
 ##' @export
+##' 
 genSurvDf <- function(b=2L, f=2L, c=1L, n=100L,
                       pb=0.5, nlf=3L, rc=0.8, pe=0.5,
                       t0=1L, tMax=100L,
-                      asFactor=TRUE, model=TRUE, timelim=5) {
+                      asFactor=TRUE,
+                      model=FALSE,
+                      timelim=5) {
     if ( (pb|rc|pe) > 1 ) stop("Ratios should be <1")
     if (nlf <= 2) stop("Factors should have at least 3 levels")
     sbcf1 <- sum(c(b, f, c))
@@ -125,6 +131,7 @@ genSurvDf <- function(b=2L, f=2L, c=1L, n=100L,
 ##'
 ##' @rdname genSurv
 ##' @export
+##' 
 genSurvDt <- function(b=2L, f=2L, c=1L, n=100L,
                       pb=0.5, nlf=3L, rc=0.8, pe=0.5,
                       t0=1L, tMax=100L,

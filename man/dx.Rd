@@ -463,16 +463,14 @@ dx(c1)
 }
 \references{
 Examples are from
-Klein J, Moeschberger M 2003
-\emph{Survival Analysis}, 2nd edition.
-New York: Springer.
-Example 11.1 - 11.7, pg 355--66
+\bold{K&M} Example 11.1 - 11.7, pg 355--66.
 
 Last example is from:
 Therneau T, Grambsch P 2000.
 \emph{Modeling Survival Data}, 1st edition.
 New York: Springer.
 Section 5.1.2, pg 91.
+\href{http://dx.doi.org/10.1007/978-1-4757-3294-8}{Springer (paywall)}
 
 Andersen PK, Borgan O, Gill R, Keiding N 1982.
 Linear Nonparametric Tests for Comparison of Counting Processes, with

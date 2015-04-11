@@ -1,74 +1,96 @@
 ##' @name gamTerms
 ##' @export
 ##' @title Individual terms of a Generalized Additive
-##' or Cox Proportional
-##' Hazard Model
+##' or Cox Proportional Hazards Model
+##' 
 ##' @description
 ##' Returns the individual terms of a \code{gam} or \code{coxph} object,
 ##' along with the standard errors, in a way useful for plotting.
+##' 
 ##' @param fit The result of a Generalized Additive Model (\code{gam})
 ##' or a Cox proportional hazards model (\code{coxph})
-##' @param se if \code{TRUE}, also return the standard errors
-##' @param link if \code{TRUE}, then the individual terms are centered so that
+##' @param se If \code{TRUE}, also return the standard errors
+##' @param link If \code{TRUE}, then the individual terms are centered so that
 ##' the average of the inverse-link of the data,
 ##' i.e., the data on the original scale, has mean zero
-##' @param weights a vector of case weights, data is centered so that the
-##' weighted mean is zero
-##' @return A list with one element per term. Each element is a matrix
-##' whose columns are x, y, and (optionally) se(y),
-##' with one row per unique x value, sorted by the first column.
+##' @param weights A vector of case weights.
+##' \cr
+##' If not supplied (the default), the data is centered so that the
+##' weighted mean is zero.
+##' @param data A \code{data.frame} in which to evaluate the model.
+##' \cr
+##' If missing, \code{eval(fit$call$data)} is used.
+##' 
+##' @return A \code{list} with one element per term.
+##' \cr
+##' Each element is a \code{matrix}
+##' whose columns are \code{x}, \code{y}, and (optionally) \code{se(y)}.
+##' \cr
+##' There is one row per unique \code{x} value, and the matrix is sorted by these values.
 ##' (This makes it easy to plot the results).
+##' \cr
 ##' The first element of the list, \code{constant},
-##' contains an overall mean for the decomposition
-##' @seealso \code{gam}, \code{plot.gam}
+##' contains an overall mean for the decomposition.
+##' 
+##' @seealso
+##' \code{\link{air}}
+##' \cr
+##' \code{?gam::gam}
+##' \cr
+##' \code{?gam::plot.gam}
+##' 
 ##' @examples
-##' data(air)
+##' data(air, package="survMisc")
 ##' gfit <- gam::gam(ozone ~ gam::s(temperature) + gam::s(wind), data=air)
 ##' temp <- gamTerms(gfit)
-##' identical( names(temp), c("constant", "temperature", "wind") )
+##' identical(names(temp), c("constant", "temperature", "wind"))
 ##' ### air has 111 rows, but only 28 unique wind speeds:
 ##' dim(temp$wind)
 ##' ### plot the fit versus square root of wind speed
 ##' yy <- cbind(temp$wind[, 2],
-##'             temp$wind[, 2] - 1.96*temp$wind[, 3],
-##'             temp$wind[, 2] + 1.96*temp$wind[, 3])
-##' ### Adding the constant makes this a plot of actual y (ozone)
-##' ### at the mean temp
+##'             temp$wind[, 2] - 1.96 * temp$wind[, 3],
+##'             temp$wind[, 2] + 1.96 * temp$wind[, 3])
+##' ### Adding the constant makes this a plot of
+##' ### actual y (ozone) at the mean temp
 ##' yy <- yy + temp$constant
 ##' graphics::matplot(sqrt(temp$wind[, 1]), yy, lty=c(1, 2, 2),
 ##'                  type='l', col=1, xaxt='n', xlab='Wind Speed', ylab='Ozone')
 ##' temp <- seq(3, 19, 2)
 ##' graphics::axis(1, sqrt(temp), format(temp))
-##' @author Terry Therneau, Dirk Larson. Updated from S-plus by Chris Dardis
-##' @keywords plot
+##' 
+##' @author Terry Therneau, Dirk Larson. Updated/adapted from S-plus by Chris Dardis.
 gamTerms <- function(fit,
                      se=TRUE,
                      link=FALSE,
-                     weights) {
+                     weights,
+                     data) {
 ### reconstruct the data, without transformations
-    Terms <- all.vars(delete.response(terms(formula(fit))))
+### get precictors (right hand side of formula)
+    rhs1 <- all.vars(delete.response(terms(formula(fit))))
     keep <- match(c("", "formula", "data", "subset", "na.action"),
-                  names(fit$call), nomatch = 0)
+                  names(fit$call),
+                  nomatch=0)
 ### get original dataset
-    data <- eval(fit$call$data)
+### data <- get(deparse(fit$call$data), env=parent.frame())
+    if(missing(data)) data <- eval(fit$call$data)
 ### Now get the terms, and match them
     fit$na.action <- NULL
 ### predicted values
-    termp <- predict(fit, type = "terms", se.fit = se)
+    pred1 <- predict(fit, type="terms", se.fit = se)
 ### vnames <- attr(terms(fit$formula), "term.labels")
-    vnames <- Terms
+    vnames <- rhs1
 ### We need to remove any offset from the vnames list
-    Terms2 <- terms(as.formula(formula(fit)))
-    if (length(attr(Terms2, 'offset')) >0)  {
-        j <- attr(Terms2, 'offset') - attr(Terms2, 'response')
+    terms2 <- terms(as.formula(formula(fit)))
+    if (length(attr(terms2, 'offset')) > 0)  {
+        j <- attr(terms2, 'offset') - attr(terms2, 'response')
         vnames <- vnames[-j]
-        }
-    tname1 <- attr(Terms2, "term.labels")
+    }
+    tname1 <- attr(terms2, "term.labels")
 ###
     if(se){
-        tfit <- termp$fit
+        tfit <- pred1$fit
     } else {
-        tfit <- termp
+        tfit <- pred1
     }
 ###
     if(is.matrix(tfit)){
@@ -81,7 +103,7 @@ gamTerms <- function(fit,
 ###
     if(nrow(data) > nrow(tfit)) {
         keep <- match(row.names(data), dimnames(tfit)[[1]])
-        data <- data[!is.na(keep),  , drop = F]
+        data <- data[!is.na(keep),  , drop=FALSE]
     }
 ###----------------------------------------
 ### Find the mean of each column, and subtract it out
@@ -118,19 +140,19 @@ gamTerms <- function(fit,
 ### Now walk through the columns one by one, and construct
 ### a data frame for each one
     nterm <- length(tname2)
-    outlist <- list(constant = attr(termp$fit, "constant") + sum(tmean) )
+    outlist <- list(constant = attr(pred1$fit, "constant") + sum(tmean) )
     for(i in 1:nterm) {
         k <- match(tname2[i], tname1)
         xx1 <- data[[vnames[k]]]
         xx2 <- sort(unique(xx1))
         keep <- match(xx2, xx1)
         if(se) {
-            if(is.matrix(termp$se.fit)){
+            if(is.matrix(pred1$se.fit)){
                  zz <- data.frame(x = xx2, y = tfit[keep, i],
-                                  se = termp$se.fit[keep, i])
+                                  se = pred1$se.fit[keep, i])
                  } else {
                      zz <- data.frame(x = xx2, y = tfit[keep, i],
-                                      se = termp$se.fit[keep])
+                                      se = pred1$se.fit[keep])
                  }
         } else {
             zz <- data.frame(x = xx2, y = tfit[keep, i])

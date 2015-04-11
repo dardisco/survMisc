@@ -1,15 +1,16 @@
 ##' @name gof
 ##' @title Goodness of fit test for \code{coxph} models
 ##' @rdname gof
-##' @export gof
+##' @export
+##' 
 gof <- function(x, ...){
     UseMethod("gof")
 }
 ##' @rdname gof
 ##' @aliases gof.coxph
 ##' @method gof coxph
-##' @S3method gof coxph
-##'
+##' @export
+##' 
 ##' @param x An object of class \code{coxph}
 ##' @param ... Additional arguments (not implemented)
 ##' @param G  Number of \bold{g}roups into which to divide risk score.
@@ -41,7 +42,6 @@ gof <- function(x, ...){
 ##'
 ##' @return A \code{list} with elements:
 ##' \item{groups}{A \code{data.table} with one row per group \eqn{G}.
-##' \cr
 ##' The columns are \describe{
 ##'   \item{n}{Number of observations}
 ##'   \item{e}{Number of events}
@@ -56,28 +56,27 @@ gof <- function(x, ...){
 ##'  }
 ##'   \item{p}{\eqn{p}-value for \eqn{Z}, which is
 ##'      \deqn{ p = 2. \code{pnorm}(-|z|)}{
-##'            p = 2*pnorm(-|z|)}
+##'             p = 2*pnorm(-|z|)}
 ##'    where \code{pnorm} is the normal distribution function
-##'  with mean \eqn{\mu =0} and standard deviation \eqn{\sigma =1}
+##'  with mean \eqn{\mu =0}{0} and standard deviation \eqn{\sigma =1}{1}
 ##' and \eqn{|z|} is the absolute value.}
 ##' }}
 ##' \item{lrTest}{Likelihood-ratio test.
 ##' Tests the improvement in log-likelihood with addition
 ##' of an indicator variable with \eqn{G-1} groups.
-##' \cr
 ##' This is done with \code{survival:::anova.coxph}.
-##' \cr
-##' The test is distributed as chi-square with
-##' \eqn{G-1} degrees of freedom}
+##' The test is distributed as chi-square with \eqn{G-1} degrees of freedom}
 ##' @note The choice of \eqn{G} is somewhat arbitrary but rarely should
-##' be \eqn{> 10}. As illustrated in the example, a larger value for
+##' be \eqn{> 10}.
+##' \cr
+##' As illustrated in the example, a larger value for
 ##' \eqn{G} makes the \eqn{Z} test for each group more likely to be significant.
 ##' This does \emph{not} affect the significance of adding the
 ##' indicator variable \code{indicG} to the original model.
 ##' \cr \cr
 ##' The \eqn{Z} score is chosen for simplicity, as for large sample sizes
 ##' the Poisson distribution approaches the normal. Strictly speaking,
-##' the Poisson would be more appropriate for \eqn{e} and \eqn{exp} as
+##' the Poisson would be more appropriate for \eqn{e} and \eqn{exp}{exp} as
 ##' per Counting Theory.
 ##' \cr
 ##' The \eqn{Z} score may be somewhat conservative as the expected events
@@ -104,22 +103,24 @@ gof <- function(x, ...){
 ##' A simplified method of calculating an overall goodness-of-fit test
 ##' for the Cox proportional hazards model.
 ##' \emph{Lifetime Data Analysis} \bold{4}(2):109--20.
-##' \href{http://link.springer.com/article/10.1023/A\%3A1009612305785}{Springer Link (paywall)}
+##' \href{http://dx.doi.org/10.1023/A:1009612305785}{Springer (paywall)}
 ##' @references
 ##' Default value for \eqn{G} as per: \cr
 ##' May S, Hosmer DW 2004.
 ##' A cautionary note on the use of the Gronnesby and Borgan
 ##' goodness-of-fit test for the Cox proportional hazards model.
 ##' \emph{Lifetime Data Analysis} \bold{10}(3):283--91.
-##' \href{http://link.springer.com/article/10.1023/B\%3ALIDA.0000036393.29224.1d}{Springer Link (paywall)}
+##' \href{http://dx.doi.org/10.1023/B:LIDA.0000036393.29224.1d}{Springer (paywall)}
 ##' @references
 ##' Changes to the \code{pbc} dataset in the example are as detailed in: \cr
 ##' Fleming T, Harrington D 2005.
 ##' \emph{Counting Processes and Survival Analysis}.
 ##' New Jersey: Wiley and Sons. Chapter 4, section 4.6, pp 188.
-##' \href{http://books.google.com/books?isbn=111815066X}{Google Books}
+##' \href{http://dx.doi.org/10.1002/9781118150672}{Wiley (paywall)}
 ##'
-gof.coxph <- function(x, ..., G=NULL){
+gof.coxph <- function(x,
+                      ...,
+                      G=NULL){
     stopifnot(inherits(x, "coxph"))
     e <- z <- p <- indicG <- NULL
     if(is.null(G)) G <- round(max(2, min(10, x$nevent/40)), 0)

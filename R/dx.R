@@ -398,15 +398,13 @@ dx <- function(x, ...){
 ##' to allow one of the examples to run.
 ##'
 ##' @references Examples are from
-##' Klein J, Moeschberger M 2003
-##' \emph{Survival Analysis}, 2nd edition.
-##' New York: Springer.
-##' Example 11.1 - 11.7, pg 355--66
+##' \bold{K&M} Example 11.1 - 11.7, pg 355--66.
 ##' @references Last example is from:
 ##' Therneau T, Grambsch P 2000.
 ##' \emph{Modeling Survival Data}, 1st edition.
 ##' New York: Springer.
 ##' Section 5.1.2, pg 91.
+##' \href{http://dx.doi.org/10.1007/978-1-4757-3294-8}{Springer (paywall)}
 ##' @references
 ##' Andersen PK, Borgan O, Gill R, Keiding N 1982.
 ##' Linear Nonparametric Tests for Comparison of Counting Processes, with
@@ -694,7 +692,7 @@ If >0 (black line) shows survival advantage for reference group."
 ### ### ### refit as stratified model
             f1 <- stats::as.formula("Surv(t1, e1) ~ strata(mf1)")
             c2 <- survival::coxph(f1, data=df1, ties=ties)
-            s1 <- survival::survfit(c2, type="aalen")
+            s1 <- survfit(c2, type="aalen")
 ### ### ### get baseline hazard (= -log survival)
             s2 <- data.frame(t=s1$time, -log(s1$surv))
 ### ### ### names of strata
@@ -804,7 +802,7 @@ Reference line (black) is at 45 degrees."
             attr(mt, "intercept") <- 0
         }
 ### ### get model matrix
-        dt1 <- data.table::data.table(model.matrix(mt, mf, contrasts))
+        dt1 <- data.table(model.matrix(mt, mf, contrasts))
 ### ### need unlist to prevent binding later of names later
         n1 <- unlist(list(names(dt1)))
 ### ### check which are factors
@@ -1066,7 +1064,7 @@ Outliers may need to be re-examined"
         ss1 <- residuals(x, type="score") %*% x$var
         colnames(ss1) <- names(x$coefficients)
 ### need to remake XS
-### dt1 <- data.table(model.matrix(x))
+###dt1 <- data.table(model.matrix(x))
         main1 <- "Coefficient vs. scaled score residuals.
 Assesses leverage: influence of observation on a single coefficient.
 Outliers may need to be re-examined"

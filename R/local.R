@@ -1,15 +1,17 @@
 ##' @name local
 ##' @rdname local
 ##' @title Local tests for a model
+##' @keywords htest
+##' 
 ##' @export locScore
-##' @aliases locScore
+##' 
 locScore <- function(x, ...){
     UseMethod("locScore")
 }
 ##' @rdname local
 ##' @aliases locScore.coxph
 ##' @method locScore coxph
-##' @S3method locScore coxph
+##' @export
 ##'
 ##' @param x A model of class \code{coxph}
 ##' @param ... Additional arguments (not implemented)
@@ -18,21 +20,23 @@ locScore <- function(x, ...){
 ##' \cr
 ##' There should be at least one coefficient to exclude and one to keep.
 ##' \cr
-##' This is a specified as vector of the same length as the no. of
-##' coefficients in the model. This should be a logical vector
+##' This is a specified as vector of the same length as the number of
+##' coefficients in the model.
+##' \cr
+##' This should be a logical vector
 ##' (i.e. composed of \code{TRUE} and \code{FALSE} or a vector of
 ##' \eqn{0}s and \eqn{1}s.
-##' \code{FALSE} or zeros indicate coefficients to exclude,
-##' \code{TRUE} or ones indicate coefficients to keep.
+##' \itemize{
+##'   \item \code{FALSE} or zeros indicate coefficients to exclude
+##'   \item \code{TRUE} or ones indicate coefficients to keep.
+##' }
+##' @param ties Method of handling ties when refitting model.
 ##' \cr
-##' @param ties Method of handling ties when refitting model. Must be
-##' one of \code{breslow}, \code{efron} or \code{exact}
+##' Must be one of \code{breslow}, \code{efron} or \code{exact}.
 ##' @return For \code{locScore} a \code{list} with the following elements,
 ##' which are \code{data.table}s:
-##' \cr
 ##' \item{coef}{coefficients from refitted model(s)}
 ##' \item{score}{hypothesis and chi-square test}
-##' \cr \cr
 ##' For \code{locLR} and \code{locWald}, a \code{data.table}
 ##' showing the hypothesis being tested and the results of the test.
 ##'
@@ -87,10 +91,7 @@ locScore <- function(x, ...){
 ##' locScore(c1, hypo=c(0, 0, 0, 1))
 ##' locScore(coxph(Surv(time, delta) ~ stage + age, data=larynx))
 ##' @references Examples are from:
-##' Klein J, Moeschberger M 2003
-##' \emph{Survival Analysis}, 2nd edition.
-##' New York: Springer.
-##' Example 8.2, pp 264-6.
+##' \bold{K&M} Example 8.2, pp 264-6.
 locScore.coxph <- function(x,
                            ...,
                            all=FALSE,
@@ -209,7 +210,7 @@ locScore.coxph <- function(x,
 ###
 ##' @rdname local
 ##' @aliases locLR
-##' @export locLR
+##' @export 
 ##'
 locLR <- function(x, ...){
     UseMethod("locLR")
@@ -217,7 +218,8 @@ locLR <- function(x, ...){
 ##' @rdname local
 ##' @aliases locLR.coxph
 ##' @method locLR coxph
-##' @S3method locLR coxph
+##' @export
+##' 
 ##' @examples
 ##' ###
 ##' data(larynx, package="KMsurv")
@@ -316,7 +318,7 @@ locLR.coxph <- function(x, ...,
 }
 ##' @rdname local
 ##' @aliases locWald
-##' @export locWald
+##' @export 
 ##'
 locWald <- function(x, ...){
     UseMethod("locWald")
@@ -324,7 +326,8 @@ locWald <- function(x, ...){
 ##' @rdname local
 ##' @aliases locWald.coxph
 ##' @method locWald coxph
-##' @S3method locWald coxph
+##' @export
+##' 
 ##' @examples
 ##' ###
 ##' data(larynx, package="KMsurv")

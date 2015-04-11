@@ -26,19 +26,19 @@ original model. There are three columns, one for each of the tests:
           The statistic is the difference in the
           likelihood ratio of the original model and that with the coefficient
           omitted.}
-\item{lrt}{The \bold{l}og-\bold{r}ank \bold{t}est, aka the \bold{score} test.
+\item{lrt}{Aka the \bold{score} test.
              \cr
              The Null hypothesis is that
              \eqn{\hat{B}=0}{B=0}.
              \cr
-             The statistic is caculated by refitting the model with the coefficient
+             The statistic is cacluated by refitting the model with the coefficient
              omitted, to generate initial values for the other \eqn{\hat{B}}{B}s.
              \cr
              It is then fitted again with all
              covariates, using these values and setting \eqn{\hat{B}=0}{B=0}.
 }
 All statistics are distributed as \eqn{\chi}{chi}-square, with degrees of freedom
-\eqn{=} number of coefficients \eqn{-1}.
+\eqn{=} no. of coefficients \eqn{-1}.
 }
 \description{
 Significiance tests of coefficients in a \code{coxph} model

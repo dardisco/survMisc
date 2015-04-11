@@ -1,13 +1,23 @@
 ##' @name tableRhs
 ##' @export tableRhs
 ##' @title Table the outcome against all predictors in a formula
-##' @param formula A formula. Also works with formulas where the
-##' left-hand side is a \code{Surv} object describing right-censored data
-##' @param data A \code{data.frame}
-##' @param return See \bold{Value} below
-##' @param nlf Number of levels defining a factor. Predictors with
+##' 
+##' @include genSurv.R
+##' 
+##' @param formula A formula.
+##' \cr
+##' Works with formulas where the left-hand side is a \code{Surv}
+##' object describing right-censored data.
+##' @param data A \code{data.frame}.
+##' @param return See \bold{Value} below.
+##' @param nlf Number of levels defining a factor.
+##' \cr
+##' Predictors with
 ##' \eqn{>nlf} levels are considered continuous and are not tabulated.
-##' Needs to be less than the number of rows in the \code{data.frame}
+##' \cr
+##' Needs to be less than the number of observations (rows) in the model
+##' specified by the \code{formula}.
+##' 
 ##' @return \itemize{
 ##'  \item If \code{return="summary"} (the default), a \code{table} with
 ##'  one row per predictor and three columns:
@@ -20,24 +30,31 @@
 ##' Other values return a \code{list} of \code{table}s. Each element is
 ##' named after the predictor.
 ##' \itemize{
+##' 
 ##'  \item If \code{return="zeros"}, one \code{table} for each predictor
-##' with a least one zero present.
-##' \cr
-##' Each \code{table} shows only those levels
-##' of the predictor for which one level of the outcome is zero.
+##'        with a least one zero present.
+##'        Each \code{table} shows only those levels
+##'        of the predictor for which one level of the outcome is zero.
+##' 
 ##'  \item If \code{return="zEq"}, one \code{table} for each predictor
-##' with a least one zero present or one level which has equal outcomes.
-##' \cr
-##' Each \code{table} shows only those levels where one of the above apply.
+##'        with a least one \bold{z}ero present or one level which has \bold{eq}ual outcomes.
+##'        Each \code{table} shows only those levels where one of the above apply.
+##' 
 ##'  \item If \code{return="counts"}, each \code{table} gives the total
-##' number of levels where zeros and equal outcomes are present and absent.
+##'        number of levels where zeros and equal outcomes are present and absent.
+##' 
 ##'  \item If \code{return="all"}, a list of \code{table}s of
-##' outcomes for \emph{all} levels of each predictor.
+##'        outcomes for \emph{all} levels of each predictor.
+##'
 ##' }
-##' @details Cross-tabulation of outcomes against levels of a predictor
-##' is useful in models where the outcome has limited values.
-##' @include genSurv.R
+##' 
+##' @details Cross-tabulation of outcomes against levels of a predictor.
+##' \cr
+##' This is a useful step prior to fitting survival models
+##' where the outcome has limited values.
+##' 
 ##' @examples
+##' \dontrun{
 ##' set.seed(1)
 ##' d1 <- genSurvDf(c=3, rc=0.5, model=FALSE)
 ##' tableRhs(Surv(t1, e) ~ ., data=d1, return="summary", nlf=2)
@@ -55,7 +72,9 @@
 ##' t1 <- tableRhs(Surv(t1, e) ~ x1, nlf=9, data=d1)
 ##' tableRhs(e ~ x1, nlf=9, r="zEq", data=d1)
 ##' tableRhs(e ~ ., nlf=3, r="c", data=d1)
-tableRhs <- function(formula = y ~ . , data=parent.frame(),
+##' }
+tableRhs <- function(formula = y ~ . ,
+                     data=parent.frame(),
                      return=c("summary", "zeros", "zEq", "counts", "all"),
                      nlf=2){
 ### this part taken from stats:lm
@@ -66,8 +85,9 @@ tableRhs <- function(formula = y ~ . , data=parent.frame(),
     mf$drop.unused.levels <- TRUE
     mf[[1L]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
-    if(nrow(mf) == 0) stop("No observations to return")
-    if(nlf > nrow(mf)) stop("No. levels specified for factor is > no. observations")
+### 
+    if(nrow(mf) == 0) return("No observations to return")
+    if(nlf > nrow(mf)) return("No. levels specified for factor is > no. observations")
 ### model terms
     mt <- attr(mf, "terms")
 ### no intercept required for tables
@@ -103,29 +123,34 @@ tableRhs <- function(formula = y ~ . , data=parent.frame(),
     z1 <- unlist(lapply(l1, function(x) 0 %in% x ))
 ### check any duplicates in rows
     eqS <- unlist(lapply(l1, function(x) any(apply(x, 1, anyDuplicated))))
-     eqA <- unlist(lapply(l1, function(x) all(x==x[1])))
+    eqA <- unlist(lapply(l1, function(x) all(x==x[1])))
+### 
+###----------------------------------------
+### summary
+###----------------------------------------
+### 
     if(return=="summary"){
         n1 <- as.table(matrix(c(z1, eqS, eqA),
                               ncol=length(l1), byrow=TRUE,
                               dimnames=list(c("zeros", "someEq", "allEq"),
-                              names(l1)) ))
+                                  names(l1)) ))
         return(n1)
     }
 ### drop list elments without zeros or some equal
     l1 <- l1[z1 | eqS]
     l1 <- lapply(l1, function(x) {
-### all elements equal
+### ### all elements equal
         eqS <- as.logical(apply(x, 1, anyDuplicated))
         eqA <- all(x==x[1])
 ### or can use this: eq1 <- apply(x, function(y) all(y==y[1]))
-### any elements zero
+### ### any elements zero
         z1 <- apply(x, 1, function(y) any(y==0))
-### add columns indicating status
+### ### add columns indicating status
         x <- as.table(cbind(x, "zeros"=z1, "someEq"=eqS))
-### add table names
+### ### add table names
         names (dimnames(x)) <- c("x", yName)
         if (eqA) names (dimnames(x)) <- c("x", paste(yName, "all Equal"))
-### keep only rows with at least one equal or zero
+### ### keep only rows with at least one equal or zero
         x <- x[(as.logical(x[, "someEq"] + x[, "zeros"])), ,drop=FALSE]
         return(x)
     })
@@ -141,7 +166,11 @@ tableRhs <- function(formula = y ~ . , data=parent.frame(),
 ### double no.s of equal
     #l1 <- lapply(l1, function(x) c(x[1], x[2]*2))
     l1 <- lapply(l1, function(x) cbind("pres"=x, "abs"=nrow(mm1) - x))
+###
+###----------------------------------------
 ### else return="counts"
+###----------------------------------------
+###
     if(length(l1)==0) l1 <- NULL
     return(l1)
 }

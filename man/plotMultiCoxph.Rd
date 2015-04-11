@@ -2,14 +2,15 @@
 \name{plot.MultiCoxph}
 \alias{plot.MultiCoxph}
 \alias{plot.multi.coxph}
-\title{Plot a \code{multi.coxph} object}
+\title{Plot an \code{multi.coxph} object}
 \usage{
-\method{plot}{multi.coxph}(x, ..., type = c("p", "w", "s"))
+\method{plot}{multi.coxph}(x, type = c("p", "w", "s"), ...)
 }
 \arguments{
 \item{x}{An object of \code{class} \code{multi.coxph}}
 
-\item{...}{Not implemented}
+\item{...}{Additional arguments. These are passed to \code{graphics::plot.default}
+or (if \code{type="s"}) \code{graphics::barplot}.}
 
 \item{type}{Type of plot}
 }
@@ -17,26 +18,25 @@
 A graph (base graphics).
 }
 \description{
-Plot a \code{multi.coxph} object
+Plot an \code{multi.coxph} object
 }
 \details{
 One of three types of graph is possible.
-\cr \cr
-If \code{type="p"} then \bold{p}oints representing the information criterion (IC)
-for each model are plotted. A line is also drawn 2 units above the
-minimum IC. Models below this are typically worth considering.
-If it is not visible on the plot, then important models have have
-been overlooked, suggesting a larger value for \code{confSetSize} may
-be appropriate.
-\cr \cr
-If \code{type="w"} then the \bold{w}eights (relative evidence weights) of the
-models are plotted. These can be interpreted as the probability that
-each model is the best in the set. A red vertical line is shown
-where the cumulated evidence weight reaches 95%.
-\cr \cr
-If \code{type="s"} then the \bold{s}um of the relative evidence weights for
-each term/ coefficient is plotted. The sum is taken across all models
-in which the term appears.
+\itemize{
+\item If \code{type="p"} then \bold{p}oints representing the information criterion (IC)
+      for each model are plotted. A line is also drawn 2 units above the
+      minimum IC. Models below this are typically worth considering.
+      If it is not visible on the plot, then important models have have
+       been overlooked, suggesting a larger value for \code{confSetSize} may
+      be appropriate.
+\item If \code{type="w"} then the \bold{w}eights (relative evidence weights) of the
+      models are plotted. These can be interpreted as the probability that
+      each model is the best in the set. A red vertical line is shown
+      where the cumulated evidence weight reaches 95%.
+\item If \code{type="s"} then the \bold{s}um of the relative evidence weights for
+      each term/ coefficient is plotted. The sum is taken across all models
+      in which the term appears.
+}
 }
 \examples{
 set.seed(1)

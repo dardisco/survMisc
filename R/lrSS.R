@@ -2,6 +2,7 @@
 ##' @export
 ##' @title Sample size required to show difference in survival by log-rank test
 ##' given prior information about Kaplan-Meier estimate
+##' 
 ##' @description No. of events required in a two-group trial
 ##' (with one binary covariate) for a two-sided log-rank test to detect a given hazard ratio.
 ##' \cr
@@ -28,35 +29,36 @@
 ##' the proportion of patients expected to  die in group \eqn{B} is:
 ##' \deqn{ d_B = [1 - \frac{ e^{ \frac{-0.69f}{t}} (1 - e^{ \frac{-0.69f}{t}})}{\frac{0.69a}{t}}] }{
 ##' dB = 1 - ( exp(-0.69f/t) [1-exp(-0.69f/t)] / 0.69a/t )}
+##' 
 ##' @param HR Hazard Ratio. Ratio of hazard with treatment to that without.
 ##' @param alpha Significance level \eqn{\alpha}{alpha}, two-tailed
 ##' @param beta Power is \eqn{1-\beta}{1-beta}
 ##' @param p Proportion of subjects allocated to one group. Needs to be in range \eqn{0-1}.
+##' \cr
 ##' Arbitrary - can be either of the two groups.
 ##' @param Sp Prior Kaplan-Meier estimate of survival (given no intervention)
 ##' @param tp Prior times corresponding to survival estimates.
 ##' \cr
-##' Must be one for each of: \eqn{f, 0.5*a+f, a+f}.
-##' @param mtp Prior median time (of survival)
-##' @param a Accrue. Time period for which subjects accrued
-##' @param f Follow-up. Time period for which subjects followed-up
+##' There must be one time corresponding to each of: \eqn{f, 0.5*a+f, a+f}.
+##' @param mtp Median time, prior. (Prior median survival time).
+##' @param a Accrue. Time period for which subjects accrued.
+##' @param f Follow-up. Time period for which subjects followed-up.
 ##' @return If any of \code{Sp}, \code{tp}, \code{mtp} \code{a} or \code{f} are missing,
-##' will return the number of subjects required (with no prior information).
-##' \cr
+##' will return the number of subjects required (with \emph{no} prior information).
 ##' Otherwise, returns a \code{list} with the following values:
 ##' \describe{
-##'  \item{n}{number of subjects required (with no prior information)}
-##'  \item{pS}{with prior Kaplan-Meier estimates: \describe{
-##'   \item{dB}{probability death in group B (that with prior information)}
-##'   \item{dA}{probability death in group A (new treatment)}
-##'   \item{p}{overall probability of death}
-##'   \item{n}{no. subjects required}
+##'   \item{n}{number of subjects required (with no prior information)}
+##'   \item{pS}{with prior Kaplan-Meier estimates: \describe{
+##'     \item{dB}{probability death in group B (that with prior information)}
+##'     \item{dA}{probability death in group A (new treatment)}
+##'     \item{p}{overall probability of death}
+##'     \item{n}{number of subjects required}
 ##'   }}
-##' \item{pM}{with prior median survival time estimates: \describe{
-##' \item{dB}{probability death in group B (that with prior information)}
-##'   \item{dA}{probability death in group A (new treatment)}
-##'   \item{p}{overall probability of death}
-##'   \item{n}{no. subjects required}
+##'   \item{pM}{with prior median survival time estimates: \describe{
+##'     \item{dB}{probability death in group B (that with prior information)}
+##'     \item{dA}{probability death in group A (new treatment)}
+##'     \item{p}{overall probability of death}
+##'     \item{n}{number of subjects required}
 ##'   }}
 ##' }
 ##' @source Schoenfeld D, 1983. Sample-size formula for the proportional-hazards regression model.
@@ -71,6 +73,7 @@
 ##' data(btumors)
 ##' m1 <- mean(rep(btumors[,"ms"],btumors[,"n"]))
 ##' lrSS(HR=1.5, Sp=c(0.43, 0.2, 0.11), tp=c(1, 2, 3), mtp=m1, a=2, f=1)
+##' 
 lrSS <- function(HR, alpha=0.1, beta=0.2, p=0.5,
                  Sp, tp, mtp, a, f
                  ){
@@ -106,10 +109,10 @@ lrSS <- function(HR, alpha=0.1, beta=0.2, p=0.5,
     dTot2 <- p * dA2 + (1 - p) * dB2
     n3 <- n1/dTot2
 ### result
-    res <- list(
+    res1 <- list(
         n=n1,
         pS=list(dB=dB1, dA=dA1, p=dTot1, n=n2),
         pM=list(dB=dB2, dA=dA2, p=dTot2, n=n3)
         )
-    return(res)
+    return(res1)
 }

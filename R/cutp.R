@@ -1,7 +1,9 @@
 ##' @name cutp
 ##' @title Cutpoint for a continuous variable in a \code{coxph} or \code{survfit} model
+##' @description Determine the optimal cutpoint for a continuous variable
+##' in a \code{coxph} or \code{survfit} model
 ##' @rdname cutp
-##' @export cutp
+##' @export
 ##'
 cutp <- function(x, ...){
     UseMethod("cutp")
@@ -9,47 +11,50 @@ cutp <- function(x, ...){
 ##' @rdname cutp
 ##' @aliases cutp.coxph
 ##' @method cutp coxph
-##' @S3method cutp coxph
+##' @export
 ##'
 ##' @include tne.R
+##' 
 ##' @param x A \code{survfit} or \code{coxph} object
-##' @param ... Additional arguments (not implemented)
-##' @param var Variable to test. Must be continuous (i.e. >2 unique values)
-##' @param plot If \code{TRUE} will plot cut points against the statistic \eqn{S}
+##' @param ... Additional arguments. Passed to \code{graphics::plot}.
+##' @param var Variable to test. Must be continuous (i.e. \eqn{>2} unique values)
+##' @param plot If \code{plot=TRUE} will plot cut points against the test statistic \eqn{Q}.
 ##' @return A \code{data.frame} with columns:
-##'  \item{CP}{The cut point. Optimum value at which to divide
-##' the groups into those \eqn{\geq}{>=} the cutpoint and those below}
+##'  \item{cp}{The \bold{c}ut \bold{p}oint. The optimum value at which to divide
+##' the groups into those \eqn{\geq}{>=} the cutpoint and those below.}
 ##'  \item{Q}{The test statistic}
 ##'  \item{p}{p-value}
-##' If \code{plot} = \code{TRUE} a plot of cut points against values of the
-##' log-rank test statistic \eqn{U}.
+##' If \code{plot=TRUE} a plot of cut points against values of the
+##' log-rank test statistic \eqn{LR}.
+##' 
 ##' @details
 ##' The statistic is based on the score test from the Cox model.
-##' For a cut point \eqn{\mu}{mu}, of a predictor vector \eqn{G} the data is split
+##' For the cut point \eqn{\mu}{mu}, of a predictor \eqn{K}, the data is split
 ##' into two groups, those \eqn{\geq \mu}{>= mu} and
 ##' those \eqn{< \mu}{< mu}.
 ##' \cr \cr
-##' The log-rank statistic \eqn{U} is calculated for each unique element
-##' \eqn{k} in \eqn{G}:
-##' \deqn{U_k = \sum_{i=1}^D ( e_i^+ - n_i^+ \frac{e_i}{n_i} )}{
-##'  U_k = sum ( e1[i] - n1[i].e[i]/n[i] ) }
-##' Where \eqn{e_i^+}{e1[i]} and \eqn{n_i^+}{n1[i]} refer to the no. of events
-##' and no. at risk in those above the cutpoint.
+##' The log-rank statistic \eqn{LR} is calculated for each unique element
+##' \eqn{k} in \eqn{K}:
+##' \deqn{LR_k = \sum_{i=1}^D ( e_i^+ - n_i^+ \frac{e_i}{n_i} )}{
+##'       LR[k] = sum ( e1[i] - n1[i].e[i]/n[i] ) }
+##' Where \eqn{e_i^+}{e1[i]} and \eqn{n_i^+}{n1[i]} refer to the number of events
+##' and number at risk in those above the cutpoint, respectively.
 ##' \cr
 ##' The sum is taken to across distinct times with observed events, to \eqn{D},
 ##' the largest of these.
 ##' \cr
-##' It is normalized (standardized) in the case of censoring by finding \eqn{\sigma^2}{s^2} which is:
+##' It is normalized (standardized), in the case of censoring,
+##' by finding \eqn{\sigma^2}{s^2} which is:
 ##' \deqn{ \sigma^2 = \frac{1}{D-1} \sum_i^D ( 1 - \sum_{j=1}^i \frac{1}{D+1-j} )^2 }{
-##'  s^2 = 1/(D-1) SUM[i to D] { 1 - SUM[j to i] (1/(D-j+1))}^2 }
+##'        s^2 = 1/(D-1) SUM[i to D] { 1 - SUM[j to i] (1/(D-j+1))}^2 }
 ##' The test statistic is then
-##' \deqn{Q = \frac{\max |U_k|}{\sigma \sqrt{D-1}} }{
-##'  Q = [ max |U_k| ] / [ s.(D-1)^0.5 ] }
-##' Under the null hypothesis that the chosen cut-point does not predict survival,
-##' the distribution of \eqn{Q} had a limiting distibution of the supremum of the
-##' absolute value of a Brownian bridge, that is
+##' \deqn{Q = \frac{\max |LR_k|}{\sigma \sqrt{D-1}} }{
+##'       Q = [ max |LR[k]| ] / [ s.(D-1)^0.5 ] }
+##' Under the null hypothesis that the chosen cut-point does \emph{not} predict survival,
+##' the distribution of \eqn{Q} has a limiting distibution which is the supremum of the
+##' absolute value of a Brownian bridge:
 ##' \deqn{ p= Pr ( \sup Q \geq q ) = 2 \sum_{i=1}^{\infty} (-1)^{i+1} \exp (-2 i^2 q^2) }{
-##'  P(Q >= q) = 2 SUM [i to Inf] (-1)^(i+1).e^(-2.i^2.q^2) }
+##'        P(Q >= q) = 2 SUM [i to Inf] (-1)^(i+1).e^(-2.i^2.q^2) }
 ##' @examples
 ##' data(kidtran, package="KMsurv")
 ##' k1 <- kidtran
@@ -70,11 +75,13 @@ cutp <- function(x, ...){
 ##' \emph{Computational Statistics & Data Analysis} \bold{30}(3):253--70.
 ##' \href{http://www.sciencedirect.com/science/article/pii/S0167947398000966}{ScienceDirect}
 ##'
-cutp.coxph <- function(x, ..., var="", plot=FALSE){
+cutp.coxph <- function(x, ...,
+                       var="",
+                       plot=FALSE){
     stopifnot(inherits(x, "coxph"))
     stopifnot(!identical(var, ""))
-### get location to evaluate variables
-### (i.e. environment if no data frame specified)
+    ## get location to evaluate variables
+    ## (i.e. environment if no data frame specified)
     v1 <- get(var, model.frame(x))
 ### check >2 levels
     stopifnot(length(unique(v1)) > 2)
@@ -124,9 +131,9 @@ cutp.coxph <- function(x, ..., var="", plot=FALSE){
 ###
     findSigma <- function(D){
         (1/(D-1)) * sum(sapply(1:D,
-### i in 1:D
+                               ## i in 1:D
                                function(i)
-### j in 1:i
+                               ## j in 1:i
                                (1 - sum( sapply( 1:i,
                                                 function(j)
                                                 1/(D+1-j) ) )) ^2
@@ -137,22 +144,23 @@ cutp.coxph <- function(x, ..., var="", plot=FALSE){
     Q1 <- cut1[2] / ( sqrt(s2)*sqrt(sum(t1$e)-1) )
 ###
     findP <- function(q, acc){
-### acc = accuracy; should be to Inf but generally 1e3 is enough
-        2* sum(sapply(1:acc, function (j)
-                      (-1)^(j+1)* exp(-2*j^2*q^2)
-                      )
-               )
+        ## acc = accuracy; should be to Inf but generally 1e3 is enough
+        2 * sum(sapply(1:acc, function (j)
+                       (-1)^(j+1)* exp(-2*j^2*q^2)
+                       )
+                )
     }
     p1 <- findP(Q1, 1e3)
-    res1 <- data.frame(CP=cut1[1], Q=Q1, p=p1)
+    res1 <- data.frame(cp=cut1[1], Q=Q1, p=p1)
     if (plot){
         m1 <- paste0("Test statistic for cut points \n For variable ", var,
-                     "\n Larger values indicate cut point more likely here")
-        plot(R1[, 1], R1[, 2],
-             xlab="Cut point",
-             ylab="Test statistic",
-             main=m1,
-             cex=3)
+                     "\nLarger values indicate cut point more likely here")
+        graphics::plot(R1[, 1], R1[, 2],
+                       xlab="Cut point",
+                       ylab="Test statistic",
+                       main=m1,
+                       cex=3,
+                       ...)
          lines(R1[, 1], R1[, 2])
     }
     return(res1)
@@ -160,8 +168,8 @@ cutp.coxph <- function(x, ..., var="", plot=FALSE){
 ##' @rdname cutp
 ##' @aliases cutp.survfit
 ##' @method cutp survfit
-##' @S3method cutp survfit
-##'
+##' @export
+##' 
 cutp.survfit <- function(x, ..., var="", plot=FALSE){
     f1 <- deparse(x$call)
     f1 <- sub("survfit", "coxph", f1)

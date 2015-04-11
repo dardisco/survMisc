@@ -16,23 +16,23 @@
   tabLabSize = 5, nRiskSize = 5)
 }
 \arguments{
-\item{object}{An object of class \code{survfit}.}
+\item{object}{An object of class \code{survfit}}
 
-\item{...}{Additional arguments (not implemented).}
+\item{...}{Additional arguments (not implemented)}
 
-\item{xLab}{Label for \eqn{x} axis on survival plot.}
+\item{xLab}{Label for \eqn{x} axis on survival plot}
 
-\item{yLab}{Label for \eqn{y} axis on survival plot.}
+\item{yLab}{Label for \eqn{y} axis on survival plot}
 
-\item{title}{Title for survival plot.}
+\item{title}{Title for survival plot}
 
-\item{titleSize}{Title size for survival plot.}
+\item{titleSize}{Title size for survival plot}
 
-\item{axisTitleSize}{Title size for axes.}
+\item{axisTitleSize}{Title size for axes}
 
-\item{axisLabSize}{Title size for label axes.}
+\item{axisLabSize}{Title size for label axes}
 
-\item{survLineSize}{Survival line size.}
+\item{survLineSize}{Survival line size}
 
 \item{type}{Type of plot. The default, \code{type="single"}, plots single lines.
  \itemize{
@@ -63,36 +63,33 @@ This will bring them just above 1 on the y-axis, making them easier to see separ
 }}
 
 \item{legend}{If \code{legend=FALSE}, no legends will be produced
-for the plot or table.}
+for the plot or table}
 
 \item{legLabs}{These can be used to replace the names
-of the strata from the fit.
-\cr
-Should be given in the same order as those strata.}
+of the strata from the fit. Should be given in the same
+order as those strata}
 
-\item{legTitle}{Title for legend.}
+\item{legTitle}{Title for legend}
 
-\item{legTitleSize}{Title size for legend.}
+\item{legTitleSize}{Title size for legend}
 
-\item{legLabSize}{Legend labels width and height.}
+\item{legLabSize}{Legend labels width and height}
 
-\item{alpha}{Alpha, the transparency of lines indicating confidence intervals
-or filled rectangles. Should be in the range \eqn{0} to \eqn{1}.
+\item{alpha}{Alpha, transparency of lines indicating confidence intervals
+or filled rectangles. Should be in range \eqn{0-1}.
 \cr
 Larger values e.g. \code{alpha=0.7} are recommended for confidence
-intervals.}
+intervals}
 
 \item{censShape}{Shape of marks to indicate censored onservations.
-\cr
-Default is \code{3} which gives vertical ticks.
-\cr
-Use \code{censShape=10} for circular marks.}
+\cr Default is \code{3} which gives vertical ticks.
+\cr Use \code{censShape=10} for circular marks.}
 
-\item{censSize}{Size of marks to indicate censored onservations.}
+\item{censSize}{Size of marks to indicate censored onservations}
 
-\item{CIline}{Confidence interval line type.}
+\item{CIline}{Confidence interval line type}
 
-\item{fillLineSize}{Line size surrouding filled boxes.}
+\item{fillLineSize}{Line size surrouding filled boxes}
 
 \item{pVal}{If \code{pVal=TRUE}, adds \eqn{p} value from
 log-rank test to plot}
@@ -102,10 +99,11 @@ Typically \eqn{1} to \eqn{3}.}
 
 \item{pX}{Location of \eqn{p} value on \eqn{x} axis.
 \cr
-Should be in the range of \eqn{0} to \eqn{1}.
-The location is relative to the maximum observed time.
+Should be in the range of \eqn{0 - 1},
+where value is to be placed relative to the maximum observed
+time.
 \cr
-E.g. \code{pX = 0.5} will place it half-way along the \eqn{x}-axis.}
+E.g. \code{pX = 0.5} will place it half-way along \eqn{x}-axis}
 
 \item{pY}{Location of \eqn{p} value on \eqn{y} axis.
 \cr
@@ -119,13 +117,13 @@ Should be in the range of \eqn{0 - 1}, as above}
   \item If \code{timeTicks="minor"}, minor axis marks are labelled instead.
 }}
 
-\item{tabTitle}{Table title.}
+\item{tabTitle}{Table title}
 
-\item{tabTitleSize}{Table title text size.}
+\item{tabTitleSize}{Table title text size}
 
-\item{tabLabSize}{Table legend text size.}
+\item{tabLabSize}{Table legend text size}
 
-\item{nRiskSize}{Number at risk - text size.}
+\item{nRiskSize}{Number at risk - text size}
 }
 \value{
 A \code{list} of \code{ggplot} objects, with elements:
@@ -139,15 +137,12 @@ Uses \code{ggplot2} to render a table showing the number of subjects
 at risk per time period and survival curves (Kaplan-Meier plot) and to render
 }
 \note{
-\itemize{
-  \item The returned \code{list} contains standard \code{ggplot2} objects.
-        \cr
-        These can be modified further, as in the last example, which changes
-        to colors to a user-defined sequence.
-        \cr
-        The default color scheme has been chosen for ease of display and accessibility.
-  \item Size arguments are passed to \code{ggplot2}'s \code{x=element_text(size=)}.
-}
+The returned \code{list} contains standard \code{ggplot2} objects.
+These can be modified further, as in the last example, which changes
+to colors to a user-defined sequence. The default color scheme has been chosen
+for ease of display and accessibility.
+\cr \cr
+Size arguments are passed to \code{ggplot2}'s \code{x=element_text(size=)}.
 }
 \examples{
 data(kidney, package="KMsurv")
@@ -160,20 +155,21 @@ autoplot(s1, type="CI", pVal=TRUE, pX=0.3,
 s1 <- survfit(Surv(time=time, event=delta) ~ 1, data=kidney)
 autoplot(s1, legLabs="")$plot
 autoplot(s1, legend=FALSE)$plot
-### load all datasets from package:km.ci
-d1 <- data(package="km.ci")$results[, "Item"]
-data(list=d1, package="km.ci")
+data(rectum.dat, package="km.ci")
 s1 <- survfit(Surv(time, status) ~ 1, data=rectum.dat)
 ### change confidence intervals to log Equal-Precision confidence bands
 km.ci::km.ci(s1, method="logep")
 autoplot(s1, type="fill", legend=FALSE)$plot
 ###
-### change to user-defined colors
+### manually changing the output
 ###
 s1 <- survfit(Surv(time, delta) ~ type, data=kidney)
 g1 <- autoplot(s1, type="CI", alpha=0.8, survLineSize=2)$plot
+### change default colors
 g1 + scale_colour_manual(values=c("red", "blue")) +
     scale_fill_manual(values=c("red", "blue"))
+### change limits of y-axis
+g1 + scale_y_continuous(limits=c(0, 1))
 }
 \author{
 Chris Dardis. Based on existing work by

@@ -1,8 +1,13 @@
 ##' @name whas100
 ##' @docType data
 ##' @title Worcester Heart Attack Study WHAS100 Data
-##' @details The main goal of this study is to describe factors associated with trends over time in the incidence and survival rates following hospital admission for acute myocardial infarction (MI).
-##' Data have been collected during thirteen 1-year periods beginning in 1975 and extending through 2001 on all MI patients admitted to hospitals in the Worcester, Massachusetts Standard Metropolitan Statistical Area.
+##' @details The main goal of this study is to describe factors
+##' associated with trends over time in the incidence and survival rates following
+##' hospital admission for acute myocardial infarction (MI).
+##' Data have been collected during thirteen 1-year periods
+##' beginning in 1975 and extending through 2001
+##' on all MI patients admitted to hospitals in
+##' the Worcester, Massachusetts Standard Metropolitan Statistical Area.
 ##' \cr
 ##' Columns are:
 ##' \describe{
@@ -23,8 +28,13 @@
 ##'  \item{bmi}{Body Mass Index}
 ##' }
 ##' @format A data frame with 100 rows and 9 columns.
-##' All columns are \code{integer}, apart from admitdate and foldate which are \code{date}, and bmi which is \code{numeric}.
+##' All columns are \code{integer}, apart from
+##' \bold{admitdate} and \bold{foldate} which are \code{date},
+##' and \bold{bmi} which is \code{numeric}.
 ##' @source \href{http://www.mmnt.net/db/0/0/ftp.wiley.com/public/sci_tech_med/survival}{Wiley FTP}.
-##' @references Hosmer D, Lemeshow S,  May S. Applied Survival Analysis: Regression Modeling of Time to Event Data, 2nd edition. John Wiley and Sons Inc., New York, NY, 2008.
+##' @references Hosmer D, Lemeshow S,  May S.
+##' \emph{Applied Survival Analysis: Regression Modeling of Time to Event Data, 2nd edition}.
+##' John Wiley and Sons Inc., New York, NY, 2008.
+##' \href{http://dx.doi.org/10.1002/9780470258019}{Wiley (paywall)}
 ##'
 NULL

@@ -7,11 +7,11 @@ based on \eqn{n} and \eqn{e}}
 sf(n, e, what = c("all", "s", "sv", "h", "hv"))
 }
 \arguments{
-\item{n}{\bold{N}umber at risk per time point (a \code{vector}).}
+\item{n}{\bold{N}umber at risk per time point (a \code{vector})}
 
-\item{e}{Number of \bold{e}vents per time point (a \code{vector}).}
+\item{e}{Number of \bold{e}vents per time point (a \code{vector})}
 
-\item{what}{What to return. See \bold{Value}.}
+\item{what}{See return, below}
 }
 \value{
 The return value will be a \code{vector},
@@ -26,7 +26,7 @@ This is \eqn{1} at \eqn{t=0} and thereafter is given by:
 
 If \code{what="sv"}, the \bold{s}urvival \bold{v}ariance is returned.
 \cr
-Greenwoods estimator of the variance of the Kaplan-Meier (product-limit)
+Greenwoods estimtor of the variance of the Kaplan-Meier (product-limit)
 estimator is:
 \deqn{Var[\hat{S}(t)] = [\hat{S}(t)]^2 \sum_{t_i \leq t} \frac{e_i}{n_i (n_i-e_i)} }{
       Var[S](t) = S(t)^2 SUM (e) / n(n-e) }
@@ -46,14 +46,13 @@ If \code{what="all"} (the default), \emph{all} of the above are returned
 in a \code{data.table}, along with:
 \cr
 Survival, based on the Nelson-Aalen estimator. Given by
-             \deqn{\hat{S_{na}} = \exp(-\hat{H})}{
-                   S = exp(-H)}
-          where \eqn{\hat{H}}{H} is hazard.
-\cr \cr
+             \deqn{\hat{S_{na}}=e^{H}}{
+                   S = exp(H)}
+          where \eqn{H} is hazard.
 HKM Hazard, based on the Kaplan-Meier estimator. Given by
-             \deqn{\hat{H_{km}} = -\log \hat{S} }{
+             \deqn{\hat{H_{km}}=-\log{S}}{
                    H = -log(S)}
-where \eqn{\hat{S}}{S} is survival.
+where \eqn{S} is survival.
 }
 \description{
 Estimates of \bold{s}urvival (or hazard) \bold{f}unction
@@ -73,9 +72,7 @@ sf(n=t1$n, e=t1$e, what="hv")
 }
 \references{
 Examples for are from:
-Klein J, Moeschberger M 2003
-\emph{Survival Analysis}, 2nd edition.
-New York: Springer.
+\bold{K&M}.
 \cr
 \code{what="sv"}: Table 4.1A, pg 93.
 \cr

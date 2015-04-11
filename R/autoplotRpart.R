@@ -1,18 +1,31 @@
 ##' @name autoplot.rpart
-##' @export autoplot.rpart
-##' @aliases autoplot.rpart
+##' @rdname autoplotRpart
+##'
+##' @keywords graphs
+##'
+##' @export
+autoplot <- function (object, ...){ 
+    UseMethod("autoplot")
+}
+##' @rdname autoplotRpart
 ##' @method autoplot rpart
-##' @title Plot a recursive partitioning tree using \code{ggplot2}
+##' @export
+##' 
+##' @title Generate a \code{ggplot} for an \code{rpart} object
+##' @description Uses \code{ggplot2} to render a recursive partitioning tree
+##' 
 ##' @include genSurv.R
-##' @param object An object of class \code{rpart} as returned by \code{rpart::rpart()}
+##' 
+##' @param object An object of class \code{rpart}, as returned by \code{rpart::rpart()}
 ##' @param ... Additional arguments (not implemented)
 ##' @param title Title for plot
 ##' @param titSize Title text size
 ##' @param uniform The default is to use a non-uniform spacing
 ##' \emph{proportional to the error in the fit}.
-##' If \code{uniform=TRUE}, uniform vertical
-##' spacing of the nodes is used. This may be less
-##' cluttered when fitting a large plot onto a page.
+##' \cr
+##' If \code{uniform=TRUE}, uniform vertical spacing of the nodes is used.
+##' \cr
+##' This may be less cluttered when fitting a large plot onto a page.
 ##' @param minbranch This parameter is ignored if \code{uniform=TRUE}.
 ##' \cr
 ##' The usual tree shows branch lengths \emph{in proportion to improvement}.
@@ -20,43 +33,49 @@
 ##' Where improvement is
 ##' minimal, there may be insuffcient room for node labels.
 ##' \code{minbranch} sets the minimum length for a branch to \code{minbranch}
-##' times the average branch length
-##' @param compress If \code{compress=FALSE} (the default), the leaf
-##' nodes will be at the horizontal plot
-##' co-ordinates of '1:nleaves'.
+##' times the average branch length.
+##' @param compress If \code{compress=FALSE} (the default), the leaves
+##' (terminal nodes) will be at the horizontal plot co-ordinates of \eqn{1:l},
+##' the number of \bold{l}eaves.
 ##' \cr
 ##' If \code{compress=TRUE}, the tree is arranged in a more compact form.
-##' (The compaction algorithm assumes \code{uniform=TRUE}).
-##' The result is usually an improvement even when that is not the case.
+##' \cr
+##' (The compaction algorithm assumes \code{uniform=TRUE}.
+##' The result is usually an improvement even when this is not the case.)
 ##' @param nspace Applies only when \code{compress=TRUE}.
 ##' \cr
 ##' The amount of extra space between a node with children and a leaf,
-##' as compared to the minimal space between leaves. The default is the
-##' value of \code{branch}.
+##' as compared to the minimal space between leaves.
+##' \cr
+##' The default is the value of \code{branch}, below.
 ##' @param branch Controls the shape of the branches from parent to child node.
-##' \cr Needs to be in the range \eqn{0-1}.  A value of \eqn{1} gives square
-##' shouldered branches,
-##' a value of \eqn{0} gives V shaped branches, with other values being intermediate.
+##' \cr
+##' Needs to be in the range \eqn{0-1}.
+##' \cr
+##' A value of \eqn{1} gives square shouldered branches.
+##' \cr
+##' A value of \eqn{0} gives 'V' shaped branches, with other values being intermediate.
 ##' @param all If \code{all="FALSE"} only terminal nodes
-##' (leaves) will be labelled
+##' (i.e. leaves) will be labelled
 ##' @param nodeLabels These can be used to replace the names of the
 ##' default labels from the fit.
+##' \cr
 ##' Should be given in the same order as those names
 ##' @param lineSize Line size connecting nodes
-##' @param vArrows Add vertical arrows for descending lines
+##' @param vArrows If \code{vArrows=TRUE}, adds vertical arrows for descending lines
 ##' @param nodeSize Node text size
 ##' @param nodeColor Node text color
-##' @param leaf If \code{leaf="fitR"} (the default) terminal nodes (leaves)
+##' @param leaf If \code{leaf="fitR"} (the default) leaves
 ##' are labelled with the fitted response. If this is a \code{factor}, the
 ##' \code{labels} of the \code{factor} are used.
 ##' \cr
 ##' The following apply only when the object is fit with
 ##' \code{rpart(..., method="exp")}:
 ##' \itemize{
-##'  \item If \code{leaf="en"}, the leaves are labelled with number of events and
-##' number at risk.
+##'  \item If \code{leaf="en"}, the leaves are labelled with number of
+##' \bold{e}vents and the \bold{n}umber at risk.
 ##'  \item If \code{leaf="both"} labels show both fitted responses and
-##' no. events/ no. at risk
+##' number of events/ number at risk.
 ##'  }
 ##' @param leafSize Leaf (terminal node) text size
 ##' @param leafColor Leaf text color
@@ -65,33 +84,37 @@
 ##' Default is \code{getOption("digits")}
 ##' @param yNU \bold{y} value for \bold{N}odes moved \bold{U}p.
 ##' Used to prevent text from overlapping.
+##' \cr
 ##' This multiplier is applied to the difference
 ##' of the largest and smallest \eqn{y} values plotted.
+##' \cr
 ##' May need to be increased if larger text sizes are
 ##' used in labelling nodes or node labels span > 1 line.
+##' \cr
 ##' Typically is \eqn{< 0.1}.
 ##' @param yND \bold{y} value for \bold{N}odes moved \bold{D}own.
+##' \cr
 ##' As above, but applies to text appearing
 ##' below the node.
 ##' @param yLD \bold{y} value for \bold{L}eaves moved \bold{D}own.
+##' \cr
 ##' As above, but applies to text appearing
 ##' below the leaves.
 ##' @return A \code{list} with the following elmenents:
 ##' \describe{
-##'  \item{plot}{A plot, as generated by \code{ggplot}}
-##'  \item{segments}{A \code{data.table} with the co-ordinates used to plot the lines}
-##'  \item{nodes}{A \code{data.table} with the co-ordinates used to plot the nodes.
-##' \cr
-##' Columns are labelled as follows:
+##'   \item{plot}{A plot, as generated by \code{ggplot}}
+##'   \item{segments}{A \code{data.table} with the co-ordinates used to plot the lines}
+##'   \item{nodes}{A \code{data.table} with the co-ordinates used to plot the nodes.
+##'   Columns are labelled as follows:
 ##'  \describe{
 ##'  \item{x, y}{\eqn{x} and \eqn{y} co-ordinates}
 ##'  \item{node}{Node name}
 ##'  \item{n}{Number of observations (number at risk) for this node}
 ##'  \item{isP}{Is node a \bold{p}arent?}
 ##'  \item{lC, rC}{Left and right \bold{c}hildren of node}
-##'  \item{isL}{Is node a leaf (terminal node)?}
+##'  \item{isL}{Is node a \bold{l}eaf (terminal node)?}
 ##'  \item{resp}{Predicted \bold{resp}onse}
-##'  \item{yNU, yND, yLD}{adjusted \eqn{y} values for nodes and leaves}
+##'  \item{yNU, yND, yLD}{adjusted \eqn{y} values for \bold{n}odes (\bold{u}p and \bold{d}down) and \bold{l}eaves (\bold{d}own)}
 ##'  }
 ##'  And where applicable:
 ##' \describe{
@@ -99,10 +122,14 @@
 ##'  \item{en}{Number of events / number of observations}
 ##'  }}
 ##' }
+##' 
 ##' @details The plot shows a division at each node. This is read as \emph{right=TRUE}.
 ##' \cr
-##' Thus for a node reading \bold{x > 0.5} the line descending to the right is that where \bold{x > 0.5}.
-##' @author Chris Dardis. Adapted from work by Andrie de Vries and Terry Therneau
+##' Thus for a node reading \bold{x > 0.5}
+##' the line descending to the right is that where \bold{x > 0.5}.
+##' 
+##' @author Chris Dardis. Adapted from work by Andrie de Vries and Terry Therneau.
+##' 
 ##' @examples
 ##' data("cu.summary", package="rpart")
 ##' fit <- rpart(Price ~ Mileage + Type + Country, cu.summary)
@@ -123,7 +150,6 @@
 ##'                leafSize=10, , yLD=0.08, nodeLabels=seq(17))$plot
 ##' ### can use expand_limits if text is cut off at margins
 ##' a1 + expand_limits(x=c(0.75, 7.25))
-##'
 autoplot.rpart <- function(object,
                            ...,
                            title="Recursive partitioning tree \n Terminal nodes show fitted response",
@@ -148,7 +174,7 @@ autoplot.rpart <- function(object,
                            yLD=0.02){
 ### prevent errors in R CMD check
     ind <- x <- y <- V5 <- e <- n <- resp <- NULL
-     xend <- yend <- yM <- ym <- en <- respEN <- NULL
+    xend <- yend <- yM <- ym <- en <- respEN <- NULL
 ###
     if (!inherits(object, "rpart")) stop("Not a legitimate \"rpart\" object")
     if (nrow(object$frame) <= 1L) stop("Fit is not a tree, just a root")
@@ -215,7 +241,7 @@ autoplot.rpart <- function(object,
     d2[, "V7" := right.child]
     d2[, "V8" := !V5]
     setnames(d2, c("x", "y", "node", "n", "isP", "lC", "rC", "isL") )
-### 2nd value for y exists?
+### does second value for y exist?
     y2e <- "yval2" %in% names(object$frame)
     if(y2e & object$method=="exp") {
         d2[, "resp" := object$frame$yval2[, 1L] ]
@@ -285,8 +311,8 @@ autoplot.rpart <- function(object,
 }
 ###
 ###----------------------------------------
-###
 ### copied from rpart:::rpartco
+### minor changes to formatting and indenting
 ###----------------------------------------
 ###
 .rpco <- function (tree, parms) {

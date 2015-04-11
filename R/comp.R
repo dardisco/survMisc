@@ -1,30 +1,34 @@
 ##' @name comp
 ##' @title Compare survival curves
 ##' @rdname comp
+##' @keywords htest
+##'
 ##' @export comp
 ##'
 comp <- function(x, ...){
     UseMethod("comp")
     }
-##' @rdname comp
-##' @aliases comp.survfit
-##' @method comp survfit
-##' @S3method comp survfit
+##' 
 ##' @include tne.R
 ##' @include covMatSurv.R
+##' @include gastric.R
+##' 
 ##' @param x A \code{survfit} or \code{coxph} object
 ##' @param ... Additional arguments
 ##' @param FHp \eqn{p} for Fleming-Harrington test
 ##' @param FHq \eqn{q} for Fleming-Harrington test
-##' @param lim limit used for Renyi tests when generating supremum of absolute value of Brownian motion
+##' @param lim limit used for Renyi tests when generating supremum of
+##' absolute value of Brownian motion
 ##' @param scores scores for tests for trend
-##' @return A list with two elements, \code{tne} and \code{tests}.
-##' \cr \cr
+##' @return A \code{list} with two elements, \code{tne} and \code{tests}.
+##' \cr 
 ##' The first is a \code{data.table} with one row for each time at
-##' which an event occurred. Columns show time, no. at risk and no. events
+##' which an event occurred.
+##' \cr
+##' Columns show time, no. at risk and no. events
 ##' (by stratum and overall).
 ##' \cr \cr
-##' The second contains the tests, as a list.
+##' The second contains the tests, as a \code{list}.
 ##' \cr \cr
 ##' The first element is the log-rank family of tests.
 ##' \cr
@@ -35,12 +39,11 @@ comp <- function(x, ...){
 ##' \cr
 ##' For a \code{survfit} or \code{coxph} object with at least 3 strata,
 ##' there are tests for trend.
-##' \cr
 ##'
 ##' @details
 ##'  The \bold{log-rank} tests are given by the general expression:
 ##'  \deqn{ Q = \sum{ W_i (e_i - \hat{e}_i)}^T \sum{ W_i \hat{V_i} W_i^{-1}} \sum{ W_i (e_i - \hat{e}_i)} }{
-##'  Q = [sum W(e-E)]^T [sum WVW]^-1 [sum W(e-E)] }
+##'         Q = [sum W(e-E)]^T [sum WVW]^-1 [sum W(e-E)] }
 ##' Where \eqn{W} is the weight, given below,  \eqn{e} is the no. of events,
 ##' \eqn{\hat{e}}{E} is the no. of expected events for that time and
 ##' \eqn{\hat{V}}{V} is the variance-covariance matrix given by \code{\link{covMatSurv}}.
@@ -86,18 +89,18 @@ comp <- function(x, ...){
 ##' \cr
 ##' They are calculated by finding
 ##' \deqn{ Z(t_i) = \sum_{t_k \leq t_i} W(t_k)[e1_k - n1_k\frac{e_k}{n_k}], \quad i=1,2,...,k}{
-##' Z(t[i]) = SUM W(t[k]) [ e1[k] - n1[k]e[k]/n[k] ]}
+##'        Z(t[i]) = SUM W(t[k]) [ e1[k] - n1[k]e[k]/n[k] ]}
 ##' (which is similar to the numerator used to find \eqn{Q}
 ##' in the log-rank test for 2 groups above).
 ##' \cr
 ##' and it's variance:
 ##' \deqn{ \sigma^2(\tau) = \sum_{t_k \leq \tau} W(t_k)^2 \frac{n1_k n2_k (n_k-e_k) e_k}{n_k^2 (n_k-1)} }{
-##' simga^2(tau) = SUM(k=1,2,...,tau) W(t[k]) [ n1[k].n2[k].(n[k]-e[k]).e[k] / n[k]^2.(n[k]-1) ] }
+##'       simga^2(tau) = SUM(k=1,2,...,tau) W(t[k]) [ n1[k].n2[k].(n[k]-e[k]).e[k] / n[k]^2.(n[k]-1) ] }
 ##' where \eqn{\tau}{tau} is the largest \eqn{t}
 ##' where both groups have at least one subject at risk.
 ##' \cr \cr
 ##' Then calculate:
-##' \deqn{ Q = \frac{ \sup{|Z(t)|}}{\sigma(\tau)} ,t<\tau }{
+##' \deqn{ Q = \frac{ \sup{|Z(t)|}}{\sigma(\tau)}, \quad t<\tau }{
 ##' Q = sup( |Z(t)| ) / sigma(tau), t<tau}
 ##' When the null hypothesis is true,
 ##' the distribution of \eqn{Q} is approximately
@@ -105,28 +108,31 @@ comp <- function(x, ...){
 ##' Q ~ sup( |B(x)|, 0 <= x <= 1)}
 ##' And for a standard Brownian motion (Wiener) process:
 ##' \deqn{ Pr[\sup|B(t)|>x] = 1-\frac{4}{\pi} \sum_{k=0}^{\infty} \frac{(-1)^k}{2k+1} \exp{ \frac{-\pi^2(2k+1)^2}{8x^2}}}{
-##' Pr[sup|B(t)|>x] = 1 - 4/pi SUM (-1)^k/2k+1 exp(-pi^2 (2k+1)^2/x^2)}
+##'        Pr[sup|B(t)|>x] = 1 - 4/pi SUM (-1)^k/2k+1 exp(-pi^2 (2k+1)^2/x^2)}
 ##' \bold{Tests for trend} are designed to detect ordered differences in survival curves.
+##' \cr
 ##' That is, for at least one group:
 ##' \deqn{S_1(t) \geq S_2(t) \geq ... \geq S_K(t) \quad t \leq \tau}{
-##'  S1(t) >= S2(t) >= ... >= SK(t) for t <= tau}
+##'       S1(t) >= S2(t) >= ... >= SK(t) for t <= tau}
 ##' where \eqn{\tau}{tau} is the largest \eqn{t} where all groups have at least one subject at risk.
 ##' The null hypothesis is that
 ##' \deqn{S_1(t) = S_2(t) = ... = S_K(t) \quad t \leq \tau}{
-##' S1(t) = S2(t) = ... = SK(t) for t <= tau}
+##'       S1(t) = S2(t) = ... = SK(t) for t <= tau}
 ##' Scores used to construct the test are typically \eqn{s = 1,2,...,K},
 ##' but may be given as a vector representing a numeric characteristic of the group.
+##' \cr
 ##' They are calculated by finding
 ##' \deqn{ Z_j(t_i) = \sum_{t_i \leq \tau} W(t_i)[e_{ji} - n_{ji} \frac{e_i}{n_i}], \quad j=1,2,...,K}{
-##' Z[t(i)] = SUM W[t(i)] [e[j](i) - n[j](i).e(i)/n(i) ]}
+##'       Z[t(i)] = SUM W[t(i)] [e[j](i) - n[j](i).e(i)/n(i) ]}
 ##' The test statistic is
 ##' \deqn{Z = \frac{ \sum_{j=1}^K s_jZ_j(\tau)}{\sqrt{\sum_{j=1}^K \sum_{g=1}^K s_js_g \sigma_{jg}}} }{
-##' Z = SUM(j=1...K) s[j]Z[j] / SUM(j=1..K) SUM(g=1..K) s[j]s[g]sigma[jg]}
+##'       Z = SUM(j=1...K) s[j]Z[j] / SUM(j=1..K) SUM(g=1..K) s[j]s[g]sigma[jg]}
 ##' where \eqn{\sigma}{sigma} is the the appropriate element in the
 ##' variance-covariance matrix (as in \code{\link{covMatSurv}}).
 ##' \cr
 ##' If ordering is present, the statistic \eqn{Z} will be greater than the upper \eqn{\alpha}{alpha}th
 ##' percentile of a standard normal distribution.
+##' 
 ##' @note Regarding the Fleming-Harrington weights: \itemize{
 ##' \item \eqn{p = q = 0} gives the log-rank test, i.e. \eqn{W=1}
 ##' \item \eqn{p=1, q=0} gives a version of the Mann-Whitney-Wilcoxon test
@@ -159,11 +165,10 @@ comp <- function(x, ...){
 ##' s4 <- survfit(Surv(time, delta) ~ stage, data=larynx)
 ##' comp(s4)
 ##' ### Renyi tests
-##' \dontrun{
 ##' data("gastric", package="survMisc")
 ##' s5 <- survfit(Surv(time, event) ~ group, data=gastric)
 ##' comp(s5)
-##' }
+##' 
 ##' @references Gehan A.
 ##' A Generalized Wilcoxon Test for Comparing Arbitrarily
 ##' Singly-Censored Samples.
@@ -181,22 +186,26 @@ comp <- function(x, ...){
 ##' Supremum Versions of the Log-Rank and Generalized Wilcoxon Statistics.
 ##' \emph{J  American Statistical Association} \bold{82}(397):312--20.
 ##' \href{http://www.jstor.org/stable/2289169}{JSTOR}
-##' @references Billingsly P 2009
+##' @references Billingsly P 1999
 ##' \emph{Convergence of Probability Measures.}
 ##' New York: John Wiley & Sons.
-##' \href{http://books.google.com/books/about/Convergence_of_Probability_Measures.html?id=GzjbezrsrFcC}{
-##' Google Books}
+##' \href{http://dx.doi.org/10.1002/9780470316962}{Wiley (paywall)}
 ##' @references Examples are from
 ##' Klein J, Moeschberger M 2003
 ##' \emph{Survival Analysis}, 2nd edition.
 ##' New York: Springer.
 ##' Examples 7.2, 7.4, 7.5, 7.6, 7.9, pp 210-225.
+##'
+##' @rdname comp
+##' @aliases comp.survfit
+##' @method comp survfit
+##' @export
 comp.survfit <- function(x, ..., FHp=1, FHq=1, lim=1e4, scores=NULL) {
     if (!class(x)=="survfit") stop("Only applies to object of class 'survfit'")
     m1 <- "Values for p and q for Fleming-Harrington tests must be >=0"
     if (FHp<0 | FHq<0) stop(m1)
 ###
-    m1 <- tne(x, return="merged", eventsOnly=TRUE)
+    m1 <- tne(x, what="all", eventsOnly=TRUE)
 ###
 ### 2 groups only:
     if (length(x$strata)==2){
@@ -221,15 +230,17 @@ comp.survfit <- function(x, ..., FHp=1, FHq=1, lim=1e4, scores=NULL) {
 ##' @rdname comp
 ##' @aliases comp.coxph
 ##' @method comp coxph
-##' @S3method comp coxph
+##' @export
+##' 
 ##' @examples
 ##' c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney )
 ##' comp(c1)
+##' 
 comp.coxph <- function(x, ..., FHp=1, FHq=1, scores=NULL, lim=1e4){
      if (!class(x)=="coxph") stop("Only applies to object of class 'coxph'")
      if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
 ###
-    m1 <- tne.coxph(x, return="merged", eventsOnly=TRUE)
+    m1 <- tne.coxph(x, what="all", eventsOnly=TRUE)
 ###
 ### 2 groups only:
     if (ncol(m1)==7){
