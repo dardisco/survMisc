@@ -1,55 +1,55 @@
-##' @name mean.Surv
-##' @rdname meanSurv
-##' @method mean Surv
-##' @export
-##' 
-##' @include tne.R
-##' @include sf.R
-##'
-##' @title Mean for \code{Surv} object
-##' 
-##' @param x A \code{Surv} object
-##' @param alpha Significance level \eqn{\alpha}{alpha}
-##' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the
-##' following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival
-##' time from then until \code{tMax} is used:
-##' \describe{
-##'   \item{Effron}{ \eqn{\hat{S}=0}{S=0}}
-##'   \item{Gill}{ \eqn{\hat{S}=\hat{S}(t_k)}{S = S(t_k)} i.e. \eqn{\hat{S}}{S} is equal to the
-##' last recorded value of \eqn{\hat{S}}{S}}.
-##'   \item{Brown}{ \eqn{\hat{S}= e^{\frac{t_i}{t_k} \log{\hat{S}(t_k)}} }{
-##'  e^[ (t_i/t_k) log S(t_k) ]}
-##' for \eqn{ t_k \le t_i \le \code{tMax}}{
-##'  t(k) <= t(i) <= tMax}
-##'                 }
-##' }
-##'
-##' @param tMax If the last observation is censored at time \eqn{t_k}{t_k}, an estimate of
-##' \eqn{\hat{S}}{S} will be generated from \eqn{t_k}{t_k} to \code{tMax}.
-##' \cr
-##' If \code{tMax=NULL} a value of \eqn{2 \times t_{max}}{2*tMax},
-##' twice the longest time recorded, is used.
-##' @param by Increments (units of time) between \eqn{t_k}{t_k} and \code{tMax}
-##' @param dfm If \code{TRUE}, will return the dataframe used to calculate the statistics
-##' @param ... Additional arguments
-##' 
-##' @return A list with the following elements:
-##' \item{mean}{Mean of the \code{Surv} object}
-##' \item{variance}{The variance}
-##' \item{CI}{The confidence level (from \eqn{alpha}{alpha} above)}
-##' \item{upper}{Upper value for confidence interval}
-##' \item{lower}{Lower value for the confidence interval}
-##' If the last observation is censored at time \eqn{t_k}{t_k},
-##' two values are returned, one calculated up to \eqn{t_k}{t_k}, the other to \code{tMax}.
-##' 
-##' @examples
-##' data(bmt, package="KMsurv")
-##' b1 <- bmt[bmt$group==1, ] # ALL patients
-##' s1 <- Surv(time=b1$t2, event=b1$d3)
-##' mean(s1)
-##' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 1)))
-##' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 0)))
-##'
+#' @name mean.Surv
+#' @rdname meanSurv
+#' @method mean Surv
+#' @export
+#' 
+#' @include tne.R
+#' @include sf.R
+#'
+#' @title Mean for \code{Surv} object
+#' 
+#' @param x A \code{Surv} object
+#' @param alpha Significance level \eqn{\alpha}{alpha}
+#' @param method If the last observation is censored at time \eqn{t_k}{t_k}, one of the
+#' following values for \eqn{\hat{S}}{S}, the Kaplan-Meier estimate of survival
+#' time from then until \code{tMax} is used:
+#' \describe{
+#'   \item{Effron}{ \eqn{\hat{S}=0}{S=0}}
+#'   \item{Gill}{ \eqn{\hat{S}=\hat{S}(t_k)}{S = S(t_k)} i.e. \eqn{\hat{S}}{S} is equal to the
+#' last recorded value of \eqn{\hat{S}}{S}}.
+#'   \item{Brown}{ \eqn{\hat{S}= e^{\frac{t_i}{t_k} \log{\hat{S}(t_k)}} }{
+#'  e^[ (t_i/t_k) log S(t_k) ]}
+#' for \eqn{ t_k \le t_i \le \code{tMax}}{
+#'  t(k) <= t(i) <= tMax}
+#'                 }
+#' }
+#'
+#' @param tMax If the last observation is censored at time \eqn{t_k}{t_k}, an estimate of
+#' \eqn{\hat{S}}{S} will be generated from \eqn{t_k}{t_k} to \code{tMax}.
+#' \cr
+#' If \code{tMax=NULL} a value of \eqn{2 \times t_{max}}{2*tMax},
+#' twice the longest time recorded, is used.
+#' @param by Increments (units of time) between \eqn{t_k}{t_k} and \code{tMax}
+#' @param dfm If \code{TRUE}, will return the dataframe used to calculate the statistics
+#' @param ... Additional arguments
+#' 
+#' @return A list with the following elements:
+#' \item{mean}{Mean of the \code{Surv} object}
+#' \item{variance}{The variance}
+#' \item{CI}{The confidence level (from \eqn{alpha}{alpha} above)}
+#' \item{upper}{Upper value for confidence interval}
+#' \item{lower}{Lower value for the confidence interval}
+#' If the last observation is censored at time \eqn{t_k}{t_k},
+#' two values are returned, one calculated up to \eqn{t_k}{t_k}, the other to \code{tMax}.
+#' 
+#' @examples
+#' data(bmt, package="KMsurv")
+#' b1 <- bmt[bmt$group==1, ] # ALL patients
+#' s1 <- Surv(time=b1$t2, event=b1$d3)
+#' mean(s1)
+#' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 1)))
+#' mean(Surv(time=c(6, 14, 21, 44, 62), event=c(1, 1, 0, 1, 0)))
+#'
 mean.Surv <- function(x,
                       alpha=0.05,
                       method=c("Efron", "Gill", "Brown"),

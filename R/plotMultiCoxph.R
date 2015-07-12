@@ -1,46 +1,46 @@
-##' @name plot.MultiCoxph
-##' @rdname plotMultiCoxph
-##' @title Plot an \code{multi.coxph} object
-##' @aliases plot.multi.coxph
-##' 
-##' @method plot multi.coxph
-##' @export
-##' 
-##' @include multiCoxph.R
-##' @include genSurv.R
-##' 
-##' @param x An object of \code{class} \code{multi.coxph}
-##' @param ... Additional arguments. These are passed to \code{graphics::plot.default}
-##' or (if \code{type="s"}) \code{graphics::barplot}.
-##' @param type Type of plot
-##' 
-##' @return A graph (base graphics).
-##' 
-##' @details One of three types of graph is possible.
-##' \itemize{
-##' \item If \code{type="p"} then \bold{p}oints representing the information criterion (IC)
-##'       for each model are plotted. A line is also drawn 2 units above the
-##'       minimum IC. Models below this are typically worth considering.
-##'       If it is not visible on the plot, then important models have have
-##'        been overlooked, suggesting a larger value for \code{confSetSize} may
-##'       be appropriate.
-##' \item If \code{type="w"} then the \bold{w}eights (relative evidence weights) of the
-##'       models are plotted. These can be interpreted as the probability that
-##'       each model is the best in the set. A red vertical line is shown
-##'       where the cumulated evidence weight reaches 95%.
-##' \item If \code{type="s"} then the \bold{s}um of the relative evidence weights for
-##'       each term/ coefficient is plotted. The sum is taken across all models
-##'       in which the term appears.
-##' }
-##' 
-##' @seealso \code{\link{multi}}
-##' 
-##' @examples
-##' set.seed(1)
-##' dt1 <- genSurvDt(b=2, c=5, f=0, model=FALSE)
-##' m1 <- multi(coxph(Surv(t1, e) ~ ., data=dt1), crit="bic")
-##' plot(m1, type="w")
-##' 
+#' @name plot.MultiCoxph
+#' @rdname plotMultiCoxph
+#' @title Plot an \code{multi.coxph} object
+#' @aliases plot.multi.coxph
+#' 
+#' @method plot multi.coxph
+#' @export
+#' 
+#' @include multiCoxph.R
+#' @include genSurv.R
+#' 
+#' @param x An object of \code{class} \code{multi.coxph}
+#' @param ... Additional arguments. These are passed to \code{graphics::plot.default}
+#' or (if \code{type="s"}) \code{graphics::barplot}.
+#' @param type Type of plot
+#' 
+#' @return A graph (base graphics).
+#' 
+#' @details One of three types of graph is possible.
+#' \itemize{
+#' \item If \code{type="p"} then \bold{p}oints representing the information criterion (IC)
+#'       for each model are plotted. A line is also drawn 2 units above the
+#'       minimum IC. Models below this are typically worth considering.
+#'       If it is not visible on the plot, then important models have have
+#'        been overlooked, suggesting a larger value for \code{confSetSize} may
+#'       be appropriate.
+#' \item If \code{type="w"} then the \bold{w}eights (relative evidence weights) of the
+#'       models are plotted. These can be interpreted as the probability that
+#'       each model is the best in the set. A red vertical line is shown
+#'       where the cumulated evidence weight reaches 95%.
+#' \item If \code{type="s"} then the \bold{s}um of the relative evidence weights for
+#'       each term/ coefficient is plotted. The sum is taken across all models
+#'       in which the term appears.
+#' }
+#' 
+#' @seealso \code{\link{multi}}
+#' 
+#' @examples
+#' set.seed(1)
+#' dt1 <- genSurvDt(b=2, c=5, f=0, model=FALSE)
+#' m1 <- multi(coxph(Surv(t1, e) ~ ., data=dt1), crit="bic")
+#' plot(m1, type="w")
+#' 
 plot.multi.coxph <- function(x,
                              type=c("p", "w", "s"),
                              ...){

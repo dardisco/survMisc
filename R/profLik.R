@@ -1,45 +1,45 @@
-##' @name profLik
-##' @export
-##' 
-##' @title Profile likelihood for coefficients in Coxph model
-##' 
-##' @param x A \code{coxph} model
-##' @param CI Confidence Interval
-##' @param interval Number of points over which to evaluate coefficient
-##' @param mult Multiplier. Coefficent will be multiplied by lower and upper
-##' value and evaluated across this range
-##' @param ... Additional parameters passed to \code{graphics::plot.default}.
-##' 
-##' @details
-##' Plots of range of values for coefficient in model with log-likelihoods
-##' for the model with the coefficient fixed at these values.
-##' \cr \cr
-##' For each coefficient a range of possible values is chosen, given by
-##' \eqn{\hat{B}*mult_{lower} - \hat{B}*mult_{upper}}{Bhat*mult[lower] - Bhat*mult[upper]}.
-##' A series of model are fit (given by \code{interval}).
-##' The coefficient is included in the model as a
-##' \emph{fixed} term and the partial log-likelihood for the model is calculated.
-##' \cr \cr
-##' A curve is plotted which gives the partial log-likelihood for each of these candidate values.
-##' An appropriate confidence interval (CI) is given
-##' by subtracting 1/2 the value of the approapriate quantile
-##' of a chi-squared distribution with 1 degree of freedom.
-##' \cr \cr
-##' Two circles are also plotted giving the 95% CI for the Wald statistic.
-##' 
-##' @return One plot for each coefficient in the model. 
-##' 
-##' @examples
-##' c1 <- coxph(formula = Surv(time, status == 2) ~ age + edema + log(bili) +
-##'                       log(albumin) + log(protime), data = pbc)
-##' profLik(c1, col="red")
-##' 
-##' @references Example is from:
-##' Therneau T, Grambsch P 2000.
-##' \emph{Modeling Survival Data}, 1st edition.
-##' New York: Springer.
-##' Section 3.4.1, pg 57.
-##'
+#' @name profLik
+#' @export
+#' 
+#' @title Profile likelihood for coefficients in Coxph model
+#' 
+#' @param x A \code{coxph} model
+#' @param CI Confidence Interval
+#' @param interval Number of points over which to evaluate coefficient
+#' @param mult Multiplier. Coefficent will be multiplied by lower and upper
+#' value and evaluated across this range
+#' @param ... Additional parameters passed to \code{graphics::plot.default}.
+#' 
+#' @details
+#' Plots of range of values for coefficient in model with log-likelihoods
+#' for the model with the coefficient fixed at these values.
+#' \cr \cr
+#' For each coefficient a range of possible values is chosen, given by
+#' \eqn{\hat{B}*mult_{lower} - \hat{B}*mult_{upper}}{Bhat*mult[lower] - Bhat*mult[upper]}.
+#' A series of model are fit (given by \code{interval}).
+#' The coefficient is included in the model as a
+#' \emph{fixed} term and the partial log-likelihood for the model is calculated.
+#' \cr \cr
+#' A curve is plotted which gives the partial log-likelihood for each of these candidate values.
+#' An appropriate confidence interval (CI) is given
+#' by subtracting 1/2 the value of the approapriate quantile
+#' of a chi-squared distribution with 1 degree of freedom.
+#' \cr \cr
+#' Two circles are also plotted giving the 95% CI for the Wald statistic.
+#' 
+#' @return One plot for each coefficient in the model. 
+#' 
+#' @examples
+#' c1 <- coxph(formula = Surv(time, status == 2) ~ age + edema + log(bili) +
+#'                       log(albumin) + log(protime), data = pbc)
+#' profLik(c1, col="red")
+#' 
+#' @references Example is from:
+#' Therneau T, Grambsch P 2000.
+#' \emph{Modeling Survival Data}, 1st edition.
+#' New York: Springer.
+#' Section 3.4.1, pg 57.
+#'
 profLik <- function(x,
                     CI=0.95,
                     interval=50,

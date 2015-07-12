@@ -1,80 +1,80 @@
-##' @name cutp
-##' @title Cutpoint for a continuous variable in a \code{coxph} or \code{survfit} model
-##' @description Determine the optimal cutpoint for a continuous variable
-##' in a \code{coxph} or \code{survfit} model
-##' @rdname cutp
-##' @export
-##'
+#' @name cutp
+#' @title Cutpoint for a continuous variable in a \code{coxph} or \code{survfit} model
+#' @description Determine the optimal cutpoint for a continuous variable
+#' in a \code{coxph} or \code{survfit} model
+#' @rdname cutp
+#' @export
+#'
 cutp <- function(x, ...){
     UseMethod("cutp")
     }
-##' @rdname cutp
-##' @aliases cutp.coxph
-##' @method cutp coxph
-##' @export
-##'
-##' @include tne.R
-##' 
-##' @param x A \code{survfit} or \code{coxph} object
-##' @param ... Additional arguments. Passed to \code{graphics::plot}.
-##' @param var Variable to test. Must be continuous (i.e. \eqn{>2} unique values)
-##' @param plot If \code{plot=TRUE} will plot cut points against the test statistic \eqn{Q}.
-##' @return A \code{data.frame} with columns:
-##'  \item{cp}{The \bold{c}ut \bold{p}oint. The optimum value at which to divide
-##' the groups into those \eqn{\geq}{>=} the cutpoint and those below.}
-##'  \item{Q}{The test statistic}
-##'  \item{p}{p-value}
-##' If \code{plot=TRUE} a plot of cut points against values of the
-##' log-rank test statistic \eqn{LR}.
-##' 
-##' @details
-##' The statistic is based on the score test from the Cox model.
-##' For the cut point \eqn{\mu}{mu}, of a predictor \eqn{K}, the data is split
-##' into two groups, those \eqn{\geq \mu}{>= mu} and
-##' those \eqn{< \mu}{< mu}.
-##' \cr \cr
-##' The log-rank statistic \eqn{LR} is calculated for each unique element
-##' \eqn{k} in \eqn{K}:
-##' \deqn{LR_k = \sum_{i=1}^D ( e_i^+ - n_i^+ \frac{e_i}{n_i} )}{
-##'       LR[k] = sum ( e1[i] - n1[i].e[i]/n[i] ) }
-##' Where \eqn{e_i^+}{e1[i]} and \eqn{n_i^+}{n1[i]} refer to the number of events
-##' and number at risk in those above the cutpoint, respectively.
-##' \cr
-##' The sum is taken to across distinct times with observed events, to \eqn{D},
-##' the largest of these.
-##' \cr
-##' It is normalized (standardized), in the case of censoring,
-##' by finding \eqn{\sigma^2}{s^2} which is:
-##' \deqn{ \sigma^2 = \frac{1}{D-1} \sum_i^D ( 1 - \sum_{j=1}^i \frac{1}{D+1-j} )^2 }{
-##'        s^2 = 1/(D-1) SUM[i to D] { 1 - SUM[j to i] (1/(D-j+1))}^2 }
-##' The test statistic is then
-##' \deqn{Q = \frac{\max |LR_k|}{\sigma \sqrt{D-1}} }{
-##'       Q = [ max |LR[k]| ] / [ s.(D-1)^0.5 ] }
-##' Under the null hypothesis that the chosen cut-point does \emph{not} predict survival,
-##' the distribution of \eqn{Q} has a limiting distibution which is the supremum of the
-##' absolute value of a Brownian bridge:
-##' \deqn{ p= Pr ( \sup Q \geq q ) = 2 \sum_{i=1}^{\infty} (-1)^{i+1} \exp (-2 i^2 q^2) }{
-##'        P(Q >= q) = 2 SUM [i to Inf] (-1)^(i+1).e^(-2.i^2.q^2) }
-##' @examples
-##' data(kidtran, package="KMsurv")
-##' k1 <- kidtran
-##' k2 <- k1[k1$gender==1 & k1$race==2, ]
-##' c1 <- coxph(Surv(time, delta) ~ age, data = k2)
-##' cutp(c1, var="age", plot=TRUE)
-##' k2 <- k1[k1$gender==2 & k1$race==2, ]
-##' c1 <- coxph(Surv(time, delta) ~ age, data = k2)
-##' cutp(c1, var="age")
-##' @references Examples are from
-##' Klein J, Moeschberger M 2003
-##' \emph{Survival Analysis}, 2nd edition.
-##' New York: Springer.
-##' Example 8.3, pp 273-274.
-##' @references Contal C, O'Quigley J, 1999
-##' An application of changepoint methods in studying the
-##' effect of age on survival in breast cancer.
-##' \emph{Computational Statistics & Data Analysis} \bold{30}(3):253--70.
-##' \href{http://www.sciencedirect.com/science/article/pii/S0167947398000966}{ScienceDirect}
-##'
+#' @rdname cutp
+#' @aliases cutp.coxph
+#' @method cutp coxph
+#' @export
+#'
+#' @include tne.R
+#' 
+#' @param x A \code{survfit} or \code{coxph} object
+#' @param ... Additional arguments. Passed to \code{graphics::plot}.
+#' @param var Variable to test. Must be continuous (i.e. \eqn{>2} unique values)
+#' @param plot If \code{plot=TRUE} will plot cut points against the test statistic \eqn{Q}.
+#' @return A \code{data.frame} with columns:
+#'  \item{cp}{The \bold{c}ut \bold{p}oint. The optimum value at which to divide
+#' the groups into those \eqn{\geq}{>=} the cutpoint and those below.}
+#'  \item{Q}{The test statistic}
+#'  \item{p}{p-value}
+#' If \code{plot=TRUE} a plot of cut points against values of the
+#' log-rank test statistic \eqn{LR}.
+#' 
+#' @details
+#' The statistic is based on the score test from the Cox model.
+#' For the cut point \eqn{\mu}{mu}, of a predictor \eqn{K}, the data is split
+#' into two groups, those \eqn{\geq \mu}{>= mu} and
+#' those \eqn{< \mu}{< mu}.
+#' \cr \cr
+#' The log-rank statistic \eqn{LR} is calculated for each unique element
+#' \eqn{k} in \eqn{K}:
+#' \deqn{LR_k = \sum_{i=1}^D ( e_i^+ - n_i^+ \frac{e_i}{n_i} )}{
+#'       LR[k] = sum ( e1[i] - n1[i].e[i]/n[i] ) }
+#' Where \eqn{e_i^+}{e1[i]} and \eqn{n_i^+}{n1[i]} refer to the number of events
+#' and number at risk in those above the cutpoint, respectively.
+#' \cr
+#' The sum is taken to across distinct times with observed events, to \eqn{D},
+#' the largest of these.
+#' \cr
+#' It is normalized (standardized), in the case of censoring,
+#' by finding \eqn{\sigma^2}{s^2} which is:
+#' \deqn{ \sigma^2 = \frac{1}{D-1} \sum_i^D ( 1 - \sum_{j=1}^i \frac{1}{D+1-j} )^2 }{
+#'        s^2 = 1/(D-1) SUM[i to D] { 1 - SUM[j to i] (1/(D-j+1))}^2 }
+#' The test statistic is then
+#' \deqn{Q = \frac{\max |LR_k|}{\sigma \sqrt{D-1}} }{
+#'       Q = [ max |LR[k]| ] / [ s.(D-1)^0.5 ] }
+#' Under the null hypothesis that the chosen cut-point does \emph{not} predict survival,
+#' the distribution of \eqn{Q} has a limiting distibution which is the supremum of the
+#' absolute value of a Brownian bridge:
+#' \deqn{ p= Pr ( \sup Q \geq q ) = 2 \sum_{i=1}^{\infty} (-1)^{i+1} \exp (-2 i^2 q^2) }{
+#'        P(Q >= q) = 2 SUM [i to Inf] (-1)^(i+1).e^(-2.i^2.q^2) }
+#' @examples
+#' data(kidtran, package="KMsurv")
+#' k1 <- kidtran
+#' k2 <- k1[k1$gender==1 & k1$race==2, ]
+#' c1 <- coxph(Surv(time, delta) ~ age, data = k2)
+#' cutp(c1, var="age", plot=TRUE)
+#' k2 <- k1[k1$gender==2 & k1$race==2, ]
+#' c1 <- coxph(Surv(time, delta) ~ age, data = k2)
+#' cutp(c1, var="age")
+#' @references Examples are from
+#' Klein J, Moeschberger M 2003
+#' \emph{Survival Analysis}, 2nd edition.
+#' New York: Springer.
+#' Example 8.3, pp 273-274.
+#' @references Contal C, O'Quigley J, 1999
+#' An application of changepoint methods in studying the
+#' effect of age on survival in breast cancer.
+#' \emph{Computational Statistics & Data Analysis} \bold{30}(3):253--70.
+#' \href{http://www.sciencedirect.com/science/article/pii/S0167947398000966}{ScienceDirect}
+#'
 cutp.coxph <- function(x, ...,
                        var="",
                        plot=FALSE){
@@ -165,11 +165,11 @@ cutp.coxph <- function(x, ...,
     }
     return(res1)
 }
-##' @rdname cutp
-##' @aliases cutp.survfit
-##' @method cutp survfit
-##' @export
-##' 
+#' @rdname cutp
+#' @aliases cutp.survfit
+#' @method cutp survfit
+#' @export
+#' 
 cutp.survfit <- function(x, ..., var="", plot=FALSE){
     f1 <- deparse(x$call)
     f1 <- sub("survfit", "coxph", f1)

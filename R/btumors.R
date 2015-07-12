@@ -6,7 +6,7 @@
 #' performed by the Radiation Therapy Oncology Group in 1978.
 #' 272 patients in total were enrolled in a trial comparing
 #' chemotherapy to chemotherapy + radiotherapy.
-#' Prognostic factors are illustrated.
+#' A summary of prognostic factors are illustrated.
 #' \cr
 #' \cr
 #' Columns are:
@@ -23,7 +23,9 @@
 #'  \item{n}{Number of patients}
 #'  \item{ms}{Median survival (months)}
 #'  }
+#' 
 #' @seealso \code{\link{lrSS}}
+#' 
 #' @source Schoenfeld D. Sample-size formula for the proportional-hazards regression model.
 #' Biometrics 1983 June; 39:499-503. \href{http://www.jstor.org/stable/2531021}{JSTOR}
 NULL

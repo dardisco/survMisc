@@ -1,76 +1,76 @@
-##' @name quantile
-##' @rdname quantile
-##' @title Quantiles and median for \code{Surv}, \code{survfit} and \code{coxph} objects
-##' @description Extends \code{stats::quantile} and \code{stats::quantile} to
-##' work with \code{Surv}, \code{survfit} and \code{coxph} objects.
-##' @export
-##' 
+#' @name quantile
+#' @rdname quantile
+#' @title Quantiles and median for \code{Surv}, \code{survfit} and \code{coxph} objects
+#' @description Extends \code{stats::quantile} and \code{stats::quantile} to
+#' work with \code{Surv}, \code{survfit} and \code{coxph} objects.
+#' @export
+#' 
 quantile <- function(x, ...){
     UseMethod("quantile")
 }
-##'
-##' @include sf.R
-##' @include tne.R
-##' 
-##' @param x A \code{Surv}, \code{survfit} or \code{coxph} object.
-##' @param ... Additional arguments (not implemented).
-##' @param q (for \code{quantile}) Vector of quantiles
-##' (expressed as percentage). For the \code{median}, \code{q=50}.
-##' @param CI Include confidence interval.
-##' \cr
-##' Defaults are \code{CI=TRUE} for \code{quantile} and
-##' \code{CI=FALSE} for \code{median}.
-##' @param alpha Significance level \eqn{\alpha}{alpha}.
-##' @param ci \bold{C}onfidence \bold{i}nterval.
-##' \cr
-##' One of: \bold{log} (the default), \bold{lin}ear or \bold{a}rcsine-\bold{s}quare \bold{r}oot.
-##' @return For \code{quantile}:
-##' A \code{data.table} (or a \code{list} of \code{data.table}s, one per stratum),
-##' with columns:
-##'   \item{q}{quantile}
-##'   \item{t}{time}
-##' If \code{CI = TRUE} then upper and lower confidence
-##' intervals, as per argument \code{ci}).
-##'  \item{l}{lower confidence limit}
-##'  \item{u}{upper confidence limit}
-##' For \code{median}:
-##' A \code{data.table} with columns:
-##'   \item{t}{time}
-##'   \item{s}{stratum}
-##' If \code{CI = TRUE} then a \code{list} of
-##' \code{data.table}s, one per stratum, as above.
-##'
-##' @note If a time cannot be calculated, \code{NaN} is returned.
-##' 
-##' @seealso
-##'
-##' Confidence intervals are calculated as shown in the pointwise confidence intervals
-##' in \code{\link{ci}}.
-##'
-##' @references Examples for quantiles are from:
-##' Klein J, Moeschberger M 2003
-##' \emph{Survival Analysis}, 2nd edition.
-##' New York: Springer.
-##' Example 4.2, pg 121.
-##' 
-##'
-##' @examples
-##' data(bmt, package="KMsurv")
-##' b1 <- bmt[bmt$group==1, ] # ALL patients
-##' s1 <- Surv(time=b1$t2, event=b1$d3)
-##' quantile(s1)
-##' b1 <- bmt[bmt$group==2, ] # AML low-risk patients
-##' s1 <- Surv(time=b1$t2, event=b1$d3)
-##' quantile(s1)
-##' b1 <- bmt[bmt$group==3, ] # AML high-risk patients
-##' s1 <- Surv(time=b1$t2, event=b1$d3)
-##' quantile(s1)
-##' ###
-##' 
-##' @rdname quantile
-##' @aliases quantile.Surv
-##' @method quantile Surv
-##' @export
+#'
+#' @include sf.R
+#' @include tne.R
+#' 
+#' @param x A \code{Surv}, \code{survfit} or \code{coxph} object.
+#' @param ... Additional arguments (not implemented).
+#' @param q (for \code{quantile}) Vector of quantiles
+#' (expressed as percentage). For the \code{median}, \code{q=50}.
+#' @param CI Include confidence interval.
+#' \cr
+#' Defaults are \code{CI=TRUE} for \code{quantile} and
+#' \code{CI=FALSE} for \code{median}.
+#' @param alpha Significance level \eqn{\alpha}{alpha}.
+#' @param ci \bold{C}onfidence \bold{i}nterval.
+#' \cr
+#' One of: \bold{log} (the default), \bold{lin}ear or \bold{a}rcsine-\bold{s}quare \bold{r}oot.
+#' @return For \code{quantile}:
+#' A \code{data.table} (or a \code{list} of \code{data.table}s, one per stratum),
+#' with columns:
+#'   \item{q}{quantile}
+#'   \item{t}{time}
+#' If \code{CI = TRUE} then upper and lower confidence
+#' intervals, as per argument \code{ci}).
+#'  \item{l}{lower confidence limit}
+#'  \item{u}{upper confidence limit}
+#' For \code{median}:
+#' A \code{data.table} with columns:
+#'   \item{t}{time}
+#'   \item{s}{stratum}
+#' If \code{CI = TRUE} then a \code{list} of
+#' \code{data.table}s, one per stratum, as above.
+#'
+#' @note If a time cannot be calculated, \code{NaN} is returned.
+#' 
+#' @seealso
+#'
+#' Confidence intervals are calculated as shown in the pointwise confidence intervals
+#' in \code{\link{ci}}.
+#'
+#' @references Examples for quantiles are from:
+#' Klein J, Moeschberger M 2003
+#' \emph{Survival Analysis}, 2nd edition.
+#' New York: Springer.
+#' Example 4.2, pg 121.
+#' 
+#'
+#' @examples
+#' data(bmt, package="KMsurv")
+#' b1 <- bmt[bmt$group==1, ] # ALL patients
+#' s1 <- Surv(time=b1$t2, event=b1$d3)
+#' quantile(s1)
+#' b1 <- bmt[bmt$group==2, ] # AML low-risk patients
+#' s1 <- Surv(time=b1$t2, event=b1$d3)
+#' quantile(s1)
+#' b1 <- bmt[bmt$group==3, ] # AML high-risk patients
+#' s1 <- Surv(time=b1$t2, event=b1$d3)
+#' quantile(s1)
+#' ###
+#' 
+#' @rdname quantile
+#' @aliases quantile.Surv
+#' @method quantile Surv
+#' @export
 quantile.Surv <- function(x, ...,
                           q=c(25, 50, 75),
                           CI=TRUE,
@@ -106,16 +106,16 @@ quantile.Surv <- function(x, ...,
     setattr(res1, "ci", ci)
     return(res1)
 }
-##'
-##' @rdname quantile
-##' @aliases quantile.survfit
-##' @method quantile survfit
-##' @export
-##' 
-##' @examples
-##' s1 <- survfit(Surv(t2, d3) ~ group, data=bmt)
-##' quantile(s1)
-##' 
+#'
+#' @rdname quantile
+#' @aliases quantile.survfit
+#' @method quantile survfit
+#' @export
+#' 
+#' @examples
+#' s1 <- survfit(Surv(t2, d3) ~ group, data=bmt)
+#' quantile(s1)
+#' 
 quantile.survfit <-  function(x,
                               ...,
                               q=c(25,50,75),
@@ -160,16 +160,16 @@ quantile.survfit <-  function(x,
     setattr(res1, "ci", ci)
     return(res1)
 }
-##'
-##' @rdname quantile
-##' @aliases quantile.coxph
-##' @method quantile coxph
-##' @export
-##' 
-##' @examples
-##' c1 <- coxph(Surv(t2, d3)~ group, data=bmt)
-##' quantile(c1)
-##' 
+#'
+#' @rdname quantile
+#' @aliases quantile.coxph
+#' @method quantile coxph
+#' @export
+#' 
+#' @examples
+#' c1 <- coxph(Surv(t2, d3)~ group, data=bmt)
+#' quantile(c1)
+#' 
 quantile.coxph <- function(x, ...,
                            q=c(25,50,75),
                            CI=TRUE,
@@ -181,26 +181,26 @@ quantile.coxph <- function(x, ...,
     s1 <- eval(parse(text=f1))
     quantile(s1, q=q, CI=CI, alpha=alpha, ci=ci)
 }
-##'
-##'
-##' @rdname quantile
-##' @export 
-##'
+#'
+#'
+#' @rdname quantile
+#' @export 
+#'
 median <- function(x, ...){
     UseMethod("median")
 }
-##'
-##' @rdname quantile
-##' @aliases median.Surv
-##' @method median Surv
-##' @export
-##' 
-##' @examples
-##' b1 <- bmt[bmt$group==1, ] # ALL patients
-##' s1 <- Surv(time=b1$t2, event=b1$d3)
-##' median(s1)
-##' median(s1, CI=TRUE)
-##' 
+#'
+#' @rdname quantile
+#' @aliases median.Surv
+#' @method median Surv
+#' @export
+#' 
+#' @examples
+#' b1 <- bmt[bmt$group==1, ] # ALL patients
+#' s1 <- Surv(time=b1$t2, event=b1$d3)
+#' median(s1)
+#' median(s1, CI=TRUE)
+#' 
 median.Surv <- function(x, ...,
                         CI=FALSE,
                         alpha=0.05,
@@ -211,19 +211,19 @@ median.Surv <- function(x, ...,
     ci <- match.arg(ci)
     quantile.Surv(x, q=50, alpha=alpha, ci=ci)
 }
-##'
-##' @rdname quantile
-##' @aliases median.survfit
-##' @method median survfit
-##' @export
-##' 
-##' @examples
-##' data(bmt, package="KMsurv")
-##' b1 <- bmt[bmt$group==1, ] # ALL patients
-##' s1 <- survfit(Surv(t2, d3)~ group, data=bmt)
-##' median(s1)
-##' median(s1, ci="asr", CI=TRUE)
-##'
+#'
+#' @rdname quantile
+#' @aliases median.survfit
+#' @method median survfit
+#' @export
+#' 
+#' @examples
+#' data(bmt, package="KMsurv")
+#' b1 <- bmt[bmt$group==1, ] # ALL patients
+#' s1 <- survfit(Surv(t2, d3)~ group, data=bmt)
+#' median(s1)
+#' median(s1, ci="asr", CI=TRUE)
+#'
 median.survfit <- function(x, ...,
                            CI=FALSE,
                            alpha=0.05,
@@ -243,15 +243,15 @@ median.survfit <- function(x, ...,
     ##     }
 
 }
-##'
-##' @rdname quantile
-##' @aliases median.coxph
-##' @method median coxph
-##' @export
-##' 
-##' @examples
-##' c1 <- coxph(Surv(t2, d3) ~ group, data=bmt)
-##' median(c1)
+#'
+#' @rdname quantile
+#' @aliases median.coxph
+#' @method median coxph
+#' @export
+#' 
+#' @examples
+#' c1 <- coxph(Surv(t2, d3) ~ group, data=bmt)
+#' median(c1)
 median.coxph <- function(x, ...,
                          CI=FALSE,
                          alpha=0.05,

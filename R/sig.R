@@ -1,50 +1,50 @@
-##' @name sig
-##' @title Significiance tests of coefficients in a \code{coxph} model
-##'
-##' @keywords htest
-##' 
-##' @rdname sig
-##' @export
+#' @name sig
+#' @title Significiance tests of coefficients in a \code{coxph} model
+#'
+#' @keywords htest
+#' 
+#' @rdname sig
+#' @export
 sig <- function(x, ...){
     UseMethod("sig")
 }
-##'
-##' @rdname sig
-##' @aliases sig.coxph
-##' @aliases log-rank test
-##' @method sig coxph
-##' @export
-##'
-##' @param x A model of class \code{coxph}
-##' @param ... Additional arguments (not implemented)
-##' 
-##' @return A \code{data.frame} with one row for each coefficient in the
-##' original model. There are three columns, one for each of the tests:
-##' \item{Wald}{the statistic is:
-##'             \deqn{\frac{\hat{B}}{\hat{SE}}}{
-##'                   B/SE}
-##'             where \eqn{\hat{B}}{B} is the estimate of the coefficient
-##'             and \eqn{\hat{SE}}{SE} is its standard error.}
-##' \item{plr}{\bold{P}artial \bold{l}ikelihood \bold{r}atio test.
-##'            \cr
-##'           The statistic is the difference in the
-##'           likelihood ratio of the original model and that with the coefficient
-##'           omitted.}
-##' \item{lrt}{Aka the \bold{score} test.
-##'              \cr
-##'              The Null hypothesis is that
-##'              \eqn{\hat{B}=0}{B=0}.
-##'              \cr
-##'              The statistic is cacluated by refitting the model with the coefficient
-##'              omitted, to generate initial values for the other \eqn{\hat{B}}{B}s.
-##'              \cr
-##'              It is then fitted again with all
-##'              covariates, using these values and setting \eqn{\hat{B}=0}{B=0}.
-##' }
-##' All statistics are distributed as \eqn{\chi}{chi}-square, with degrees of freedom
-##' \eqn{=} no. of coefficients \eqn{-1}.
-##'
-##' 
+#'
+#' @rdname sig
+#' @aliases sig.coxph
+#' @aliases log-rank test
+#' @method sig coxph
+#' @export
+#'
+#' @param x A model of class \code{coxph}
+#' @param ... Additional arguments (not implemented)
+#' 
+#' @return A \code{data.frame} with one row for each coefficient in the
+#' original model. There are three columns, one for each of the tests:
+#' \item{Wald}{the statistic is:
+#'             \deqn{\frac{\hat{B}}{\hat{SE}}}{
+#'                   B/SE}
+#'             where \eqn{\hat{B}}{B} is the estimate of the coefficient
+#'             and \eqn{\hat{SE}}{SE} is its standard error.}
+#' \item{plr}{\bold{P}artial \bold{l}ikelihood \bold{r}atio test.
+#'            \cr
+#'           The statistic is the difference in the
+#'           likelihood ratio of the original model and that with the coefficient
+#'           omitted.}
+#' \item{lrt}{Aka the \bold{score} test.
+#'              \cr
+#'              The Null hypothesis is that
+#'              \eqn{\hat{B}=0}{B=0}.
+#'              \cr
+#'              The statistic is cacluated by refitting the model with the coefficient
+#'              omitted, to generate initial values for the other \eqn{\hat{B}}{B}s.
+#'              \cr
+#'              It is then fitted again with all
+#'              covariates, using these values and setting \eqn{\hat{B}=0}{B=0}.
+#' }
+#' All statistics are distributed as \eqn{\chi}{chi}-square, with degrees of freedom
+#' \eqn{=} no. of coefficients \eqn{-1}.
+#'
+#' 
 sig.coxph <- function(x, ...){
     if(!inherits(x, "coxph")) stop
     ("Only applies to objects of class coxph")

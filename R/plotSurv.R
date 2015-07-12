@@ -1,41 +1,41 @@
-##' @name plot.Surv
-##' @method plot Surv
-##' @export
-##' @title Plot Survival object
-##' @description
-##' Plots an object of class \code{Surv}.
-##' \cr
-##' Different methods apply to different types of \code{Surv} objects.
-##' @export
-##' @param x A \code{Surv} object
-##' @param l Length of arrow. Length is \code{l/nrow(x)}
-##' @param ... Additional arguments. These are passed to \code{graphics::arrows} when
-##' drawing right- or left-censored observations.
-##' @return A graph (base graphics).
-##' The type of graph depends on the \code{type} of the \code{Surv} object.
-##' This is given by \code{attr(s, which="type")} :
-##' \item{counting}{Lines with an arrow pointing right if right censored}
-##' \item{right}{Lines with an arrow pointing right if right censored}
-##' \item{left}{Lines with an arrow pointing left if left censored}
-##' \item{interval}{If censored:
-##'  \itemize{
-##'    \item Lines with an arrow pointing right if right censored.
-##'    \item Lines with an arrow pointing left if left censored.
-##'  }
-##' If not censored:
-##'  \itemize{
-##'    \item Lines if observations of more than one time point
-##'    \item Points if observation of one time only (i.e. start and end times are the same)
-##'  }
-##' }
-##'
-##' @keywords plot
-##' 
-##' @examples
-##' df0 <- data.frame(t1=c(0, 2, 4, 6, NA, NA, 12, 14),
-##'                   t2=c(NA, NA, 4, 6, 8, 10, 16, 18))
-##' s5 <- Surv(df0$t1, df0$t2, type="interval2")
-##' plot(s5)
+#' @name plot.Surv
+#' @method plot Surv
+#' @export
+#' @title Plot Survival object
+#' @description
+#' Plots an object of class \code{Surv}.
+#' \cr
+#' Different methods apply to different types of \code{Surv} objects.
+#' @export
+#' @param x A \code{Surv} object
+#' @param l Length of arrow. Length is \code{l/nrow(x)}
+#' @param ... Additional arguments. These are passed to \code{graphics::arrows} when
+#' drawing right- or left-censored observations.
+#' @return A graph (base graphics).
+#' The type of graph depends on the \code{type} of the \code{Surv} object.
+#' This is given by \code{attr(s, which="type")} :
+#' \item{counting}{Lines with an arrow pointing right if right censored}
+#' \item{right}{Lines with an arrow pointing right if right censored}
+#' \item{left}{Lines with an arrow pointing left if left censored}
+#' \item{interval}{If censored:
+#'  \itemize{
+#'    \item Lines with an arrow pointing right if right censored.
+#'    \item Lines with an arrow pointing left if left censored.
+#'  }
+#' If not censored:
+#'  \itemize{
+#'    \item Lines if observations of more than one time point
+#'    \item Points if observation of one time only (i.e. start and end times are the same)
+#'  }
+#' }
+#'
+#' @keywords plot
+#' 
+#' @examples
+#' df0 <- data.frame(t1=c(0, 2, 4, 6, NA, NA, 12, 14),
+#'                   t2=c(NA, NA, 4, 6, 8, 10, 16, 18))
+#' s5 <- Surv(df0$t1, df0$t2, type="interval2")
+#' plot(s5)
 plot.Surv <- function(x, l=3, ...){
     if(!class(x)=="Surv") stop("Only applies to class 'Surv'")
     ## if(!attr(x,which="type")=="right") warning("Applies to right censored data")
