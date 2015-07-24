@@ -1,4 +1,4 @@
-#' @name comp
+\#' @name comp
 #' @title Compare survival curves
 #' @rdname comp
 #' @keywords htest
@@ -8,11 +8,11 @@
 comp <- function(x, ...){
     UseMethod("comp")
     }
-#' 
+#'
 #' @include tne.R
-#' @include covMatSurv.R
-#' @include gastric.R
-#' 
+#' @include COV.R
+#' @include E.R
+#'
 #' @param x A \code{survfit} or \code{coxph} object
 #' @param ... Additional arguments
 #' @param FHp \eqn{p} for Fleming-Harrington test
@@ -21,7 +21,7 @@ comp <- function(x, ...){
 #' absolute value of Brownian motion
 #' @param scores scores for tests for trend
 #' @return A \code{list} with two elements, \code{tne} and \code{tests}.
-#' \cr 
+#' \cr
 #' The first is a \code{data.table} with one row for each time at
 #' which an event occurred.
 #' \cr
@@ -132,7 +132,7 @@ comp <- function(x, ...){
 #' \cr
 #' If ordering is present, the statistic \eqn{Z} will be greater than the upper \eqn{\alpha}{alpha}th
 #' percentile of a standard normal distribution.
-#' 
+#'
 #' @note Regarding the Fleming-Harrington weights: \itemize{
 #' \item \eqn{p = q = 0} gives the log-rank test, i.e. \eqn{W=1}
 #' \item \eqn{p=1, q=0} gives a version of the Mann-Whitney-Wilcoxon test
@@ -149,8 +149,9 @@ comp <- function(x, ...){
 #' emphasising differences later in time, gives a p-value of 0.04.
 #'
 #' @examples
-#' ### 2 curves
-#' data(kidney,package="KMsurv")
+#' ## Two curves
+#' ## K&M 2nd ed. Example 7.2, Table 7.2, pp 209--210.
+#' data("kidney", package="KMsurv")
 #' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 #' comp(s1)
 #' ### 3 curves
@@ -168,7 +169,7 @@ comp <- function(x, ...){
 #' data("gastric", package="survMisc")
 #' s5 <- survfit(Surv(time, event) ~ group, data=gastric)
 #' comp(s5)
-#' 
+#'
 #' @references Gehan A.
 #' A Generalized Wilcoxon Test for Comparing Arbitrarily
 #' Singly-Censored Samples.
@@ -200,30 +201,35 @@ comp <- function(x, ...){
 #' @aliases comp.survfit
 #' @method comp survfit
 #' @export
-comp.survfit <- function(x, ..., FHp=1, FHq=1, lim=1e4, scores=NULL) {
-    if (!class(x)=="survfit") stop("Only applies to object of class 'survfit'")
+comp.survfit <- function(x, ...,
+                         FHp=1,
+                         FHq=1,
+                         lim=1e4,
+                         scores=NULL) {
+    stopifnot(class(x)=="survfit")
     m1 <- "Values for p and q for Fleming-Harrington tests must be >=0"
-    if (FHp<0 | FHq<0) stop(m1)
+    if(FHp < 0 | FHq < 0) stop(m1)
 ###
-    m1 <- tne(x, what="all", eventsOnly=TRUE)
+    tne1 <- tne(x, byWhat="time", eventsOnly=TRUE)
 ###
 ### 2 groups only:
-    if (length(x$strata)==2){
-        res1 <- comp2Surv(n=m1$n, e=m1$e,
-                          n1=m1[, grep("n_", colnames(m1))[1], with=FALSE],
-                          e1=m1[, grep("e_", colnames(m1))[1], with=FALSE],
+    if(attr(tne1, "ncg")==2){
+        res1 <- comp2Surv(n=tne1$n,
+                          e=tne1$e,
+                          n1=tne1[, grep("n_", colnames(tne1))[1], with=FALSE],
+                          e1=tne1[, grep("e_", colnames(tne1))[1], with=FALSE],
                           FHp=FHp, FHq=FHq, lim=lim)
     } else {
-        res1 <- compNSurv(t=m1$t, n=m1$n, e=m1$e,
-                          n1=as.matrix(m1[, grep("n_",colnames(m1)),
+        res1 <- compNSurv(t=tne1$t, n=tne1$n, e=tne1$e,
+                          n1=as.matrix(tne1[, grep("n_",colnames(tne1)),
                           with=FALSE]),
-                          e1=as.matrix(m1[, grep("e_",colnames(m1)),
+                          e1=as.matrix(tne1[, grep("e_",colnames(tne1)),
                           with=FALSE]),
                           FHp=FHp, FHq=FHq, scores=scores)
     }
 ###
     res <- list(
-        tne = m1,
+        tne = tne1,
         tests = res1)
     return(res)
 }
@@ -231,33 +237,33 @@ comp.survfit <- function(x, ..., FHp=1, FHq=1, lim=1e4, scores=NULL) {
 #' @aliases comp.coxph
 #' @method comp coxph
 #' @export
-#' 
+#'
 #' @examples
 #' c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney )
 #' comp(c1)
-#' 
+#'
 comp.coxph <- function(x, ..., FHp=1, FHq=1, scores=NULL, lim=1e4){
      if (!class(x)=="coxph") stop("Only applies to object of class 'coxph'")
      if (FHp<0|FHq<0) stop("Values for p and q for Fleming-Harrington tests must be >=0")
 ###
-    m1 <- tne.coxph(x, what="all", eventsOnly=TRUE)
+    tne1 <- tne(x, byWhat="time", eventsOnly=TRUE)
 ###
 ### 2 groups only:
-    if (ncol(m1)==7){
-        res1 <- comp2Surv(n=m1$n, e=m1$e,
-                          n1=m1[, grep("n_", colnames(m1))[1], with=FALSE],
-                          e1=m1[, grep("e_", colnames(m1))[1], with=FALSE],
+    if (ncol(tne1)==7){
+        res1 <- comp2Surv(n=tne1$n, e=tne1$e,
+                          n1=tne1[, grep("n_", colnames(tne1))[1], with=FALSE],
+                          e1=tne1[, grep("e_", colnames(tne1))[1], with=FALSE],
                           FHp=FHp, FHq=FHq, round1=5)
     } else {
-        res1 <- compNSurv(t=m1$t, n=m1$n, e=m1$e,
-                          n1=as.matrix(m1[, grep("n_",colnames(m1)),
+        res1 <- compNSurv(t=tne1$t, n=tne1$n, e=tne1$e,
+                          n1=as.matrix(tne1[, grep("n_",colnames(tne1)),
                           with=FALSE]),
-                          e1=as.matrix(m1[, grep("e_",colnames(m1)),
+                          e1=as.matrix(tne1[, grep("e_",colnames(tne1)),
                           with=FALSE]),
                           FHp=FHp, FHq=FHq, scores=scores)
     }
      res <- list(
-         tne = m1,
+         tne = tne1,
          tests = res1)
      return(res)
 }
@@ -269,9 +275,8 @@ comp.coxph <- function(x, ..., FHp=1, FHq=1, scores=NULL, lim=1e4){
 comp2Surv <- function(n, e, n1, e1,
                       FHp=1,FHq=1,
                       lim=1e4,round1=5){
-    if (FHp<0|FHq<0) stop
-    ("Values for p and q for Fleming-Harrington tests must be >=0")
-    stopifnot( all.equal(length(n),length(e),length(n1),length(e1)) )
+    stopifnot(FHp > 0 && FHq > 0)
+#    stopifnot( all.equal(length(n),length(e),length(n1),length(e1)) )
     if(!isTRUE(all(vapply(c(n,e,n1,e1),
                           FUN=is.numeric,
                           FUN.VALUE=TRUE)==TRUE))) stop
@@ -279,8 +284,10 @@ comp2Surv <- function(n, e, n1, e1,
 ###
 ### make observed - expected for group 1
     eME1 <- e1-(n1*e/n)
+    E(tne1)
 ### variance (2 groups)
-    var1 <- as.matrix( (n1/n)*(1-(n1/n))*((n-e)/(n-1))*e )
+    var1 <- as.matrix((n1/n)*(1-(n1/n))*((n-e)/(n-1))*e)
+    tne1[, "COV" := COV(tne1)]
 ### remove NaNs -
 ### first or last no.s may not be possible to calculate
     if (any(is.nan(var1))){
@@ -300,7 +307,8 @@ comp2Surv <- function(n, e, n1, e1,
 ###
 ### WEIGHTS
 ### log-rank, weight = 1
-    chi1 <- sum(eME1)^2/sum(var1)
+    chi1 <-
+        tne1[, sum(eME_1)]^2/sum(cov1)
     LR1 <- dis1(chi1)
 ### Gehan-Breslow generalized Wilcoxon, weight = n
     chi1 <- sum(n*eME1)^2/sum(n^2*var1)

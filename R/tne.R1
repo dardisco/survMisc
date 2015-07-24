@@ -1,0 +1,1491 @@
+#' @name tn
+#' @title \bold{t}ime and \bold{n}umber at risk, with status or
+#' numer of events.
+#'
+#' @include printTn.R
+#'
+#' @param x
+#' For the default method, a \code{numeric} vector indicating
+#' \emph{status}.
+#'  \cr
+#' Each element indicates whether an event occurred (\code{1}) or
+#' not (\code{0}) for an observation.
+#'  \cr
+#' These are assumed to be ordered by discrete times.
+#'  \cr
+#' This is similar to the \code{event} argument for \code{Surv}
+#' objects.
+#'  \cr
+#' Methods are available for objects of class
+#' \code{Surv}, \code{survfit},
+#' \code{coxph} and \code{formula}.
+#'  \cr
+#' The methods for \code{data.frame} (for a model frame)
+#' and \code{data.table} are not intended for interactive use.
+#'  \cr
+#' The method for \code{tn} objects converts the object
+#' from 'long' to 'wide' form or \emph{vice versa}.
+#' @param shape See \bold{Value} below.
+#' @param tweOnly \bold{T}imes \bold{w}ith \bold{e}vnets.
+#'  \cr
+#' If \code{tweOnly=TRUE} (the default),
+#' show only times at which \emph{at least one} event occurred.
+#' Otherwise shows \emph{all} times recorded
+#' (i.e. including those censored).
+#' @param abbNames
+#' \bold{Abb}reviate names.
+#'  \cr
+#' The default is to name
+#' the elements of the \code{list} after each stratum.
+#'  \cr
+#'  As the names for each stratum are made by concatenating
+#'  the predictor names, this can
+#'  become unwieldly.
+#'  \cr
+#'  If \code{abbNames="FALSE"} they are instead numbered.
+#'  \cr
+#' In either case, the \code{longNames} are given
+#' as an \code{attribute} of the returned \code{tn} object.
+#' @param contrasts.arg Methods for handling factors.
+#'  \cr
+#' A \code{list}. The \code{names} are the names of
+#' columns of the \code{model.frame} containing
+#' \code{factor}s.
+#'  \cr
+#' The \emph{values} are used as replacement
+#' values for the \code{contrasts} replacement function.
+#' These should be functions (given as character strings)
+#' or numeric matrices. 
+#'  \cr
+#' This can be passed from
+#' \code{survfit}, \code{coxph} and \code{formula} objects to:
+#'  \cr
+#' ?stats::model.matrix
+#' @param call Used to pass the \code{call} from a \code{formula}
+#'  to the final \code{tn.data.table} method. 
+#'
+#' @return A \code{data.table} with the additional \code{class}
+#'  \code{tn}. The same information can be displayed in two ways.
+#'  \cr
+#' If \code{shape=="wide"} (the default), the data is
+#'  returned in 'wide' format. There is one
+#'  row for each time.
+#'  \cr
+#'  For a \code{numeric} or \code{Surv} object this has columns: 
+#'   \item{t}{time.}
+#'   \item{n}{number at risk.}
+#'   \item{e}{Number of events.}
+#'  A \code{survfit}, \code{coxph} or \code{formula} object
+#'  will have additional columns for \code{n} and \code{e}
+#'  for each covariate group. 
+#'
+#' If \code{shape=="obs"}, the data is
+#'  returned in 'long' format. There is one
+#'  row for each observation of an event.
+#'  \cr
+#'  For a \code{numeric} or \code{Surv} object this has columns: 
+#'   \item{time}{time}
+#'   \item{n}{number at risk}
+#'   \item{status}{event observed (\code{=1}) or not \code{=0}.}
+#'  A \code{survfit}, \code{coxph} or \code{formula} object
+#'  will have additional columns:
+#'   \item{cg}{\bold{c}ovariate \bold{g}roup.
+#'  \cr
+#'  This is formed from combining the variables; these
+#'  are separated by an comma ','}
+#'   \item{ncg}{\bold{n}umber at risk, by \bold{c}ovariate \bold{g}roup}
+#'
+#' \bold{Special terms}.
+#'  \cr
+#'  The following are considered 'special'
+#'  terms in a survival model:
+#'   \item{strata}{For a stratified model, a \code{by list} with
+#'    one \code{tn} object per strata as above.}
+#'   \item{cluster}{These terms are dropped.}
+#'   \item{tt}{The variable is unchhanged. That is, time-transform
+#'    terms are handled as if the the function
+#'    \code{tt(x)} was \code{identity(x)}.
+#' \cr
+#' \bold{Attribures}.
+#'  \cr
+#'  The returned object will also have attributes for
+#'  the following:
+#'   \item{shape}{as above}
+#'   \item{tweOnly}{as above}
+#'   \item{abbNames}{as above}
+#'   \item{ncg}{Number of covariate groups}
+#'   \item{call}{The call used to generate the object}
+#'
+#' @note Partial matching is available for the
+#' following arguments, based on the characters in bold:
+#'  \cr
+#' \bold{sh}ape, \bold{abb}Names, \bold{twe}Only,
+#' \bold{con}trasts.arg
+#'  \cr
+#' Currently only binary status and right-censoring
+#' are supported.
+#'
+#' @rdname tn
+#' @export
+#'
+## for R CMD check
+n <- e <- status <- NULL
+tn <- function(x, ...) UseMethod("tn")
+## all are methods ultimately passed to
+## tn.data.frame (below)
+## except tn.numeric() and tn.Surv()
+###----------------------------------------
+#' @rdname tn
+#' @aliases tn.numeric
+#' @method tn numeric
+#' @export
+#'
+#' @examples
+#' ## binary vector
+#' tn(c(1,0,1,0,1))
+tn.numeric <- function(x, ...,
+                       tweOnly=TRUE){
+  partMatch(...)
+  stopifnot(all(x %in% c(0,1)))
+  res1 <- data.table::data.table(
+    t=(t <- seq_along(x)),
+    status=x,
+    n=rev(t))
+  if(tweOnly) res1 <- res1[e==1, ]
+  setAttrTn(res1,
+             shape="long",
+             tweOnly=tweOnly,
+             abbNames=TRUE,
+             ncg=0,
+             call=match.call(),
+             class=c("tn", class(res1)))
+  return(res1)
+}
+#' @rdname tn
+#' @aliases tn.Surv
+#' @method tn Surv
+#' @export
+#'
+#' @examples
+#' ## Surv object
+#' df0 <- data.frame(t=c(1, 1, 2, 3, 5, 8, 13, 21),
+#'                   e=rep(c(0, 1), 4))
+#' s1 <- with(df0, Surv(t, e, type="right"))
+#' tn(s1, shape="long")
+#' ## some awkward values
+#' s1 <- Surv(time=c(Inf, -1, NaN, NA, 10, 12),
+#'            event=c(c(NA, 1, 1, NaN, Inf, 0.75)))
+#' tn(s1, shape="wide")
+#' 
+tn.Surv <- function(x, ..., 
+                     shape=c("wide", "long"),
+                     abbNames=TRUE,
+                     tweOnly=TRUE){
+  partMatch(...)
+  shape <- match.arg(shape)
+  stopifnot(inherits(x, "Surv"))
+  stopifnot(attributes(x)$type=="right")
+  res1 <- data.table::data.table(unclass(x))
+  if(shape=="long"){
+    res1[, "n" := rev(seq.int(nrow(res1)))]
+    data.table::setcolorder(res1, c("time", "n", "status"))
+    if(tweOnly){
+      data.table::setkey(res1, status)
+      res1 <- res1[status > 0.5, ]
+    }
+  }
+  if(shape=="wide") {
+    res1 <- res1[, list("n"=length(status),
+                        "e"=sum(status)),
+                 by=sort(time, na.last=TRUE)]
+    res1[, "n" := c(sum(n), sum(n) - cumsum(n)[ - length(n)])]
+    data.table::setnames(res1, c("t", "n", "e"))
+    if(tweOnly){
+      data.table::setkey(res1, e)
+      res1 <- res1[e > 0.5, ]
+    }
+  }
+  ## sort by time or t
+  data.table::setkeyv(res1, colnames(res1)[1])
+  setAttrTn(res1,
+             shape=shape,
+             tweOnly=tweOnly,
+             abbNames=abbNames,
+             ncg=0,
+             call=match.call(),
+             class=c("tn", class(res1)))
+  return(res1)
+}
+###
+###----------------------------------------
+###
+#' @rdname tn
+#' @aliases tn.coxph
+#' @method tn coxph
+#' @export
+#'
+#' @examples
+#' ## coxph object
+#' ## K&M 2nd ed. Section 1.2. Table 1.1, page 2.
+#' data("hodg", package="KMsurv")
+#' hodg <- data.table::data.table(hodg)
+#' data.table::setnames(hodg, c(names(hodg)[!names(hodg) %in% c("score", "wtime")], "Z1", "Z2"))
+#' c1 <- coxph(Surv(time=time, event=delta) ~ Z1 + Z2,
+#'             data=hodg[gtype==1 && dtype==1, ])
+#' tn(c1, shape="long")
+#'
+#' ## T&G. Section 3.2, pg 47.
+#' c1 <- coxph(Surv(time, status==2) ~ log(bili) + age + strata(edema), data=pbc)
+#' tn(c1)
+#' tn(c1, shape="long")
+#' data(bmt, package="KMsurv")
+#' tn(c1 <- coxph(Surv(t2, d3) ~ z3*z10, data=bmt))
+#'
+tn.coxph <- function(x, ...,
+                     shape=c("wide", "long"),
+                     tweOnly=TRUE,
+                     abbNames=TRUE,
+                     contrasts.arg=NULL){
+  partMatch(...)
+  shape <- match.arg(shape)
+  x$call$formula <- stats::terms(
+    x=formula(x$call),
+    specials=c("strata", "cluster", "tt"))
+  x$call$drop.unused.levels <- TRUE
+  call1 <- x$call
+  x$call[[1]] <- as.name("model.frame")
+  ## model.frame
+  xMF1 <- eval(x$call, parent.frame())
+  tn(x=xMF1,
+     shape=shape,
+     tweOnly=tweOnly,
+     abbNames=abbNames,
+      contrasts.arg=contrasts.arg,
+     call=call1)
+}
+#' @rdname tn
+#' @aliases tn.survfit
+#' @method tn survfit
+#' @export
+#'
+#' @examples
+#' ## K&M 2nd ed. Example 7.2, pg 210.
+#' data(kidney, package="KMsurv")
+#' s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
+#' T=tn(s1)
+#' S=tn(s1, shape="long")
+#' tn(s1, shape="wide", tweOnly=FALSE)
+tn.survfit <- function(x, ..., 
+                       shape=c("wide", "long"),
+                       tweOnly=TRUE,
+                       abbNames=TRUE,
+                       contrasts.arg=NULL){
+  partMatch(...)
+  shape <- match.arg(shape)
+  x$call$formula <- stats::terms(
+    x=formula(x$call),
+    specials=c("strata", "cluster", "tt"))
+  x$call$drop.unused.levels <- TRUE
+  call1 <- x$call
+  x$call[[1]] <- as.name("model.frame")
+  xMF1 <- eval(x$call, parent.frame())
+  tn(x=xMF1,
+     shape=shape,
+     tweOnly=tweOnly,
+     abbNames=abbNames,
+     contrasts.arg=contrasts.arg,
+     call=call1)
+}
+#' @rdname tn
+#' @aliases tn.formula
+#' @method tn formula
+#' @export
+#'
+#' @examples
+#' ## formula object
+#' ## K&M 2nd ed. Example 7.9, pg 224.
+#' data(kidney, package="KMsurv")
+#' with(kidney, tn(Surv(time=time, event=delta) ~ type, shape="long", twe=F))
+#' ## null model
+#' with(kidney, tn(Surv(time=time, event=delta) ~ 0))
+#' ## this doesn't work
+#' ## s1 <- survfit(Surv(t2, d3) ~ z3*z10, data=bmt)
+#' tn(Surv(time=t2, event=d3) ~ z3*z10, data=bmt, shape="wide")
+#' tn(Surv(time=t2, event=d3) ~ ., data=bmt)
+#' ## example where each list element has only one row
+#' ## also names are impractical
+#' tn(Surv(time=t2, event=d3) ~ ., data=bmt)
+#' ## a null model
+#' with(kidney, tn(Surv(time=time, event=delta) ~ 0, by="st"))
+debugonce("tn.formula")
+debugonce("partMatch")
+#' #' 
+tn.formula <- function(x, ...,
+                       shape=c("wide", "long"),
+                       tweOnly=TRUE,
+                       abbNames=TRUE,
+                       contrasts.arg=NULL){
+  shape <- match.arg(shape)
+  partMatch(env1=environment(), ...)
+  stopifnot(inherits(x, "formula"))
+### based on code from stats::lm()
+  mc1 <- mc2 <- match.call()
+  names(mc1)[names(mc1)=="x"] <- "formula"
+  mc1 <- mc1[c(1L, match(c("formula", "data"), names(mc1), 0L))]
+  mc1$drop.unused.levels <- TRUE
+  mc1[[1L]] <- as.name("model.frame")
+  mf1 <- eval(mc1, parent.frame())
+  tn(x=mf1,
+     shape=shape,
+     tweOnly=tweOnly,
+     abbNames=abbNames,
+     contrasts.arg=contrasts.arg,
+     call=mc2)
+}
+#' @rdname tn
+#' @aliases tn.data.frame
+#' @method tn data.frame
+#' @export
+#'
+debugonce("tn.data.frame")
+tn.data.frame <- function(x, ...,
+                          shape=c("wide", "long"),
+                          tweOnly=TRUE,
+                          abbNames=TRUE,
+                          contrasts.arg=NULL,
+                          call=NULL){
+  stopifnot(inherits(x, "data.frame"))
+  stopifnot(survival::is.Surv(x[[1]]))
+  stopifnot(attr(x[[1]], "type") == "right")
+  shape <- match.arg(shape)
+  partMatch(env1=environment(), ...)
+### data.table from x
+  xDT <- data.table::data.table(
+    cbind(
+      stats::model.matrix(terms(x), x,
+                          contrasts.arg=contrasts.arg),
+      stats::model.response(x)))
+### data.table::setkey(xDT, time)
+  ## names of clusters
+  xNC1 <- grepl("^cluster\\(.*\\)", names(x))
+  if(any(xNC1)){
+    ## drop cluster terms
+    xDT[, names(xDT)[grepl("^cluster\\(.*\\)",
+                           names(xDT))] := NULL]
+  }
+  ## names of strata
+  xNS1 <- grepl("^strata\\(.*\\)", names(x))
+  if(any(xNS1)){
+    ## remove strata
+    xDT[, names(xDT)[grepl("^strata\\(.*\\)",
+                           names(xDT))] := NULL]
+    collapseDT(xDT,
+               except=c("time", "status", names(xDT)[xNS1]),
+               nName="cg")
+    ## add column for strata
+    collapseDT(xDT,
+               except=names(xDT)[!xNS1],
+               nName="str")
+    l1 <- by(xDT[, list(time, status, cg)],
+             xDT[, str],
+             identity)
+    res1 <- lapply(l1, tn(shape=shape,
+                          tweOnly=tweOnly,
+                          abbNames=abbNames))
+    data.table::setattr(res1,
+                        "class",
+                        c("stratTn"=class(res1)))
+    data.table::setattr(res1, "call", call)
+    return(res1)
+  } else {
+    if(stats::is.empty.model(x)){
+      ## convert to Surv object
+      s1 <- xDT[, Surv(time, status)]
+      return(tn(s1))
+    } else {
+      collapseDT(xDT)
+      xDT[, colnames(xDT)[!colnames(xDT)
+                          %in% c("time", "status", "cg")] := NULL]
+      tn(x=xDT,
+          shape=shape,
+          tweOnly=tweOnly,
+          abbNames=abbNames,
+          call=call)
+    }
+  }
+}
+#' @rdname tn
+#' @aliases tn.data.table
+#' @method tn data.table
+#' @export
+#' 
+utils::data(kidney, package="KMsurv")
+t2 <-
+  tw <- with(kidney, tn(survival::Surv(time=time, event=delta) ~ type, shape="wide"))
+debugonce("tn.data.table")
+debugonce("partMatch")
+ data("hodg", package="KMsurv")
+ hodg <- data.table::data.table(hodg)
+ data.table::setnames(hodg, c(names(hodg)[!names(hodg) %in% c("score", "wtime")], "Z1", "Z2"))
+ c1 <- coxph(Surv(time=time, event=delta) ~ Z1 + Z2,
+             data=hodg[gtype==1 && dtype==1, ])
+ t1 <- tn(c1, shape="wide")
+
+tn.data.table <- function(x, ...,
+                          shape=c("wide", "long"),
+                          tweOnly=TRUE,
+                          abbNames=TRUE,
+                          call=NULL){
+  stopifnot(all(names(x) %in% c("time", "status", "cg")))
+  shape <- match.arg(shape)
+  partMatch(env1=environment(), ...)
+  data.table::setkey(x, time, cg)
+  ## number at risk
+  x[, "n" := rev(seq.int(nrow(x)))]
+  ## number at risk per covariate group
+  x[, "ncg" := rev(seq.int(length(n))), by=cg]
+  ## get long names
+  ln1 <- data.table::data.table(
+    "id" = x[, seq_along(levels(cg))],
+    "longName" = x[, levels(cg)])
+  if(abbNames) x[, "cg" := as.integer(cg)]
+  if(tweOnly){
+    ## times with greater than zero events
+    x[, "tGr0e" := sum(status) > 0L, by=time]
+    ## subset longNames
+    cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
+    ln1[, "twe" := id %in% cg1]
+    ## subset x and drop tGr0e from x
+    x <- x[(tGr0e)]
+    x[, tGr0e := NULL]
+  }
+  data.table::setnames(x, c("t", colnames(x)[-1]))
+  data.table::setcolorder(x,
+                          c("t", "n", "status", "cg", "ncg"))
+  setAttrTn(x,
+            "shape"="long",
+            "tweOnly"=tweOnly,
+            "abbNames"=abbNames,
+            "longNames"=ln1,
+            "ncg"=nrow(ln1),
+            "call"=call,
+            "class"=c("tn", class(x)))
+  if(shape=="long") return(x)
+  tn(x=x,
+     shape="long",
+     tweOnly=tweOnly,
+     abbNames=abbNames,
+     call=call)
+}
+tw <- with(kidney, tn(survival::Surv(time=time, event=delta) ~ type, shape="long", tweOnly=FALSE))
+debugonce("tn.tn")
+tn.tn <- function(x, ...,
+                  shape=attr(x, "shape"),
+                  tweOnly=NULL,
+                  abbNames=NULL,
+                  call=NULL){
+  partMatch(env1=environment(), ...)
+  if(shape=="long"){
+    x[, "e1" := sum(status), by=list(t, cg)]
+    x[, "n1" := max(ncg), by=list(t, cg)]
+### x[, "ncg1" := max(ncg), by=list(time, cg)]
+    x[, "status" := NULL]
+###
+    t1 <- x[, sort(unique(t))]
+    lt1 <- length(t1)
+    cgInt1 <- x[, unique(as.integer(cg))]
+    lcg1 <- length(cgInt1)
+    w1 <- "\nMay be inefficient use of memory."
+    w2 <- "One covariate group for each time point!"
+    if(lcg1 == lt1) warning(c(w2, w1))
+    w3 <- "Note large no. covariate groups relative to time points"
+    if(lt1 / lcg1 < 2) warning(c(w3, w1))
+    ## new memory assignment here
+    res1 <- data.table::data.table(
+      matrix(rep(as.integer(c(NA, 0)), lcg1 * lt1),
+             ncol=2 * lcg1,
+             nrow=lt1,
+             byrow=TRUE))
+    ## import zoo::na.locf.default
+    locf <- zoo::na.locf.default
+    ## if cg not abbreviated
+    ## use as.integer on factor(cg) instead
+    abbFn <- if(abbNames) identity else as.integer 
+    ##
+    ## a 'for' loop is easier
+    ## to read/ debug here
+    for(k in seq_along(cgInt1)){
+         k1 <- cgInt1[k]
+         ## subset by covariate group
+         tn1 <- x[abbFn(cg)==k1,
+                  list(n1[1L], e1[1]),
+                  by="t"]
+         ## index of time
+         ind1 <- which(t1 %in% tn1[, t])
+         ## number at risk
+         ## map e.g. k=2 to j=2,3 with
+         ## j=2L * k
+         j1 <- 2L * k
+         data.table::set(res1,
+                         i=ind1, j=j1 - 1L,
+                         value=tn1[, V1])
+         if (ind1[1] > 1L){
+           ## set first rows to max(n)
+           data.table::set(res1,
+                           i=seq.int(ind1[1]), j=j1 - 1L,
+                           value=tn1[, max(V1)])
+         }
+         ## index of missing n
+         miss1 <- any(is.na(res1[[j1 - 1L]]))
+         if(miss1){
+           data.table::set(res1, j=j1 - 1L,
+                           value=as.integer(locf(res1[[j1 - 1L]])))
+         }
+         ## add no. events
+         data.table::set(res1,
+                         i=ind1, j=j1,
+                         value=as.integer(tn1[, V2]))
+       }
+    ## covariate group names
+    if(abbNames){
+      cgn1 <- cgInt1
+    } else {
+      cgn1 <- attr(x, "longNames")[, longName]
+    }
+    ## names for 'n' and 'e' columns
+    nen1 <- c("n_", "e_")
+    nen2 <- as.vector(outer(nen1, cgn1, paste, sep=""))
+    data.table::setnames(res1, nen2)
+    ## make no. at risk (total) per time period
+    ## add columns 1, 3, ... , ncol(res1)-1
+    res1[, "n" := rowSums(.SD),
+         .SDcols = seq.int(from=1L, to=(2L * lcg1 - 1L), by=2L)]
+    ## total events per time period
+    ## add columns 2, 4, ... , ncol(res1)
+    res1[, "e" := rowSums(.SD),
+         .SDcols = seq.int(from=2L, to=(2L * lcg1), by=2L)]
+    ## now add time
+    res1[, "t" := t1]
+    data.table::setcolorder(res1,
+                            c("t", "n", "e", nen2))
+    if(tweOnly){
+      ## times with greater than zero events
+      x[, "tGr0e" := sum(status) > 0L, by=t]
+      ## subset longNames
+      cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
+      ln1[, "twe" := id %in% cg1]
+      ## subset x and drop tGr0e from x
+      x <- x[(tGr0e)]
+      x[, tGr0e := NULL]
+    }
+    setAttrTn(res1,
+              "shape"="wide",
+              "tweOnly"=tweOnly,
+              "abbNames"=abbNames,
+              "longNames"=attr(x, "longNames"),
+              "ncg"=lcg1,
+              "call"=call,
+              "class"=c("tn", class(x)))
+    return(res1)
+  }
+  if(shape=="wide"){
+    n_ <- grep("n_", names(x))
+    e_ <- grep("e_", names(x))
+    nMe1 <- x[, .SD, , .SDcols=n_] - x[, .SD, ,.SDcols=e_]
+    ## no. censored at each time
+    e_ <- grep("e_", names(x), value=TRUE)
+    substr(e_, 1, 1) <- "c"
+    x[, (e_) :=
+      nMe1 - data.table::rbindlist(
+        list(
+          x[seq.int(2, nrow(x)), .SD, ,.SDcols=n_],
+          as.list(rep(0L, length(n_)))))]
+    ## total no. censored per time period
+    x[, "nc" := rowSums(.SD),
+      .SDcols = grep("c_", names(x))]
+    ## no. observations
+    nObs1 <- x[,  sum(e + nc)]
+    res1 <- data.table::data.table(
+      "t" = rep(x[, t], x[, e + nc]))
+    res1[, "t" := rep(x[, t], x[, e + nc])]
+    res1[, "n" := rev(seq.int(nrow(res1)))]
+    res1[, "status" := unlist(mapply(
+                      rep, x=c(1,0), times=x[, c(e, nc), by=t]$V1))]
+    ## names for covariate groups
+    cg_ <- gsub("c_", "", e_)
+    res1[, "cg" := unlist(mapply(
+                      rep, x=cg_, times=x[, c(e, nc), by=t]$V1))]
+    res1[, "cg" := as.factor(cg)]
+    ## number at risk per covariate group
+    res1[, "ncg" := rev(seq.int(length(n))), by=cg]
+    setAttrTn(res1,
+              "shape"="long",
+              "tweOnly"=tweOnly,
+              "abbNames"=abbNames,
+              "longNames"=attr(x, "longNames"),
+              "ncg"=length(cg_),
+              "call"=call,
+              "class"=c("tn", class(x)))
+    return(res1)
+  }
+}
+### helper functions
+###
+## partial matching with an ellipsis
+partMatch <- function(env1=NULL, ...){
+  l1 <- as.list(substitute(list(...)))[-1L]
+  n1 <- c("sh", "twe", "abb", "con")
+  s1 <- sapply(n1, pmatch, names(l1))
+  n2 <- c("shape", "tweOnly", "abbNames", "contrasts.arg")
+  names(s1) <- n2
+  s1 <- s1[!is.na(s1)]
+  for(i in seq_along(s1)){
+    p1 <- paste0("env1$", names(s1)[i], " <- ", l1[[s1[i]]])
+    ## this isn't v. pretty...
+    eval(parse(text=p1))
+  }
+}
+## collapse/ paste a data table
+## x = data.table
+## except = columns to remain unmodified
+## nName = new name for collapsed column
+## returns the modified data.table
+collapseDT <- function(x,
+                       except=c("time", "status"),
+                       nName="cg"){
+### stopifnot(inherits, x, "data.table")
+  toCollapse1 <- names(x)[!(names(x) %in% except)]
+  x[, (nName) := paste(toCollapse1,
+                .SD,
+                sep="=",
+                collapse=", "),
+    .SDcols=toCollapse1,
+    by=seq.int(nrow(x))]
+  toRemove1 <- which(names(x) %in% toCollapse1)
+  data.table::set(x, j=toRemove1, value=NULL)
+}
+## set attributes for a tn data.table
+setAttrTn <- function(x,
+                      shape=NULL,
+                      tweOnly=NULL,
+                      abbNames=NULL,
+                      longNames=NULL,
+                      ncg=NULL,
+                      call=NULL,
+                      class=NULL){
+### stopifnot(inherits(x, "tn"))
+  ## can't use .Internal in a package...
+  ## l1 <- .Internal(ls(envir=environment(), all.names=TRUE))
+  l1 <- ls()
+  l1 <- l1[!grepl("x", l1)]
+  for(i in seq_along(l1)){
+    data.table::setattr(x,
+                        name=l1[i],
+                        value=eval(as.name(l1[i])))
+  }
+  return(x)
+}
+
+
+
+
+
+    res1n <- mapply(FUN=rep,
+                    x[, .SD, .SDcols="n"],
+                    x[, .SD, .SDcols=e_cg1])
+    
+    sapply(x[, n], rep, times=x[, .SD, .SDcols=e_cg1])
+
+        x <- res1ncg[[2]]
+    diff1 <- unlist(
+      sapply(rle(x)$lengths, function(x){
+        if (x==1) return(0)
+        return(1:x-1)}))
+
+    
+    setkey(res1, time)
+    data.table::set(res1, i=1L, j=4L, value=x[, max(n)])
+           rle(x)$values
+           77 - seq.int(6)
+           
+           !as.logical(c(1, diff(x)))
+unlist(x[, lapply(.SD, function(i) as.integer(i >= 1)), .SDcols=cg1])
+           
+16:  0.5      1  2 119  76
+17:  0.5      1  2 118  75
+18:  0.5      1  2 117  74
+19:  0.5      1  2 116  73
+20:  0.5      1  2 115  72
+21:  0.5      1  2 114  71
+22:  2.5      1  2  96  56
+23:  2.5      1  2  95  55
+24:  3.5      1  2  85  49
+25:  6.5      1  2  64  35
+26: 15.5      1  2  24  14
+    
+
+    
+    ## total number at risk
+    res1[, "n" := rev(seq.int(nrow(res1)))]
+    ## number at risk per covariate group
+    res1[, "ncg" := rev(seq.int(length(n))), by=cg]
+    
+
+    
+    data.table::set(res1, j=4L,
+                    value=rep(cg1, ncg1))
+    x[, max(n), by=cg]
+                      
+    x[, list(t, e_1)]
+    x[, rep(t, eval(as.name(cg1)))]
+    x[, c(rep(t, e_1), rep(t, e_2))]
+    x[, log1]
+    
+    for(i in seq_along(cg1)){
+      x[]
+    cg1 <- eMP1 <- gsub("e_", "", cg1)
+    
+    }}
+}
+
+)
+x[, lapply(.SD, identity), .SDcols=cg1]
+rep(x[, t])
+        
+
+##     l1 <- sapply(cg1, as.name)
+##     lapply(l1, x[, '['])
+##     lapply(l1, function(i) x[, l1[i]])
+##     scg1 <- paste0("sum(", cg1, ")", collapse=", ")
+##     scg1 <- paste0("c(", scg1, ")")
+##     x[, c(sum(e_1), sum(e_2))]
+##     x[, eval(bquote(.(l1)))]
+##                       as.name(cg1))))]
+##     x[, eval(as.name(cg1))]
+##     bquote(.(as.name(n1)
+##     c(sum(e_1), sum(e_2))]
+    
+##     length(x[, c(n_1[as.logical(e_1)],
+##                  n_2[as.logical(e_2)])])
+
+
+## )
+
+###
+
+### stopifnot(is.data.table(x))
+
+
+## if(byWhat == "long"){
+##     ## expected events
+##     dt1[, "Ecg" := (e * ncg) / n]
+##     ## make events - expected
+##     dt1[, "e_Ecg" := e - Ecg]
+##     if (abbNames){
+##         dt1[, cg := as.numeric(cg)]
+##         attr(dt1, "longNames") <- ln1
+##     }
+##     return(dt1)
+## }
+### Rcpp locf
+## // [[Rcpp::export]]
+## NumericVector naLocf3(NumericVector x) {
+##     double *p=x.begin(), *end = x.end() ;
+##     double v = *p ; p++ ;
+
+##     while( p < end ){
+##         while( p<end && !NumericVector::is_na(*p) ) p++ ;
+##         v = *(p-1) ;
+##         while( p<end && NumericVector::is_na(*p) ) {
+##             *p = v ;
+##             p++ ;
+##         }
+##     }
+##     return x;
+## }
+###----------------------------------------
+
+
+##             dt2[t %in% tn1[, t], i := tn1[, V1]]
+##      if(byWhat=="cg"){
+##         ## make a list
+##         res1 <- by(res1[, list(time, status, ncg)],
+##                  dt[, cg],
+##                  identity)
+##         if(abbNames){
+##             names(res1) <-  x[, seq_along(levels(cg))]
+##         } else {
+##             names(res1) <- dt1[, levels(cg)]
+##         }
+##     }
+
+## dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=FALSE)]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=TRUE)]
+##             ## e = number of events
+##             e1 <- paste0("e_", dt1[, levels(cg)[i]])
+##             te1 <- dt1[i1, sum(e, na.rm=TRUE), by=t]
+##             dt2[t %in% te1[, t], (e1) := te1[, V1]]
+##             dt2[is.na(eval(bquote(.(as.name(e1))))), (e1) := 0]
+
+##                          ## list element per covariate group
+##              el1 <- l1[k]
+##                 ## index (match time)
+##              ind1 <- as.integer(which(t1 %in% el1[[1]]$t))
+##                 ## number at risk
+##                 if(length(ind1)==1L){
+##                     set(dt2, i=NULL, j=k, value=el1[[1]]$n)
+##                 } else {
+##                     set(dt2, i=ind1, j=k, value=el1[[1]]$n)
+##                 for (l in seq_along)
+##                 set(dt2, i=seq.int(ind1[l]), j=k, value=el1[[1]]$n[l])
+
+
+
+##     data.table::setnames(dt1,
+##                          c("t", "e", name, "n", ncg1))
+##     data.table::setcolorder(dt1,
+##                             c("t", "n", "e", name, ncg1))
+##     ## get long names
+##     ln1 <- data.table::data.table(
+##             "id" = dt1[, seq_along(levels(eval(as.name(name))))],
+##             "name" = dt1[, levels(eval(as.name(name)))])
+##         if(shortNames){
+##             dt1[, (name) := as.numeric(eval(as.name(name)))]
+##             attr(dt1, "longNames") <- ln1
+##         }
+##         l1 <- by(dt1[, list(t, n, e, eval(as.name(ncg1)))],
+##                  dt1[, eval(as.name(name))],
+##                  identity)
+##         dimnames(l1) <- list(dt1[, unique(eval(as.name(name)))])
+##         if(shortNames) attr(l1, "longNames") <- ln1
+
+##                 i1 <- dt1[, which(cg==levels(cg)[i])]
+##             ## n = number at risk
+##             n1 <- paste0("n_", dt1[, levels(cg)[i]])
+##             tn1 <- dt1[i1, max(ncg), by=t]
+##             dt2[t %in% tn1[, t], i := tn1[, V1]]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=FALSE)]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=TRUE)]
+##             ## e = number of events
+##             e1 <- paste0("e_", dt1[, levels(cg)[i]])
+##             te1 <- dt1[i1, sum(e, na.rm=TRUE), by=t]
+##             dt2[t %in% te1[, t], (e1) := te1[, V1]]
+##             dt2[is.na(eval(bquote(.(as.name(e1))))), (e1) := 0]
+##                 }
+
+
+##         ##
+##         res1 <- by(dt1[, list(t, n, e, eval(as.name(ncg1)))],
+##                  dt1[, eval(as.name(name))],
+##                  identity)
+##         dimnames(l1) <- list(dt1[, unique(eval(as.name(name)))])
+##         if(shortNames) attr(l1, "longNames") <- ln1
+## }
+
+
+##         dt[, list(t,n,ncg), ][, list(list(.SD)), by=cg]$V1
+##         dt[, list(t,n,ncg), by=unique(cg)][, list(list(.SD))]$V1
+##         [, list(list(.SD)), by=cg]$V1
+##         dt[, list(t, n, e), mult="first"]
+
+##         l1 <-           dt[, list(t, "n"=eval(as.name(ncg1)), e, eval(as.name(name)))][, list(list(.SD)), by=eval((name))]$V1
+##         dt[, list(t, "n"=nstr, e, str)][, list(list(.SD)), by=str]$V1
+
+##         l1 <-
+##             dt[, list(t, "n"=ncg, e, cg) ][, list(list(.SD)), by=cg]$V1
+
+##         if(byWhat %in% c("row", "cg") && eventsOnly) dt1 <- dt1[e==1, ]
+
+##         l1 <- dt[, list(t, "n"=ncg, e, str) ][, list(list(.SD)), by=str]$V1
+
+
+
+
+##     ## get covariate groups
+##     dt1[, "cg" := as.factor(apply(X=dt1, MARGIN=1, FUN=pasteVar, dt=dt1))]
+##     dt1 <- dropVar(dt=dt1, keep=c("cg", "time", "status"))
+##     data.table::setnames(dt1,
+##                          c("t", "e", "cg", "n"))
+##     data.table::setcolorder(dt1,
+##                             c("t", "n", "e", "cg"))
+##     ## get long names
+##     ln1 <- data.table::data.table(
+##         "id" = dt1[, seq_along(levels(cg))],
+##         "name" = dt1[, levels(cg)])
+##     if(byWhat %in% c("row", "cg") && eventsOnly) dt1 <- dt1[e==1, ]
+## ###
+##     if(byWhat == "wide"){
+##         if(exists("xStr")){
+##             dt1[, "str" := xStr[, str]]
+
+
+
+
+##         dt1[, "st" := NULL]
+##         ### slow!
+##         tnTime <- function(dt){
+##             dt1 <- dt
+##         dt2 <- data.table::data.table(t=sort(unique(dt1[, t])))
+##         for(i in dt1[, 1:length(levels(cg))]){
+##             ## index (match covariate group)
+##             i1 <- dt1[, which(cg==levels(cg)[i])]
+##             ## n = number at risk
+##             n1 <- paste0("n_", dt1[, levels(cg)[i]])
+##             tn1 <- dt1[i1, max(ncg), by=t]
+##             dt2[t %in% tn1[, t], (n1) := tn1[, V1]]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=FALSE)]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=TRUE)]
+##             ## e = number of events
+##             e1 <- paste0("e_", dt1[, levels(cg)[i]])
+##             te1 <- dt1[i1, sum(e, na.rm=TRUE), by=t]
+##             dt2[t %in% te1[, t], (e1) := te1[, V1]]
+##             dt2[is.na(eval(bquote(.(as.name(e1))))), (e1) := 0]
+##         }
+##         ## make no. at risk (total) per time period
+##         dt2[, "n" := rowSums(.SD), .SDcols = grep("n_", colnames(dt2))]
+##         ## total events per time period
+##         dt2[, "e" := rowSums(.SD), .SDcols = grep("e_", colnames(dt2))]
+##         data.table::setcolorder(dt2,
+##                                 c("t", "n", "e",
+##                                   colnames(dt2)[!colnames(dt2) %in% c("t", "n", "e")]))
+##         return(dt2)
+##         }
+##         if(eventsOnly) dt2 <- dt2[e >= 1, ]
+##         if (shortNames){
+##             sn1 <- dt1[, seq_along(levels(cg))]
+##             ne1 <- c("n_", "e_")
+##             n1 <- as.vector(outer(ne1, sn1, paste, sep=""))
+##             data.table::setnames(dt2, c("t", "n", "e", n1))
+##             attr(dt2, "longNames") <- ln1
+##         }
+##         return(dt2)
+##     }
+## ###
+##     if(byWhat == "cg"){
+##         ## make a list
+##         l1 <- dt1[, list(t, "n"=ns, e, cg) ][, list(list(.SD)), by=cg]$V1
+##         x[, list(time, "n"=ncg, status, cg) ][, list(list(.SD)), by=cg]$V1
+##         if(shortNames){
+##             attr(l1, "longNames") <- ln1
+##         } else {
+##             names(l1) <- dt1[, levels(cg)]
+##         }
+##         return(l1)
+##     }
+## }
+
+
+
+
+
+
+##     ## drop variables
+##     dropVar <- function(x, keep){
+##         stopifnot(data.table::is.data.table(x))
+##         ## data table columns
+##         dtCol1 <- colnames(x)[!colnames(x) %in% keep]
+##         for(i in seq_along(dtCol1)){
+##             n1 <- dtCol1[i]
+##             x[, (n1) := NULL]
+##         }
+##         return(x)
+##     }
+
+## ###----------------------------------------
+##             tn.data.table <- function(x, ..., byWhat=byWhat){}
+##         ## get covariate groups
+##     dt1[, (name) := as.factor(apply(X=dt1, MARGIN=1,
+##                  FUN=pasteVar, dt1=dt1))]
+##     dt1 <- dropVar(dt1=dt1, keep=c("time", "status", name))
+## ###if(name=="str"){
+##     ## number at risk
+##     dt1[, "n" := rev(seq.int(nrow(x)))]
+##     ## number at risk per covariate group
+##     ncg1 <- paste0("n", name)
+##     dt1[, (ncg1) := rev(seq.int(length(n))), by=eval((name))]
+##     data.table::setnames(dt1,
+##                          c("t", "e", name, "n", ncg1))
+##     data.table::setcolorder(dt1,
+##                             c("t", "n", "e", name, ncg1))
+##     ## get long names
+##     ln1 <- data.table::data.table(
+##             "id" = dt1[, seq_along(levels(eval(as.name(name))))],
+##             "name" = dt1[, levels(eval(as.name(name)))])
+##         if(shortNames){
+##             dt1[, (name) := as.numeric(eval(as.name(name)))]
+##             attr(dt1, "longNames") <- ln1
+##         }
+##         l1 <- by(dt1[, list(t, n, e, eval(as.name(ncg1)))],
+##                  dt1[, eval(as.name(name))],
+##                  identity)
+##         dimnames(l1) <- list(dt1[, unique(eval(as.name(name)))])
+##         if(shortNames) attr(l1, "longNames") <- ln1
+##         if(byWhat="wide"){
+##             dt2 <- data.table::data.table(t=sort(unique(dt1[, t])))
+##             n1 <- dt1[, unique(eval(as.name(name)))]
+##             t1 <- dt1[, sort(unique(t))]
+##             dt2 <- data.table::data.table(
+##                 matrix(rep(0L, 2 * length(n1) * length(t1)),
+##                        ncol=2 * length(n1),
+##                        nrow=length(t1)))
+## #            dt2[, "t" := t1]
+##             for(k in seq_along(n1)){
+##                 ## list element per covariate group
+##                 el1 <- l1[k]
+##                 ## index (match time)
+##                 ind1 <- as.integer(which(t1 %in% el1[[1]]$t))
+##                 ## number at risk
+##                 if(length(ind1)==1L){
+##                     set(dt2, i=NULL, j=k, value=el1[[1]]$n)
+##                 } else {
+##                     set(dt2, i=ind1, j=k, value=el1[[1]]$n)
+##                 for (l in seq_along)
+##                 set(dt2, i=seq.int(ind1[l]), j=k, value=el1[[1]]$n[l])
+
+
+##                 i1 <- dt1[, which(cg==levels(cg)[i])]
+##             ## n = number at risk
+##             n1 <- paste0("n_", dt1[, levels(cg)[i]])
+##             tn1 <- dt1[i1, max(ncg), by=t]
+##             dt2[t %in% tn1[, t], i := tn1[, V1]]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=FALSE)]
+##             dt2[, (n1) := zoo::na.locf(
+##                            eval(bquote(.(as.name(n1)))),
+##                            na.rm=FALSE, fromLast=TRUE)]
+##             ## e = number of events
+##             e1 <- paste0("e_", dt1[, levels(cg)[i]])
+##             te1 <- dt1[i1, sum(e, na.rm=TRUE), by=t]
+##             dt2[t %in% te1[, t], (e1) := te1[, V1]]
+##             dt2[is.na(eval(bquote(.(as.name(e1))))), (e1) := 0]
+##         }
+##         ## make no. at risk (total) per time period
+##         dt2[, "n" := rowSums(.SD), .SDcols = grep("n_", colnames(dt2))]
+##         ## total events per time period
+##         dt2[, "e" := rowSums(.SD), .SDcols = grep("e_", colnames(dt2))]
+##         data.table::setcolorder(dt2,
+##                                 c("t", "n", "e",
+##                                   colnames(dt2)[!colnames(dt2) %in% c("t", "n", "e")]))
+##         return(dt2)
+
+
+## with(kidney, tn(Surv(time=time, event=delta) ~ 0))
+## t1 <- tn(Surv(time=time, event=delta) ~ type, data=kidney, eventsOnly=FALSE, byWhat="wide")
+## debugonce("tn.data.table")
+## c1 <- coxph(Surv(time=time, event=delta) ~ Z1 + Z2,
+##             data=hodg[gtype==1 && dtype==1, ])
+## t1 <- tn(c1, byWhat="status")
+## tn(s1, byWhat="status")
+##     time status cg   n ncg
+##  1:  0.5      1  2  76  76
+##  2:  0.5      1  2  75  75
+##  3:  0.5      1  2  74  74
+##  4:  0.5      1  2  73  73
+##  5:  0.5      1  2  72  72
+##  6:  0.5      1  2  71  71
+##  7:  1.5      1  1 119  43
+##  8:  2.5      1  2  70  70
+##  9:  2.5      1  2  69  69
+## 10:  3.5      1  1 118  42
+## 11:  3.5      1  2  68  68
+## 12:  4.5      1  1 117  41
+## 13:  4.5      1  1 116  40
+## 14:  5.5      1  1 115  39
+## 15:  6.5      1  2  67  67
+## 16:  8.5      1  1 114  38
+## 17:  8.5      1  1 113  37
+## 18:  9.5      1  1 112  36
+## 19: 10.5      1  1 111  35
+## 20: 11.5      1  1 110  34
+## 21: 15.5      1  1 109  33
+## 22: 15.5      1  2  66  66
+## 23: 16.5      1  1 108  32
+## 24: 18.5      1  1 107  31
+## 25: 23.5      1  1 106  30
+##     26: 26.5      1  1 105  29
+
+
+## f1 <- function(x,
+##                byWhat=c("time", "status"),
+##                abcd=1){
+##   byWhat <- match.arg(byWhat)
+##    return(abcd)
+## }
+
+##       res1[, sapply(1L, pmax, c(0L, nMinusE1)), with=F]
+
+      
+##       res1[, pmax(unlist(.SD), c(1, nMinusE1)), .SDcols=j1]
+##       set
+      
+      
+
+
+    
+##     x1[, .SD, .SDcols=c(2, 4)][is.na(x1[, .SD, .SDcols=c(2, 4)])] <- 0L
+    
+##     data.table::set(x,
+##                     i=1L:ind1[1], j=j1 - 1L,
+##                     value=tn1[, max(V1)])
+    
+##     x1[is.na(x1[, .SD, .SDcols=c(2, 4)]), ]
+    
+##     x1[, lapply(.SD, function(x) x[is.na(x)] <- 0L), .SDcols=c(1,3)]
+    
+    
+##     cn2 <- as.vector(outer(cn2, cn1, paste, sep=""))
+    
+## x1 <- merge(x[cg==1, list(cg, time, n, e1, ncg)], x[cg==2, list(cg, time, n, e1, ncg)],by=c("time", "cg"), all=T, allow=T)
+
+    
+##       res1 <-
+##       x1 <- x[, list("n1"=length(status),
+##                      "e1"=sum(status)),
+##               by=list(time, cg)]
+    
+##     res1[, "n" := c(sum(n), sum(n) - cumsum(n)[ - length(n)])]
+
+x1 <- merge(x[cg==1, list(cg, time, n, e1, ncg)],
+            x[cg==2, list(cg, time, n, e1, ncg)],
+by=c("time", "cg"), all=T, allow=T)
+
+
+
+
+###
+    x1 <- merge(x[cg==1, list(cg, time, e1, n1)],
+                x[cg==2, list(cg, time, e1, n1)],
+                by=c("time", "cg"), all=T, allow=T)
+    x1[, cg := NULL]
+    data.table::setkey(x1, NULL)
+    x1 <- x1[!duplicated(x1), ]
+
+    
+    
+    ## unique covariate groups
+    ucg1 <- sort(unique(x[, cg]))
+    ## no. of covariate groups
+    lcg1 <- length(ucg1)
+    ## easier to add t1 to data.table later
+    t1 <- x[, sort(unique(time))]
+    lt1 <- length(t1)
+    w1 <- "\nMay be inefficient use of memory."
+    w2 <- "One covariate group for each time point!"
+    if(lcg1 == lt1) warning(c(w2, w1))
+    w3 <- "Note large no. covariate groups relative to time points"
+    if((lt1 %/% lcg1) == 1) warning(c(w3, w1))
+    ## new memory assignment here
+    res1 <- data.table::data.table(
+      matrix(rep(0L, 2 * lcg1 * lt1),
+             ncol=2 * lcg1,
+             nrow=lt1))
+    ## import zoo::na.locf.default
+    locf <- zoo::na.locf.default
+    ##
+    ## a 'for' loop is easier to read here
+    for(k in seq.int(lcg1)){
+      ## subset by covariate group
+      tn1 <- x[cg==ucg1[k],
+                list(max(ncg), as.integer(sum(status, na.rm=TRUE))),
+                by=time]
+      ## index of time
+      ind1 <- which(t1 %in% tn1[, time])
+      ## number at risk
+      ## map e.g. k=2 to j=2,3 with
+      ## j=2L * k
+      j1 <- as.integer(2L * k)
+      data.table::set(res1,
+                      i=ind1, j=j1 - 1L,
+                      value=tn1[, V1])
+      ## set first rows to max(n)
+      data.table::set(res1,
+                      i=1L:ind1[1], j=j1 - 1L,
+                      value=tn1[, max(V1)])
+      ## add no. events
+      data.table::set(res1,
+                      i=ind1, j=j1,
+                      value=tn1[, V2])
+      ## remove n - e
+      nMinusE1 <- res1[, do.call(`-`, .SD), .SDcols=c(j1-1L, j1)]
+      ## drop last element
+      length(nMinusE1) <- lt1 - 1L
+      data.table::set(res1,
+                      j=j1 - 1L,
+                      value=res1[, sapply(.SD, pmax, c(0L, nMinusE1)),
+                        .SDcols=(j1-1L)])
+      ## index
+      ind2 <- which(res1[[j1 - 1L]]==0)
+      if(length(ind2)){
+        data.table::set(res1, i=ind2, j=j1 - 1L, value=NA)
+        data.table::set(res1, j=j1 - 1L,
+                        value=locf(res1[[j1 - 1L]], fromlast=TRUE))
+      }
+    }
+    ## column names
+    if(abbNames){
+      cn1 <- attr(x, "longNames")[, id]
+    } else {
+      cn1 <- attr(x, "longNames")[, longName]
+    }
+    cn2 <- c("n_", "e_")
+    cn2 <- as.vector(outer(cn2, cn1, paste, sep=""))
+    data.table::setnames(res1, cn2)
+    ## easier to add time in at this point
+    res1[, "t" := t1]
+    ## make no. at risk (total) per time period
+    res1[, "n" := rowSums(.SD),
+         .SDcols = grep("n_", colnames(res1))]
+    ## total events per time period
+    res1[, "e" := rowSums(.SD),
+         .SDcols = grep("e_", colnames(res1))]
+    data.table::setcolorder(res1,
+                            c("t", "n", "e", cn2))
+    if(eventsOnly){
+      data.table::setkey(res1, t, e)
+      res1 <- res1[e > 0.5, ]
+    }
+    data.table::setkey(res1, t)
+    setAttrTn(res1,
+               "shape"=shape,
+               "eventsOnly"=eventsOnly,
+               "abbNames"=abbNames,
+               "longNames"=attr(x, "longNames"),
+               "ncg"=lcg1,
+               "call"=call,
+               "class"=c("tn", class(res1)))
+      return(res1)
+  }
+  if(shape=="wide"){
+    e1 <- x[, sum(e, na.rm=TRUE)]
+    res1 <- data.table::data.table(
+      matrix(rep(0, e1 * 5),
+             nrow=e1, ncol=5L))
+    data.table::setnames(res1, c("time", "status", "cg", "n", "ncg"))
+    ## event columns for each covariate group
+    e_cg1 <- grep("e_", names(x), value=TRUE)
+    ## numbers in each covariate groups
+    ncg1 <- x[, lapply(.SD, sum), .SDcols=e_cg1]
+    ## covariate group names
+    cgn1 <- gsub("e_", "", e_cg1)
+    data.table::set(res1, j=1L,
+                    value=
+                    unlist(sapply(x[, .SD, .SDcols=e_cg1],
+                                  rep, x=x[, t])))
+    data.table::set(res1, j=2L,
+                    value=
+                    unlist(sapply(x[, .SD, .SDcols=e_cg1],
+                                  rep, x=x[, as.numeric(e >= 1)])))
+    data.table::set(res1, j=3L,
+                    value=rep(cgn1, ncg1))
+    n_cg1 <- grep("n_", names(x), value=TRUE)
+    ## easier to calculate ncg in two steps
+    res1ncg <- mapply(FUN=rep,
+                      x[, .SD, .SDcols=n_cg1],
+                      x[, .SD, .SDcols=e_cg1])
+    data.table::set(res1, j=5L,
+                    value=
+                    unlist(lapply(res1ncg, function(x){
+                      diff1 <- unlist(
+                        sapply(rle(x)$lengths, function(x){
+                          if (x==1) return(0)
+                          return(1:x-1)}))
+                      return(x - diff1)})))
+    setkey(res1, time)
+    res1[match(x[, t], res1[, time]), "n" := x[, n]]
+    return(res1)
+}
+
+    ## build up an expression with
+    ## one element for each co-variate group
+    cgInt1 <- x[, as.integer(cg)]
+    p1 <- paste0("x[as.integer(cg)==",
+                 cgInt1, 
+                 "L, list(cg, time, e1, n1)]")
+    p1 <- paste0(p1, collapse=", ")
+    p1 <- paste0("list(", p1, ")")
+    p1 <- paste0(
+      Reduce(function(...) merge(..., by=c('time', 'cg'), all=TRUE, allow.cartesian=TRUE), l1)
+      l1 <- eval(parse(text=p1))
+    x1 <- , env=parent.frame())
+    
+                 ", by=c('time', 'cg'), all=TRUE, allow.cartesian=TRUE)")
+    p1 <- paste0("do.call('merge', ", p1, ")")
+
+
+  data.table::data.table(
+    Reduce(function(...) merge(..., by=c("time", "cg"),
+                 all=TRUE, allow.cartesian=TRUE),
+           list(
+             x[as.integer(cg)==7L,
+               list(cg, time, e1, n1)],
+             x[as.integer(cg)==12L,
+               list(cg, time, e1, n1)],
+             x[as.integer(cg)==33L,
+               list(cg, time, e1, n1)],
+             x[as.integer(cg)==37L,
+               list(cg, time, e1, n1)],
+             x[as.integer(cg)==8L, list(cg, time, e1, n1)],
+             x[as.integer(cg)==26L, list(cg, time, e1, n1)],
+             x[as.integer(cg)==18L, list(cg, time, e1, n1)],
+             x[as.integer(cg)==22L, list(cg, time, e1, n1)]
+             ))
+    
+    l1 <- list(
+      x[as.integer(cg)==7L,
+        list(cg, time, e1, n1)],
+      x[as.integer(cg)==12L,
+        list(cg, time, e1, n1)],
+      x[as.integer(cg)==33L,
+        list(cg, time, e1, n1)],
+      x[as.integer(cg)==37L,
+        list(cg, time, e1, n1)]
+      )
+
+    
+    do.call('merge', list(x[as.integer(cg)==7L,
+                            list(cg, time, e1, n1)],
+                          x[as.integer(cg)==12L,
+                            list(cg, time, e1, n1)],
+                          x[as.integer(cg)==33L,
+                            list(cg, time, e1, n1)],
+                          x[as.integer(cg)==37L,
+                            list(cg, time, e1, n1)],
+                          by=c('time', 'cg'), all=TRUE,
+                          allow.cartesian=TRUE))
+    
+    data.table::set(x1, j=1L, value=NULL)
+    data.table::setkey(x1, NULL)
+    x1 <- x1[!duplicated(x1), ]
+      ## remove n - e
+      nMinusE1 <- res1[, do.call(`-`, .SD), .SDcols=c(j1-1L, j1)]
+      ## drop last element
+      length(nMinusE1) <- lt1 - 1L
+      data.table::set(res1,
+                      j=j1 - 1L,
+                      value=res1[, sapply(.SD, pmax, c(0L, nMinusE1)),
+                        .SDcols=(j1-1L)])
+  ## add zeros to e_ columns
+    e1 <- grep("e.", colnames(x1), value=TRUE)
+    for (col in e1) x1[is.na(get(col)), (col) := 0L]
+    ## import zoo::na.locf.default
+    locf <- zoo::na.locf.default
+    n1 <- grep("n1.", colnames(x1), value=TRUE)
+    for (col in n1) x1[, (col) :=
+                       locf(get(col))]
+      res1[, ]
+    
+                         c("t", nen2, "n", "e"))
+
+    ## names for 'n' and 'e' columns
+    nen1 <- c("n_", "e_")
+    nen2 <- as.vector(outer(nen1, cgn1, paste, sep=""))
+    data.table::setnames(x1,
+                         c("t", nen2, "n", "e"))
+    data.table::setcolorder(x1,
+                            c("t", "n", "e", nen2))
+      matrix(c(rep(0, nObs1),
+               rep(0L, nObs1 * 4)),
+             nrow=nObs1, ncol=5L))
+    #data.table::setnames(res1, c("t", "n", "status", "cg", "ncg"))
+
+res1[, "t" := rep(x[, t], x[, e + nc])]
+
+
+    as.matrix(x[, list(e, nc)]))
+    
+    apply(X=x[, list(e, nc)], MARGIN=1,
+          FUN=function(rows) c(rows[, e], rows[, nc]))
+    setkey(x, t)
+    rep(c(0,1), times=x[, c(e, nc), by=t]$V1)
+    toKeep <- (colnames(x) %in% c("e", "nc"))
+    
+  c(colnames(x)[toKeep], row1[toKeep])
+
+    
+    mapply(rep, c(1,0),
+           unlist(list(x[, e], x[, nc])))
+    x[, t(.SD), .SDcols=c("e", "nc")]
+    x[, list(e, nc), by=nc]
+    x[, unlist(e)],
+    x[, apply(matrix(list(e, nc)),1, c)]
+    
+                               ncol=16, byrow=T)]
+
+    relist(unlist(x[, list(e, nc)]), matrix(seq(32), nrow=2, ncol=16, byrow=TRUE))
+
+    c(rep(1, x[, e]), rep(0, x[, nc]))
+    sapply(c(0, 1), rep, times=as.vector(unlist(x[, list(e, nc)])))
+    rep(c(0, 1), each=c(1,4,2,4))
+    sapply(c(0, 1), rep, each=c(1,4,2,4))
+    
+    mapply(rep, c(1,0), as.matrix(x[, list(e, nc)]))
+    outer(as.matrix(x[, list(e, nc)]), c(1,0))
+
+    nMe1 <- x[, n - e]
+
+    x[, "nc" := nMe1 - c(x[seq.int(2, nrow(x)), n], 0)]
+    x[1:15, "nc" := nc[1:(nrow(x)-1)] - n[2:nrow(x)]]
+    e1 <- 
+    data.table::setkey(x, t, n, e)
+    res1 <- data.table::data.table(
+      matrix(rep(0, e1 * 5),
+             nrow=e1, ncol=5L))
+    data.table::setnames(res1, c("t", "n", "status", "cg", "ncg"))
+    ## event columns for each covariate group
+    e_cg1 <- grep("e_", names(x), value=TRUE)
+    ## numbers in each covariate groups
+    ncg1 <- x[, lapply(.SD, sum), .SDcols=e_cg1]
+    ## covariate group names
+    cgn1 <- gsub("e_", "", e_cg1)
+    data.table::set(res1, j=1L,
+                    value=
+                    unlist(sapply(x[, .SD, .SDcols=e_cg1],
+                                  rep, x=x[, t])))
+    data.table::set(res1, j=2L,
+                    value=
+                    unlist(sapply(x[, .SD, .SDcols=e_cg1],
+                                  rep, x=x[, as.numeric(e >= 1)])))
+    data.table::set(res1, j=3L,
+                    value=rep(cgn1, ncg1))
+    n_cg1 <- grep("n_", names(x), value=TRUE)
+    ## easier to calculate ncg in two steps
+    res1ncg <- mapply(FUN=rep,
+                      x[, .SD, .SDcols=n_cg1],
+                      x[, .SD, .SDcols=e_cg1])
+    data.table::set(res1, j=5L,
+                    value=
+                    unlist(lapply(res1ncg, function(x){
+                      diff1 <- unlist(
+                        sapply(rle(x)$lengths, function(x){
+                          if (x==1) return(0)
+                          return(1:x-1)}))
+                      return(x - diff1)})))
+    setkey(res1, time)
+    res1[match(x[, t], res1[, time]), "n" := x[, n]]
+    
+  
+  
+  
+pasteVar <- function(row1, x,
+                     toKeep=c("time", "status")){
+### stopifnot(data.table::is.data.table(x))
+  toDrop <- !(colnames(x) %in% toKeep)
+  paste(
+    colnames(x)[toDrop],
+    row1[toDrop],
+    sep="=",
+    collapse=", ")
+}
