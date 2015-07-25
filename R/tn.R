@@ -142,21 +142,21 @@ tn <- function(x, ...) UseMethod("tn")
 #'
 tn.numeric <- function(x, ...,
                        tweOnly=TRUE){
-  partMatch(env1=environemt(), ...)
-  stopifnot(all(x %in% c(0,1)))
-  res1 <- data.table::data.table(
-    "t"=(t <- seq_along(x)),
-    "status"=x,
-    "n"=rev(t))
-  if(tweOnly) res1 <- res1[status==1, ]
-  setAttrTn(res1,
-            shape="long",
-            tweOnly=tweOnly,
-            abbNames=TRUE,
-            ncg=0,
-            call=match.call(),
-            class=c("tn", class(res1)))
-  return(res1)
+    partMatch(env1=environemt(), ...)
+    stopifnot(all(x %in% c(0,1)))
+    res1 <- data.table::data.table(
+        "t"=(t <- seq_along(x)),
+        "status"=x,
+        "n"=rev(t))
+    if(tweOnly) res1 <- res1[status==1, ]
+    setAttrTn(res1,
+              shape="long",
+              tweOnly=tweOnly,
+              abbNames=TRUE,
+              ncg=0,
+              call=match.call(),
+              class=c("tn", class(res1)))
+    return(res1)
 }
 #' @rdname tn
 #' @aliases tn.Surv
@@ -164,44 +164,44 @@ tn.numeric <- function(x, ...,
 #' @export
 #'
 tn.Surv <- function(x, ..., 
-                     shape=c("wide", "long"),
-                     abbNames=TRUE,
-                     tweOnly=TRUE){
-  shape <- match.arg(shape)
-  partMatch(env1=environemt(), ...)
-  stopifnot(inherits(x, "Surv"))
-  stopifnot(attributes(x)$type=="right")
-  res1 <- data.table::data.table(unclass(x))
-  if(shape=="long"){
-    res1[, "n" := rev(seq.int(nrow(res1)))]
-    data.table::setcolorder(res1, c("time", "n", "status"))
-    data.table::setnames(res1, c("t", "n", "status"))
-    if(tweOnly){
-      data.table::setkey(res1, status)
-      res1 <- res1[status > 0.5, ]
+                    shape=c("wide", "long"),
+                    tweOnly=TRUE,
+                    call=NULL){
+    shape <- match.arg(shape)
+    partMatch(env1=environemt(), ...)
+    if(is.null(call)) call <- match.call()
+    stopifnot(inherits(x, "Surv"))
+    stopifnot(attributes(x)$type=="right")
+    res1 <- data.table::data.table(unclass(x))
+    if(shape=="long"){
+        res1[, "n" := rev(seq.int(nrow(res1)))]
+        data.table::setcolorder(res1, c("time", "n", "status"))
+        data.table::setnames(res1, c("t", "n", "status"))
+        if(tweOnly){
+            data.table::setkey(res1, status)
+            res1 <- res1[status > 0.5, ]
+        }
     }
-  }
-  if(shape=="wide"){
-    res1 <- res1[, list("n"=length(status),
-                        "e"=sum(status)),
-                 by=sort(time, na.last=TRUE)]
-    res1[, "n" := c(sum(n), sum(n) - cumsum(n)[ - length(n)])]
-    data.table::setnames(res1, c("t", "n", "e"))
-    if(tweOnly){
-      data.table::setkey(res1, e)
-      res1 <- res1[e > 0.5, ]
+    if(shape=="wide"){
+        res1 <- res1[, list("n"=length(status),
+                            "e"=sum(status)),
+                     by=sort(time, na.last=TRUE)]
+        res1[, "n" := c(sum(n), sum(n) - cumsum(n)[ - length(n)])]
+        data.table::setnames(res1, c("t", "n", "e"))
+        if(tweOnly){
+            data.table::setkey(res1, e)
+            res1 <- res1[e > 0.5, ]
+        }
     }
-  }
-  ## sort by time or t
-  data.table::setkeyv(res1, colnames(res1)[1])
-  setAttrTn(res1,
-             shape=shape,
-             tweOnly=tweOnly,
-             abbNames=abbNames,
-             ncg=0,
-             call=match.call(),
-             class=c("tn", class(res1)))
-  return(res1)
+    ## sort by time or t
+    data.table::setkeyv(res1, colnames(res1)[1])
+    setAttrTn(res1,
+              shape=shape,
+              tweOnly=tweOnly,
+              ncg=0,
+              call=call,
+              class=c("tn", class(res1)))
+    return(res1)
 }
 ###
 ###----------------------------------------
@@ -216,22 +216,22 @@ tn.coxph <- function(x, ...,
                      tweOnly=TRUE,
                      abbNames=TRUE,
                      contrasts.arg=NULL){
-  shape <- match.arg(shape)
-  partMatch(env1=environemt(), ...)
-  x$call$formula <- stats::terms(
-    x=formula(x$call),
-    specials=c("strata", "cluster", "tt"))
-  x$call$drop.unused.levels <- TRUE
-  call1 <- x$call
-  x$call[[1]] <- as.name("model.frame")
-  ## model.frame
-  xMF1 <- eval(x$call, parent.frame())
-  tn(x=xMF1,
-     shape=shape,
-     tweOnly=tweOnly,
-     abbNames=abbNames,
-     contrasts.arg=contrasts.arg,
-     call=call1)
+    shape <- match.arg(shape)
+    partMatch(env1=environment(), ...)
+    x$call$formula <- stats::terms(
+        x=formula(x$call),
+        specials=c("strata", "cluster", "tt"))
+    x$call$drop.unused.levels <- TRUE
+    call1 <- x$call
+    x$call[[1]] <- as.name("model.frame")
+    ## model.frame
+    xMF1 <- eval(x$call, parent.frame())
+    tn(x=xMF1,
+       shape=shape,
+       tweOnly=tweOnly,
+       abbNames=abbNames,
+       contrasts.arg=contrasts.arg,
+       call=call1)
 }
 #' @rdname tn
 #' @aliases tn.survfit
@@ -243,21 +243,21 @@ tn.survfit <- function(x, ...,
                        tweOnly=TRUE,
                        abbNames=TRUE,
                        contrasts.arg=NULL){
-  partMatch(...)
-  shape <- match.arg(shape)
-  x$call$formula <- stats::terms(
-    x=formula(x$call),
-    specials=c("strata", "cluster", "tt"))
-  x$call$drop.unused.levels <- TRUE
-  call1 <- x$call
-  x$call[[1]] <- as.name("model.frame")
-  xMF1 <- eval(x$call, parent.frame())
-  tn(x=xMF1,
-     shape=shape,
-     tweOnly=tweOnly,
-     abbNames=abbNames,
-     contrasts.arg=contrasts.arg,
-     call=call1)
+    shape <- match.arg(shape)
+    partMatch(env1=environment(), ...)
+    x$call$formula <- stats::terms(
+        x=formula(x$call),
+        specials=c("strata", "cluster", "tt"))
+    x$call$drop.unused.levels <- TRUE
+    call1 <- x$call
+    x$call[[1]] <- as.name("model.frame")
+    xMF1 <- eval(x$call, parent.frame())
+    tn(x=xMF1,
+       shape=shape,
+       tweOnly=tweOnly,
+       abbNames=abbNames,
+       contrasts.arg=contrasts.arg,
+       call=call1)
 }
 #' @rdname tn
 #' @aliases tn.formula
@@ -269,23 +269,23 @@ tn.formula <- function(x, ...,
                        tweOnly=TRUE,
                        abbNames=TRUE,
                        contrasts.arg=NULL){
-  shape <- match.arg(shape)
-  partMatch(env1=environment(), ...)
-  stopifnot(inherits(x, "formula"))
+    shape <- match.arg(shape)
+    partMatch(env1=environment(), ...)
+    stopifnot(inherits(x, "formula"))
 ### based on code from stats::lm()
-  mc1 <- match.call()
-  names(mc1)[names(mc1)=="x"] <- "formula"
-  mc1 <- mc1[c(1L, match(c("formula", "data"), names(mc1), 0L))]
-  mc1$drop.unused.levels <- TRUE
-  call1 <- mc1
-  mc1[[1L]] <- as.name("model.frame")
-  mf1 <- eval(mc1, parent.frame())
-  tn(x=mf1,
-     shape=shape,
-     tweOnly=tweOnly,
-     abbNames=abbNames,
-     contrasts.arg=contrasts.arg,
-     call=call1)
+    mc1 <- match.call()
+    names(mc1)[names(mc1)=="x"] <- "formula"
+    mc1 <- mc1[c(1L, match(c("formula", "data"), names(mc1), 0L))]
+    mc1$drop.unused.levels <- TRUE
+    call1 <- mc1
+    mc1[[1L]] <- as.name("model.frame")
+    mf1 <- eval(mc1, parent.frame())
+    tn(x=mf1,
+       shape=shape,
+       tweOnly=tweOnly,
+       abbNames=abbNames,
+       contrasts.arg=contrasts.arg,
+       call=call1)
 }
 #' @rdname tn
 #' @aliases tn.data.frame
@@ -298,65 +298,73 @@ tn.data.frame <- function(x, ...,
                           abbNames=TRUE,
                           contrasts.arg=NULL,
                           call=NULL){
-  stopifnot(inherits(x, "data.frame"))
-  stopifnot(survival::is.Surv(x[[1]]))
-  stopifnot(attr(x[[1]], "type") == "right")
-  shape <- match.arg(shape)
-  partMatch(env1=environment(), ...)
+    stopifnot(survival::is.Surv(x[[1]]))
+    stopifnot(attr(x[[1]], "type") == "right")
+    shape <- match.arg(shape)
+    partMatch(env1=environment(), ...)
 ### data.table from x
-  xDT <- data.table::data.table(
-    cbind(
-      stats::model.matrix(terms(x), x,
-                          contrasts.arg=contrasts.arg),
-      stats::model.response(x)))
+    xDT <- data.table::data.table(
+        cbind(
+            stats::model.matrix(terms(x), x,
+                                contrasts.arg=contrasts.arg),
+            stats::model.response(x)))
 ### data.table::setkey(xDT, time)
-  ## names of clusters
-  xNC1 <- grepl("^cluster\\(.*\\)", names(x))
-  if(any(xNC1)){
-    ## drop cluster terms
-    xDT[, names(xDT)[grepl("^cluster\\(.*\\)",
-                           names(xDT))] := NULL]
-  }
-  ## names of strata
-  xNS1 <- grepl("^strata\\(.*\\)", names(x))
-  if(any(xNS1)){
-    ## remove strata
-    xDT[, names(xDT)[grepl("^strata\\(.*\\)",
-                           names(xDT))] := NULL]
-    collapseDT(xDT,
-               except=c("time", "status", names(xDT)[xNS1]),
-               nName="cg")
-    ## add column for strata
-    collapseDT(xDT,
-               except=names(xDT)[!xNS1],
-               nName="str")
-    l1 <- by(xDT[, list(time, status, cg)],
-             xDT[, str],
-             identity)
-    res1 <- lapply(l1, tn(shape=shape,
-                          tweOnly=tweOnly,
-                          abbNames=abbNames))
-    data.table::setattr(res1,
-                        "class",
-                        c("stratTn"=class(res1)))
-    data.table::setattr(res1, "call", call)
-    return(res1)
-  } else {
-    if(stats::is.empty.model(x)){
-      ## convert to Surv object
-      s1 <- xDT[, Surv(time, status)]
-      return(tn(s1))
-    } else {
-      collapseDT(xDT)
-      xDT[, colnames(xDT)[!colnames(xDT)
-                          %in% c("time", "status", "cg")] := NULL]
-      tn(x=xDT,
-          shape=shape,
-          tweOnly=tweOnly,
-          abbNames=abbNames,
-          call=call)
+    ## names of clusters
+    xNC1 <- grepl("^cluster\\(.*\\)", names(x))
+    if(any(xNC1)){
+        ## drop cluster terms
+        xDT[, names(xDT)[grepl("^cluster\\(.*\\)",
+                               names(xDT))] := NULL]
     }
-  }
+    ## names of strata
+    xNS1 <- grep("^strata\\(.*\\)", names(x))
+    if(any(xNS1)){
+        ## strata numbers
+        xDTstn1 <- grep("^strata\\(.*\\)", names(xDT))
+        ## separate table onlly for strata
+        xDTstr <- xDT[, .SD, .SDcols=xDTstn1]
+        collapseDT(xDTstr, except=NA, nName="strat")
+        data.table::set(xDT, j=xDTstn1, value=NULL)
+        collapseDT(xDT,
+                   except=c("time", "status"),
+                   nName="cg")
+        xDT[, "cg" := as.factor(cg)]
+        xDT[, "strat" := as.factor(xDTstr[, strat])]
+        l1 <- by(xDT[, list(time, status, cg)],
+                 xDT[, strat],
+                 identity)
+        res1 <- vector(mode="list")
+        for (i in seq_along(l1)){
+            res1[i] <- tn(l1[[i]], 
+                          shape=shape,
+                          tweOnly=tweOnly,
+                          abbNames=abbNames)
+            names(res1)[i] <- names(l1)[i]
+        }
+        data.table::setattr(res1,
+                            "class",
+                            c("stratTn", class(res1)))
+        data.table::setattr(res1, "call", call)
+        return(res1)
+    } else {
+        if(stats::is.empty.model(x)){
+            ## convert to Surv object
+            s1 <- xDT[, Surv(time, status)]
+            return(tn(s1,
+                      shape=shape,
+                      tweOnly=tweOnly,
+                      call=call))
+        } else {
+            collapseDT(xDT,
+                       except=c("time", "status"),
+                       nName="cg")
+            tn(x=xDT,
+               shape=shape,
+               tweOnly=tweOnly,
+               abbNames=abbNames,
+               call=call)
+        }
+    }
 }
 #' @rdname tn
 #' @aliases tn.data.table
@@ -368,46 +376,47 @@ tn.data.table <- function(x, ...,
                           tweOnly=TRUE,
                           abbNames=TRUE,
                           call=NULL){
-  stopifnot(all(names(x) %in% c("time", "status", "cg")))
-  shape <- match.arg(shape)
-  partMatch(env1=environment(), ...)
-  data.table::setkey(x, time, cg)
-  ## number at risk
-  x[, "n" := rev(seq.int(nrow(x)))]
-  ## number at risk per covariate group
-  x[, "ncg" := rev(seq.int(length(n))), by=cg]
-  ## get long names
-  ln1 <- data.table::data.table(
-    "id" = x[, seq_along(levels(cg))],
-    "longName" = x[, levels(cg)])
-  if(abbNames) x[, "cg" := as.integer(cg)]
-  if(tweOnly){
-    ## times with greater than zero events
-    x[, "tGr0e" := sum(status) > 0L, by=time]
-    ## subset longNames
-    cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
-    ln1[, "twe" := id %in% cg1]
-    ## subset x and drop tGr0e from x
-    x <- x[(tGr0e)]
-    x[, tGr0e := NULL]
-  }
-  data.table::setnames(x, c("t", colnames(x)[-1]))
-  data.table::setcolorder(x,
-                          c("t", "n", "status", "cg", "ncg"))
-  setAttrTn(x,
-            "shape"="long",
-            "tweOnly"=tweOnly,
-            "abbNames"=abbNames,
-            "longNames"=ln1,
-            "ncg"=nrow(ln1),
-            "call"=call,
-            "class"=c("tn", class(x)))
-  if(shape=="long") return(x)
-  tn(x=x,
-     shape="long",
-     tweOnly=tweOnly,
-     abbNames=abbNames,
-     call=call)
+    stopifnot(all(names(x) %in% c("time", "status", "cg")))
+    shape <- match.arg(shape)
+    partMatch(env1=environment(), ...)
+    data.table::setkey(x, time, cg)
+    ## number at risk
+    x[, "n" := rev(seq.int(nrow(x)))]
+    ## number at risk per covariate group
+    x[, "ncg" := rev(seq.int(length(n))), by=cg]
+    ## get long names
+    x[, "cg" := as.factor(cg)]
+    ln1 <- data.table::data.table(
+        "id" = x[, unique(as.integer(cg))],
+        "longName" = x[, levels(cg)])
+    if(abbNames) x[, "cg" := as.integer(cg)]
+    if(tweOnly){
+        ## times with greater than zero events
+        x[, "tGr0e" := sum(status) > 0L, by=time]
+        ## subset longNames
+        cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
+        ln1[, "twe" := id %in% cg1]
+        ## subset x and drop tGr0e from x
+        x <- x[(tGr0e)]
+        x[, tGr0e := NULL]
+    }
+    data.table::setnames(x, c("t", colnames(x)[-1]))
+    data.table::setcolorder(x,
+                            c("t", "n", "status", "cg", "ncg"))
+    setAttrTn(x,
+              "shape"="long",
+              "tweOnly"=tweOnly,
+              "abbNames"=abbNames,
+              "longNames"=ln1,
+              "ncg"=nrow(ln1),
+              "call"=call,
+              "class"=c("tn", class(x)))
+    if(shape=="long") return(x)
+    tn(x=x,
+       shape="long",
+       tweOnly=tweOnly,
+       abbNames=abbNames,
+       call=call)
 }
 #' @rdname tn
 #' @aliases tn.tn
@@ -424,8 +433,8 @@ s1 <- with(df0, Surv(t, e, type="right"))
 tn(s1, shape="long")
 ## some awkward values
 suppressWarnings(
-  s1 <- Surv(time=c(Inf, -1, NaN, NA, 10, 12),
-             event=c(c(NA, 1, 1, NaN, Inf, 0.75))))
+    s1 <- Surv(time=c(Inf, -1, NaN, NA, 10, 12),
+               event=c(c(NA, 1, 1, NaN, Inf, 0.75))))
 tn(s1, shape="long", tweOnly=FALSE)
 ## coxph object
 ## K&M 2nd ed. Section 1.2. Table 1.1, page 2.
@@ -436,202 +445,220 @@ data.table::setnames(hodg,
                                    c("score", "wtime")],
                        "Z1", "Z2"))
 c1 <- coxph(Surv(time=time, event=delta) ~ Z1 + Z2,
-data=hodg[gtype==1 && dtype==1, ])
+            data=hodg[gtype==1 && dtype==1, ])
 tn(c1, shape="long")
-## T&G. Section 3.2, pg 47.
-c1 <- coxph(Surv(time, status==2) ~ log(bili) + age + strata(edema), data=pbc)
-tn(c1)
-tn(c1, shape="long")
-data(bmt, package="KMsurv")
 tn(c1 <- coxph(Surv(t2, d3) ~ z3*z10, data=bmt))
 ## K&M 2nd ed. Example 7.2, pg 210.
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
-T=tn(s1)
-S=tn(s1, shape="long")
+tn(s1)
+tn(s1, shape="long")
 tn(s1, shape="wide", tweOnly=FALSE)
 ## formula object
 ## K&M 2nd ed. Example 7.9, pg 224.
 data(kidney, package="KMsurv")
 with(kidney, tn(Surv(time=time, event=delta) ~ type, shape="long", twe=F))
 ## null model
-with(kidney, tn(Surv(time=time, event=delta) ~ 0))
-## this doesn't work
-## s1 <- survfit(Surv(t2, d3) ~ z3*z10, data=bmt)
+## this is passed to tn.Surv
+(t1 <- with(kidney, tn(Surv(time=time, event=delta) ~ 0)))
+## but the original call is preserved
+attr(t1, "call")
+## survival::survfit doesn't accept interaction terms
+\dontrun{
+    s1 <- survfit(Surv(t2, d3) ~ z3*z10, data=bmt)}
+## but tn.formula does...
 tn(Surv(time=t2, event=d3) ~ z3*z10, data=bmt, shape="wide")
-tn(Surv(time=t2, event=d3) ~ ., data=bmt)
+## the same is true for the '.' (dot operator) in formulas
+suppressMessages(tn(Surv(time=t2, event=d3) ~ ., data=bmt))
 ## example where each list element has only one row
 ## also names are impractical
-tn(Surv(time=t2, event=d3) ~ ., data=bmt)
-## a null model
-with(kidney, tn(Surv(time=time, event=delta) ~ 0, by="st"))
-#' 
+(t1 <- tn(Surv(time=t2, event=d3) ~ ., data=bmt, sh="long"))
+## T&G. Section 3.2, pg 47.
+## stratified model
+c1 <- coxph(Surv(time, status==2) ~ log(bili) + age + strata(edema), data=pbc)
+tn(c1, sh="long")
+tn(c1, shape="long")
+data(bmt, package="KMsurv")
+
 tn.tn <- function(x, ...,
                   shape=attr(x, "shape"),
                   tweOnly=NULL,
                   abbNames=NULL,
                   call=NULL){
-  partMatch(env1=environment(), ...)
-  if(shape=="long"){
-    x[, "e1" := sum(status), by=list(t, cg)]
-    x[, "n1" := max(ncg), by=list(t, cg)]
+    partMatch(env1=environment(), ...)
+    if(shape=="long"){
+        x[, "e1" := sum(status), by=list(t, cg)]
+        x[, "n1" := max(ncg), by=list(t, cg)]
 ### x[, "ncg1" := max(ncg), by=list(time, cg)]
-    x[, "status" := NULL]
+        #x[, "status" := NULL]
 ###
-    t1 <- x[, sort(unique(t))]
-    lt1 <- length(t1)
-    cgInt1 <- x[, unique(as.integer(cg))]
-    lcg1 <- length(cgInt1)
-    w1 <- "\nMay be inefficient use of memory."
-    w2 <- "One covariate group for each time point!"
-    if(lcg1 == lt1) warning(c(w2, w1))
-    w3 <- "Note large no. covariate groups relative to time points"
-    if(lt1 / lcg1 < 2) warning(c(w3, w1))
-    ## new memory assignment here
-    res1 <- data.table::data.table(
-      matrix(rep(as.integer(c(NA, 0)), lcg1 * lt1),
-             ncol=2 * lcg1,
-             nrow=lt1,
-             byrow=TRUE))
-    ## import zoo::na.locf.default
-    locf <- zoo::na.locf.default
-    ## if cg not abbreviated
-    ## use as.integer on factor(cg) instead
-    abbFn <- if(abbNames) identity else as.integer 
-    ##
-    ## a 'for' loop is easier
-    ## to read/ debug here
-    for(k in seq_along(cgInt1)){
-         k1 <- cgInt1[k]
-         ## subset by covariate group
-         tn1 <- x[abbFn(cg)==k1,
-                  list(n1[1L], e1[1]),
-                  by="t"]
-         ## index of time
-         ind1 <- which(t1 %in% tn1[, t])
-         ## number at risk
-         ## map e.g. k=2 to j=2,3 with
-         ## j=2L * k
-         j1 <- 2L * k
-         data.table::set(res1,
-                         i=ind1, j=j1 - 1L,
-                         value=tn1[, V1])
-         if (ind1[1] > 1L){
-           ## set first rows to max(n)
-           data.table::set(res1,
-                           i=seq.int(ind1[1]), j=j1 - 1L,
-                           value=tn1[, max(V1)])
-         }
-         ## index of missing n
-         miss1 <- any(is.na(res1[[j1 - 1L]]))
-         if(miss1){
-           data.table::set(res1, j=j1 - 1L,
-                           value=as.integer(locf(res1[[j1 - 1L]])))
-         }
-         ## add no. events
-         data.table::set(res1,
-                         i=ind1, j=j1,
-                         value=as.integer(tn1[, V2]))
-       }
-    ## covariate group names
-    if(abbNames){
-      cgn1 <- cgInt1
-    } else {
-      cgn1 <- attr(x, "longNames")[, longName]
+        t1 <- x[, sort(unique(t))]
+        lt1 <- length(t1)
+        cgInt1 <- x[, unique(as.integer(cg))]
+        lcg1 <- length(cgInt1)
+        m1 <- '\nMay be inefficient use of memory. Suggest shape="long" instead.\n'
+        m2 <- "\nOne covariate group for each time point!"
+        if(lcg1 == lt1) message(c(m2, m1))
+        m3 <- "\nNote large no. covariate groups relative to no. of time points"
+        if(lt1 / lcg1 < 2) message(c(m3, m1))
+        ## new memory assignment here
+        res1 <- data.table::data.table(
+            matrix(rep(as.integer(c(NA, 0)), lcg1 * lt1),
+                   ncol=2 * lcg1,
+                   nrow=lt1,
+                   byrow=TRUE))
+        ## import zoo::na.locf.default
+        locf <- zoo::na.locf.default
+        ## if cg not abbreviated
+        ## use as.integer on factor(cg) instead
+        abbFn <- if(abbNames){
+            identity
+        } else {
+            as.integer
+        }
+        ##
+        ## a 'for' loop is easier
+        ## to read/ debug here
+        for(k in seq_along(cgInt1)){
+            k1 <- cgInt1[k]
+            ## subset by covariate group
+            tn1 <- x[abbFn(cg)==k1,
+                     list(n1[1L], e1[1]),
+                     by="t"]
+            ## index of time
+            ind1 <- which(t1 %in% tn1[, t])
+            ## number at risk
+            ## map e.g. k=2 to j=2,3 with
+            ## j=2L * k
+            j1 <- 2L * k
+            data.table::set(res1,
+                            i=ind1, j=j1 - 1L,
+                            value=tn1[, V1])
+            if (ind1[1] > 1L){
+                ## set first rows to max(n)
+                data.table::set(res1,
+                                i=seq.int(ind1[1]), j=j1 - 1L,
+                                value=tn1[, max(V1)])
+            }
+            ## index of missing n
+            miss1 <- any(is.na(res1[[j1 - 1L]]))
+            if(miss1){
+                data.table::set(res1, j=j1 - 1L,
+                                value=as.integer(locf(res1[[j1 - 1L]])))
+            }
+            ## add no. events
+            data.table::set(res1,
+                            i=ind1, j=j1,
+                            value=as.integer(tn1[, V2]))
+        }
+        ## covariate group names
+        if(abbNames){
+            cgn1 <- cgInt1
+        } else {
+            cgn1 <- attr(x, "longNames")[, longName]
+        }
+        ne_ <- c("n_", "e_")
+        ## names for 'n' and 'e' columns
+        nne1 <- as.vector(outer(ne_, cgn1, paste, sep=""))
+        data.table::setnames(res1, nne1)
+        ## make no. at risk (total) per time period
+        ## add columns 1, 3, ... , ncol(res1)-1
+        res1[, "n" := rowSums(.SD),
+             .SDcols = seq.int(from=1L, to=(2L * lcg1 - 1L), by=2L)]
+        ## total events per time period
+        ## add columns 2, 4, ... , ncol(res1)
+        res1[, "e" := rowSums(.SD),
+             .SDcols = seq.int(from=2L, to=(2L * lcg1), by=2L)]
+        ## now add time
+        res1[, "t" := t1]
+        data.table::setcolorder(res1,
+                                c("t", "n", "e", nne1))
+        ln1 <- attr(x, "longNames")
+        if(tweOnly){
+            ## times with greater than zero events
+            x[, "tGr0e" := sum(status) > 0L, by=t]
+            ## subset longNames
+            cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
+            ln1[, "twe" := id %in% cg1]
+            ## subset x and drop tGr0e from x
+            x <- x[(tGr0e)]
+            x[, tGr0e := NULL]
+        }
+        setAttrTn(res1,
+                  "shape"="wide",
+                  "tweOnly"=tweOnly,
+                  "abbNames"=abbNames,
+                  "longNames"=ln1,
+                  "ncg"=lcg1,
+                  "call"=call,
+                  "class"=c("tn", class(x)))
+        return(res1)
     }
-    ## names for 'n' and 'e' columns
-    nen1 <- c("n_", "e_")
-    nen2 <- as.vector(outer(nen1, cgn1, paste, sep=""))
-    data.table::setnames(res1, nen2)
-    ## make no. at risk (total) per time period
-    ## add columns 1, 3, ... , ncol(res1)-1
-    res1[, "n" := rowSums(.SD),
-         .SDcols = seq.int(from=1L, to=(2L * lcg1 - 1L), by=2L)]
-    ## total events per time period
-    ## add columns 2, 4, ... , ncol(res1)
-    res1[, "e" := rowSums(.SD),
-         .SDcols = seq.int(from=2L, to=(2L * lcg1), by=2L)]
-    ## now add time
-    res1[, "t" := t1]
-    data.table::setcolorder(res1,
-                            c("t", "n", "e", nen2))
-    if(tweOnly){
-      ## times with greater than zero events
-      x[, "tGr0e" := sum(status) > 0L, by=t]
-      ## subset longNames
-      cg1 <- x[x[, tGr0e], unique(as.integer(cg))]
-      ln1[, "twe" := id %in% cg1]
-      ## subset x and drop tGr0e from x
-      x <- x[(tGr0e)]
-      x[, tGr0e := NULL]
+    if(shape=="wide"){
+        n_ <- grep("n_", names(x))
+        e_ <- grep("e_", names(x))
+        nMe1 <- x[, .SD, , .SDcols=n_] - x[, .SD, ,.SDcols=e_]
+        ## no. censored at each time
+        e_ <- grep("e_", names(x), value=TRUE)
+        substr(e_, 1, 1) <- "c"
+        x[, (e_) :=
+          nMe1 - data.table::rbindlist(
+              list(
+                  x[seq.int(2, nrow(x)), .SD, ,.SDcols=n_],
+                  as.list(rep(0L, length(n_)))))]
+        ## total no. censored per time period
+        x[, "nc" := rowSums(.SD),
+          .SDcols = grep("c_", names(x))]
+        ## no. observations
+        nObs1 <- x[,  sum(e + nc)]
+        res1 <- data.table::data.table(
+            "t" = rep(x[, t], x[, e + nc]))
+        res1[, "t" := rep(x[, t], x[, e + nc])]
+        res1[, "n" := rev(seq.int(nrow(res1)))]
+        res1[, "status" := unlist(mapply(
+                            rep, x=c(1,0), times=x[, c(e, nc), by=t]$V1))]
+        ## names for covariate groups
+        cg_ <- gsub("c_", "", e_)
+        res1[, "cg" := unlist(mapply(
+                        rep, x=cg_, times=x[, c(e, nc), by=t]$V1))]
+        res1[, "cg" := as.factor(cg)]
+        ## number at risk per covariate group
+        res1[, "ncg" := rev(seq.int(length(n))), by=cg]
+        setAttrTn(res1,
+                  "shape"="long",
+                  "tweOnly"=tweOnly,
+                  "abbNames"=abbNames,
+                  "longNames"=attr(x, "longNames"),
+                  "ncg"=length(cg_),
+                  "call"=call,
+                  "class"=c("tn", class(x)))
+        return(res1)
     }
-    setAttrTn(res1,
-              "shape"="wide",
-              "tweOnly"=tweOnly,
-              "abbNames"=abbNames,
-              "longNames"=attr(x, "longNames"),
-              "ncg"=lcg1,
-              "call"=call,
-              "class"=c("tn", class(x)))
-    return(res1)
-  }
-  if(shape=="wide"){
-    n_ <- grep("n_", names(x))
-    e_ <- grep("e_", names(x))
-    nMe1 <- x[, .SD, , .SDcols=n_] - x[, .SD, ,.SDcols=e_]
-    ## no. censored at each time
-    e_ <- grep("e_", names(x), value=TRUE)
-    substr(e_, 1, 1) <- "c"
-    x[, (e_) :=
-      nMe1 - data.table::rbindlist(
-        list(
-          x[seq.int(2, nrow(x)), .SD, ,.SDcols=n_],
-          as.list(rep(0L, length(n_)))))]
-    ## total no. censored per time period
-    x[, "nc" := rowSums(.SD),
-      .SDcols = grep("c_", names(x))]
-    ## no. observations
-    nObs1 <- x[,  sum(e + nc)]
-    res1 <- data.table::data.table(
-      "t" = rep(x[, t], x[, e + nc]))
-    res1[, "t" := rep(x[, t], x[, e + nc])]
-    res1[, "n" := rev(seq.int(nrow(res1)))]
-    res1[, "status" := unlist(mapply(
-                      rep, x=c(1,0), times=x[, c(e, nc), by=t]$V1))]
-    ## names for covariate groups
-    cg_ <- gsub("c_", "", e_)
-    res1[, "cg" := unlist(mapply(
-                      rep, x=cg_, times=x[, c(e, nc), by=t]$V1))]
-    res1[, "cg" := as.factor(cg)]
-    ## number at risk per covariate group
-    res1[, "ncg" := rev(seq.int(length(n))), by=cg]
-    setAttrTn(res1,
-              "shape"="long",
-              "tweOnly"=tweOnly,
-              "abbNames"=abbNames,
-              "longNames"=attr(x, "longNames"),
-              "ncg"=length(cg_),
-              "call"=call,
-              "class"=c("tn", class(x)))
-    return(res1)
-  }
 }
 ### helper functions
 ###
 ## partial matching with an ellipsis
 ## from environment env1
 partMatch <- function(env1=NULL, ...){
-  l1 <- as.list(substitute(list(...)))[-1L]
-  n1 <- c("sh", "twe", "abb", "con")
-  s1 <- sapply(n1, pmatch, names(l1))
-  n2 <- c("shape", "tweOnly", "abbNames", "contrasts.arg")
-  names(s1) <- n2
-  s1 <- s1[!is.na(s1)]
-  for(i in seq_along(s1)){
-    p1 <- paste0("env1$", names(s1)[i], " <- ", l1[[s1[i]]])
-    ## this isn't v. pretty...
-    eval(parse(text=p1))
-  }
+    l1 <- as.list(substitute(list(...)))[-1L]
+    n1 <- c("sh", "twe", "abb", "con")
+    s1 <- sapply(n1, pmatch, names(l1))
+    n2 <- c("shape", "tweOnly", "abbNames", "contrasts.arg")
+    names(s1) <- n2
+    s1 <- s1[!is.na(s1)]
+    for (i in seq_along(s1)){
+        names(l1)[s1[i]] <- names(s1[i])
+    }
+    l1 <- l1[names(l1) %in% n2]
+    for(i in seq_along(l1)){
+        if (is.character(l1[[i]])){
+            p1 <- paste0("env1$", names(l1)[i], " <- \"", l1[[i]], "\"")
+        } else { 
+            p1 <- paste0("env1$", names(l1)[i], " <- ", l1[[i]])
+        }
+        ## this isn't v. pretty...
+        eval(parse(text=p1))
+    }
 }
 ## collapse/ paste a data table
 ## x = data.table
@@ -642,15 +669,23 @@ collapseDT <- function(x,
                        except=c("time", "status"),
                        nName="cg"){
 ### stopifnot(inherits, x, "data.table")
-  toCollapse1 <- names(x)[!(names(x) %in% except)]
-  x[, (nName) := paste(toCollapse1,
-                .SD,
-                sep="=",
-                collapse=", "),
-    .SDcols=toCollapse1,
-    by=seq.int(nrow(x))]
-  toRemove1 <- which(names(x) %in% toCollapse1)
-  data.table::set(x, j=toRemove1, value=NULL)
+    if(ncol(x)==1){
+        data.table::setnames(x, nName)
+        return(invisible())
+    }
+    ## names in 'except'?
+    toCollapse1 <- names(x)[!names(x) %in% except]
+    x[, (nName) := paste(toCollapse1,
+                    .SD,
+                    sep="=",
+                    collapse=", "),
+      .SDcols=toCollapse1,
+      by=seq.int(nrow(x))]
+    toRemove1 <- which(names(x) %in% toCollapse1)
+    if(length(toRemove1)){
+        data.table::set(x, j=toRemove1, value=NULL)
+    }
+    return(invisible())
 }
 ## set attributes for a tn data.table
 setAttrTn <- function(x,
@@ -662,14 +697,21 @@ setAttrTn <- function(x,
                       call=NULL,
                       class=NULL){
 ### stopifnot(inherits(x, "tn"))
-  ## can't use .Internal in a package...
-  ## l1 <- .Internal(ls(envir=environment(), all.names=TRUE))
-  l1 <- ls()
-  l1 <- l1[!grepl("x", l1)]
-  for(i in seq_along(l1)){
-    data.table::setattr(x,
-                        name=l1[i],
-                        value=eval(as.name(l1[i])))
-  }
-  return(x)
+    ## can't use .Internal in a package...
+    ## l1 <- .Internal(ls(envir=environment(), all.names=TRUE))
+    l1 <- ls()
+    l1 <- l1[!grepl("x", l1)]
+    for(i in seq_along(l1)){
+        data.table::setattr(x,
+                            name=l1[i],
+                            value=eval(as.name(l1[i])))
+    }
+    return(x)
 }
+        toRemove1 <- seq.int(ncol(x))[!seq.int(ncol(x))]
+        data.table::set(x, j=xNS1, value=NULL)
+        ## collapse strata
+        collapseDT(x,
+                   except=NA,
+                   nName="strat")
+   #    

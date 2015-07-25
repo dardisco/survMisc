@@ -55,7 +55,7 @@
 #' x[0, ]
 #' (data.table::set(x, j=seq.int(ncol(x)), value=NULL))
 print.tn <- function(x, ...,
-                      maxRow=getOption("datatable.print.nrows", 100L),
+                      maxRow=getOption("datatable.print.nrows", 50L),
                       nRowP=getOption("datatable.print.topn", 5L),
                       pRowNames=TRUE,
                       maxCol=getOption("survMisc.maxCol", 8L),
