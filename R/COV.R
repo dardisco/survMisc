@@ -14,7 +14,7 @@ COV <- function(x, ...) UseMethod("COV")
 #'  \emph{number of events}, \eqn{e_t}{e[t]}.
 #'  These are assumed to be ordered by discrete times.
 #'  \cr
-#'  A method is available for objects of \code{class} \code{tne}.
+#'  A method is available for objects of \code{class} \code{tn}.
 #' @param ... Additional arguments (not implemented).
 #'  \cr
 #'  The following arguments apply only to the default method.
@@ -79,80 +79,80 @@ COV <- function(x, ...) UseMethod("COV")
 #' @examples
 #' data(kidney, package="KMsurv")
 #' k1 <- with(kidney,
-#'             tne(Surv(time=time, event=delta) ~ type)
+#'            tn(Surv(time=time, event=delta) ~ type))
 #' with(k1, COV(x=e, n=n, n1=n_1))
 #' COV(k1)
 #'
 COV.tn <- function(x, ...){
-    stopifnot(attr(x, "byWhat")=="time")
-    ## no. of groups
-    g1 <- attr(x, "ncg")
-    if (g1 <= 1) error("Only valid if more than one covariate group")
-    ## if 2 groups only
-    if (g1==2){
-      n1 <- ifelse(attr(x, "short.Names"),
-                   "n_1",
-                   paste0)
-      n1 <- names(x)
-      data.table::setnames(x, c(names(x)[1:3],
-                                "n_1",
-                                names(x)[5:length(names(x))]))
-      data.table::setattr(x, "cov",
-                          x[,
-                            (n_1 / n) * (1 - (n_1 / n)) *
-                            ((n - e) / (n - 1)) * e]
-    }
-    ## more than 2 groups?
-    if(g1 > 2){
-    ### hold results
-        res1 <- array(data=0,  dim=c(g1, g1, nrow(x)))
-### diagonal elements
-        for (i in seq.int(g1)){
-            res1[i, i, ] <- (n1[, i] * (n - n1[, i]) * e * (n - e)) / ((n^2) * (n - 1))
-        }
-### off-diagonal elements
-        for (j in seq.int(g1)){
-            for (k in seq.int(g1)){
-                if (j==k) next
-                res1[j, k, ] <- -( n1[, j]*n1[, k]*e*(n-e) ) / ( (n^2)*(n-1) )
-            }
-        }
-        dimnames(res1) <- list(1:g1, 1:g1, t)
-    }
-    return(res1)
-      }
-    
+  ## no. of groups
+  g1 <- attr(x, "ncg")
+  if (g1 <= 1) stop("Only valid if more than one covariate group")
+  ## if 2 groups only
+  if (g1==2){
+    n1 <- names(x)[grepl("n_", names(x))][1]
+    data.table::setattr(x, "cov",
+                        x[,
+                          (get(n1) / n) * (1 - (get(n1) / n)) *
+                          ((n - e) / (n - 1)) * e]
+                        )
+  }
+  ## more than 2 groups?
+  if(g1 > 2){
+### hold results
+    res1 <- array(data=0,  dim=c(g1, g1, nrow(x)))
+    n1 <- as.matrix(x[, .SD, .SDcols=grep("n_", names(x))])
+    ## diagonal elements
+    d1 <- n1 * (x[, n] - n1) * x[, e * (n - e) / (n^2 * (n - 1L))]
+    ## off-diagonals
+    od1 <- - apply(n1, 1, prod) * x[, e * (n - e) / (n^2 * (n-1L))] 
+    for (i in seq.int(nrow(x))){
+      diag(res1[, , i]) <- d1[seq.int(from=(i + 1 - g1),
+                                      to=g1*i)]
+      upper.tri(res1[, , i]) <- od1[seq.int(from=(i + 1 - g1),
+                                            to=g1*i)]
+      lower.tri(res1[, , i]) <- od1[seq.int(from=(i + 1 - g1),
+                                            to=g1*i)]
+    }             
+    dimnames(res1) <- list(1:g1, 1:g1, x[, t])
+    data.table::setattr(x, "cov", res1)
+  }
+  return(attr(x, "cov"))
+}
+###---------------- 
 COV.stratTn <- function(x, ...){
     return(lapply(x, FUN=coV))
 }
-###----------------------------------------
-## covMatSurv <- function(t, n, e, n1){
-##     stopifnot(all(sapply(list(t, n, e, n1), is.numeric)))
-##     ## ensure all same length
-##     stopifnot(diff(range(sapply(list(t, n, e), length))) < .Machine$double.eps)
-## ### no. of groups
-##     g1 <- ifelse(
-##         is.null(dim(n1)) | ncol(n1)==1,
-##         1,
-##         ncol(n1))
-## ### if 2 groups only
-##     if (g1==1){
-##         var1 <- (n1 / n) * (1 - (n1 / n)) * ((n - e) / (n - 1)) * e
-##         return(var1)
-##     }
-## ### hold results
-##     a1 <- array(data=0,  dim=c(g1, g1, length(t)))
-## ### diagonal elements
-##     for (i in seq_len(g1)){
-##         a1[i, i, ] <- (n1[, i] * (n - n1[, i]) * e * (n - e)) / ((n^2) * (n - 1))
-##     }
-## ### off-diagonal elements
-##     for (j in seq_len(g1)){
-##         for (k in 1:g1){
-##             if (j==k) next
-##             a1[j, k, ] <- -( n1[, j]*n1[, k]*e*(n-e) ) / ( (n^2)*(n-1) )
-##         }
-##     }
-##     dimnames(a1) <- list(1:g1, 1:g1, t)
-##     return(a1)
-## }
+###---------------- 
+COV.numeric <- function(x, n, n1){
+  stopifnot(all(sapply(list(x, n, n1), is.numeric)))
+  ## ensure all same length
+  stopifnot(
+    diff(range(sapply(list(x, n), length)))
+    < .Machine$double.eps)
+  ## no. of groups
+  g1 <- ncol(n1)
+  if (is.null(g1)) g1 <- 1L
+  ## if 2 groups only
+  if (g1==1){
+    cov1 <- (n1 / n) * (1 - (n1 / n)) * ((n - x) / (n - 1)) * x
+    return(cov1)
+  }
+  ## hold results
+  a1 <- array(data=0,  dim=c(g1, g1, length(t)))
+  ## diagonal elements
+  for (i in seq_len(g1)){
+    a1[i, i, ] <-
+      (n1[, i] * (n - n1[, i]) * x * (n - x)) / (n^2 * (n - 1))
+  }
+  ## off-diagonal elements
+  for (j in seq_len(g1)){
+    for (k in 1:g1){
+      if (j==k) next
+      a1[j, k, ] <-
+        - (n1[, j] * n1[, k] * x * (n - x)) / (n^2 * (n-1))
+    }
+  }
+  dimnames(a1) <- list(1:g1, 1:g1, 1:length(x))
+  return(a1)
+}
+    

@@ -216,22 +216,22 @@ tn.coxph <- function(x, ...,
                      tweOnly=TRUE,
                      abbNames=TRUE,
                      contrasts.arg=NULL){
-    shape <- match.arg(shape)
-    partMatch(env1=environment(), ...)
-    x$call$formula <- stats::terms(
+  shape <- match.arg(shape)
+  partMatch(env1=environment(), ...)
+  x$call$formula <- stats::terms(
         x=formula(x$call),
-        specials=c("strata", "cluster", "tt"))
-    x$call$drop.unused.levels <- TRUE
-    call1 <- x$call
-    x$call[[1]] <- as.name("model.frame")
-    ## model.frame
-    xMF1 <- eval(x$call, parent.frame())
-    tn(x=xMF1,
-       shape=shape,
-       tweOnly=tweOnly,
-       abbNames=abbNames,
-       contrasts.arg=contrasts.arg,
-       call=call1)
+    specials=c("strata", "cluster", "tt"))
+  x$call$drop.unused.levels <- TRUE
+  call1 <- x$call
+  x$call[[1]] <- as.name("model.frame")
+  ## model.frame
+  xMF1 <- eval(x$call, parent.frame())
+  tn(x=xMF1,
+     shape=shape,
+     tweOnly=tweOnly,
+     abbNames=abbNames,
+     contrasts.arg=contrasts.arg,
+     call=call1)
 }
 #' @rdname tn
 #' @aliases tn.survfit
@@ -330,17 +330,17 @@ tn.data.frame <- function(x, ...,
                    nName="cg")
         xDT[, "cg" := as.factor(cg)]
         xDT[, "strat" := as.factor(xDTstr[, strat])]
-        l1 <- by(xDT[, list(time, status, cg)],
-                 xDT[, strat],
-                 identity)
+        #browser()
+        xDTstn1 <- seq.int(names(xDT))[!(grepl("^strat", names(xDT)))]
         res1 <- vector(mode="list")
-        for (i in seq_along(l1)){
-            res1[i] <- tn(l1[[i]], 
-                          shape=shape,
-                          tweOnly=tweOnly,
-                          abbNames=abbNames)
-            names(res1)[i] <- names(l1)[i]
+        for (i in xDT[, levels(strat)]){
+          res1[[i]] <- xDT[levels(strat)==i, .SD, .SDcols=xDTstn1]
         }
+        lapply(res1, function(x) x[, "c":=1])
+        lapply(res1, tn, shape=shape,
+               tweOnly=tweOnly,
+               abbNames=abbNames)
+        names(res1) <- xDT[, levels(strat)]
         data.table::setattr(res1,
                             "class",
                             c("stratTn", class(res1)))
@@ -446,14 +446,14 @@ data.table::setnames(hodg,
                        "Z1", "Z2"))
 c1 <- coxph(Surv(time=time, event=delta) ~ Z1 + Z2,
             data=hodg[gtype==1 && dtype==1, ])
-tn(c1, shape="long")
+t1 <- tn(c1, shape="long")
 tn(c1 <- coxph(Surv(t2, d3) ~ z3*z10, data=bmt))
 ## K&M 2nd ed. Example 7.2, pg 210.
 data(kidney, package="KMsurv")
 s1 <- survfit(Surv(time=time, event=delta) ~ type, data=kidney)
 tn(s1)
 tn(s1, shape="long")
-tn(s1, shape="wide", tweOnly=FALSE)
+tn(s1, shape="wide", tweOnly=T)
 ## formula object
 ## K&M 2nd ed. Example 7.9, pg 224.
 data(kidney, package="KMsurv")
@@ -479,6 +479,7 @@ c1 <- coxph(Surv(time, status==2) ~ log(bili) + age + strata(edema), data=pbc)
 tn(c1, sh="long")
 tn(c1, shape="long")
 data(bmt, package="KMsurv")
+
 
 tn.tn <- function(x, ...,
                   shape=attr(x, "shape"),
@@ -509,12 +510,13 @@ tn.tn <- function(x, ...,
                    byrow=TRUE))
         ## import zoo::na.locf.default
         locf <- zoo::na.locf.default
+        ## abbFn = abbreviate function
         ## if cg not abbreviated
         ## use as.integer on factor(cg) instead
-        abbFn <- if(abbNames){
-            identity
+        if (abbNames){
+          abbFn <- identity
         } else {
-            as.integer
+          abbFn <- as.integer
         }
         ##
         ## a 'for' loop is easier
@@ -651,12 +653,12 @@ partMatch <- function(env1=NULL, ...){
     }
     l1 <- l1[names(l1) %in% n2]
     for(i in seq_along(l1)){
-        if (is.character(l1[[i]])){
+      ## this isn't v. pretty...
+      if (is.character(l1[[i]])){
             p1 <- paste0("env1$", names(l1)[i], " <- \"", l1[[i]], "\"")
         } else { 
             p1 <- paste0("env1$", names(l1)[i], " <- ", l1[[i]])
         }
-        ## this isn't v. pretty...
         eval(parse(text=p1))
     }
 }
@@ -707,8 +709,7 @@ setAttrTn <- function(x,
                             value=eval(as.name(l1[i])))
     }
     return(x)
-}
-        toRemove1 <- seq.int(ncol(x))[!seq.int(ncol(x))]
+}      toRemove1 <- seq.int(ncol(x))[!seq.int(ncol(x))]
         data.table::set(x, j=xNS1, value=NULL)
         ## collapse strata
         collapseDT(x,
