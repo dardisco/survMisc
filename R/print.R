@@ -54,7 +54,7 @@
 #' x[1:80, ]
 #' x[0, ]
 #' (data.table::set(x, j=seq.int(ncol(x)), value=NULL))
-print.tn <- function(x, ...,
+print.tne <- function(x, ...,
                       maxRow=getOption("datatable.print.nrows", 50L),
                       nRowP=getOption("datatable.print.topn", 5L),
                       pRowNames=TRUE,
@@ -131,3 +131,117 @@ print.tn <- function(x, ...,
     print(toPrint1, right=TRUE, quote=FALSE)
     return(invisible())
 }
+### 
+print.lrt <- function(x, ..., what=NULL){
+    x1 <- data.table::copy(x)
+    data.table::setattr(x1, "class", "data.frame")
+    rownames(x1) <- x1[, "W"]
+    x1[, "W"] <- NULL
+    if (ncol(x1)==3){
+        x1[, "pChisq"] <- format.pval(x1[, "pChisq"])
+        stats::printCoefmat(x1,
+                            has.Pvalue=TRUE,
+                            cs.ind=1L, # *c*oefficients and *s*tandard errors
+                            dig.tst=getOption("digits"))
+    } else { 
+        x1[, c("pNorm", "pChisq")] <- format.pval(x1[, c("pNorm", "pChisq")])
+        ## no need to print pChiSq values routinely
+        if (is.null(what)){
+            stats::printCoefmat(x1[, c("Q", "Var", "Z", "pNorm")],
+                                has.Pvalue=TRUE,
+                                cs.ind=seq.int(2), 
+                                dig.tst=getOption("digits"))
+        } else {
+            stats::printCoefmat(x1[, c("Q", "Var", "chiSq", "df", "pChisq")],
+                                has.Pvalue=TRUE,
+                                cs.ind=as.integer(c(1, 2)),
+                                dig.tst=getOption("digits"))
+        }
+    }
+}
+###
+print.sup <- function(x, ...){
+    x1 <- data.table::copy(x)
+    data.table::setattr(x1, "class", "data.frame")
+    rownames(x1) <- x1[, "W"]
+    x1[, "W"] <- NULL
+    x1[, "pSupBr"] <- format.pval(x1[, "pSupBr"])
+    stats::printCoefmat(x1,
+                        has.Pvalue=TRUE,
+                        cs.ind=seq.int(2), # *c*oefficients and *s*tandard errors
+                        dig.tst=getOption("digits"))
+}
+###
+print.COV <- function(x, ...) print(str(x))
+###
+print.tneAttr <- function(x, ..., abbNames=TRUE){
+    t1 <- x[, sort(unique(t))]
+    ## length of time (number of observations)
+    lt1 <- length(t1)
+    ## covariate groups (as integer)
+    cgInt1 <- x[, seq_along(unique(cg))]
+    ## length (number) of covariate groups
+    lcg1 <- length(cgInt1)
+    ## number of variables
+    nVar1 <- ncol(x) - 2L
+### new structure here
+    res1 <- data.table::data.table(
+        matrix(rep(0, nVar1 * lcg1 * lt1),
+               ncol=nVar1 * lcg1,
+               nrow=lt1,
+               byrow=TRUE))
+    res1[, "t" := t1]
+    ## import zoo::na.locf.default
+    locf <- zoo::na.locf.default
+    ## abbFn = abbreviate function
+    ## if cg not abbreviated
+    ## use as.integer on factor(cg) instead
+    if (abbNames){
+        abbFn <- identity
+    } else {
+        abbFn <- as.integer
+    }
+    ## a 'for' loop is easier
+    ## to read/ debug here
+    for (k in cgInt1){
+        ## subset by covariate group
+        s1 <- x[abbFn(cg)==k, .SD, .SD=grep("[^cg]", colnames(x))]
+        ## index of time
+        ind1 <- which(t1 %in% s1[, t])
+        s1[, t := NULL]
+        ## number at risk
+        ## map e.g. k=2 to j=2,3 with
+        ## j=2L * k
+        j1 <- nVar1 * k
+        data.table::set(res1,
+                        i=ind1,
+                        j=seq.int(from=j1 - (nVar1 - 1), to=j1),
+                        value=s1)
+        if (ind1[1] > 1L){
+            ## set first rows to max(n)
+            data.table::set(res1,
+                            i=seq.int(ind1[1]),
+                            j=seq.int(j1),
+                            value=s1[1, ])
+        }
+    }
+    res1[res1==0] <- NA
+    res1 <- locf(res1, fromLast=FALSE)
+    ## covariate group names
+    if(abbNames){
+        cgn1 <- cgInt1
+    } else {
+        cgn1 <- attr(x, "longNames")[, longName]
+    }
+    n1 <- colnames(x)[grep("[^cg\\|t]", colnames(x))]
+    n1 <- paste0(n1, "_")
+    ## names for 'n' and 'e' columns
+    na1 <- as.vector(outer(n1, cgn1, paste, sep=""))
+    data.table::setnames(res1, c(na1, "t"))
+    ## now add time
+    data.table::setcolorder(res1,
+                            c("t", na1))
+    print(res1)
+    return(res1)
+}
+    
