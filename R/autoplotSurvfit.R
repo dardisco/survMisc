@@ -158,7 +158,7 @@ autoplot.survfit <- function(object, ...,
                              sigP=1,
                              pX=0.1,
                              pY=0.1,
-                             timeTicks=c("major", "minor"),
+                             timeTicks=NULL, #c("major", "minor"),
                              tabTitle="Number at risk by time",
                              tabTitleSize=15,
                              tabLabSize=5,
@@ -296,12 +296,17 @@ autoplot.survfit <- function(object, ...,
         scale_y_continuous(yLab) +
         ggtitle(title)
 ### times to show
-    timeTicks <- match.arg(timeTicks)
+    ## timeTicks <- match.arg(timeTicks)
 ### use marks from existing plot
-    if(timeTicks=="major"){
+    if('major' %in% timeTicks || is.null(timeTicks)){
         times1 <- ggplot_build(g1)$panel$ranges[[1]]$x.major_source
     } else {
-        times1 <- ggplot_build(g1)$panel$ranges[[1]]$x.minor_source
+        if ("minor" %in% timeTicks){
+            times1 <- ggplot_build(g1)$panel$ranges[[1]]$x.minor_source
+        } else if (is.numeric(timeTicks) && (!any(timeTicks < 0L))){
+            times1 <- timeTicks
+        } else
+            stop("timeTicks must be \"major\", \"minor\" or a positive numeric vector")
     }
 ### x axis
     g1 <- g1 +
