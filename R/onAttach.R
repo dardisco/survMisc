@@ -1,3 +1,5 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("survMisc 0.4.8")
+    if (interactive()) {
+        packageStartupMessage("survMisc", as.character(utils::packageVersion("survMisc")))
+    }
 }

@@ -1,20 +1,10 @@
 #' @name rsq
 #' @title r^2 measures for a a \code{coxph} or \code{survfit} model
-#' @rdname rsq
-#' @export 
-#'
-rsq <- function(x, ...){
-    UseMethod("rsq")
-}
-#' @rdname rsq
-#' @aliases rsq.coxph
-#' @method rsq coxph
-#' @export
 #'
 #' @param x A \code{survfit} or \code{coxph} object
-#' @param ... Additional arguments (not implemented)
-#' @param sigD \bold{Sig}nificant \bold{d}igits (for ease of display).
-#' If \code{sigD=NULL} will return the original numbers.
+#' @param sigD \bold{sig}nificant \bold{d}igits (for ease of display).
+#' If \code{sigD=NULL}, will return the original numbers.
+#' @inheritParams sf.ten
 #' 
 #' @return A \code{list} with the following elements:
 #'  \item{cod}{The \bold{c}oefficient \bold{o}f \bold{d}etermination, which is
@@ -50,27 +40,43 @@ rsq <- function(x, ...){
 #' \emph{The Stata Journal} \bold{6}(1):83--96.
 #' \href{http://www.stata-journal.com/sjpdf.html?articlenum=st0098}{The Stata Journal}
 #'
-rsq.coxph <- function(x, ..., sigD=2){
-    stopifnot(inherits(x, "coxph"))
-    l0 <- x$loglik[1]
-    l1 <- x$loglik[2]
-    n1 <- x$n
-    ne1 <- x$nevent
-    res1 <-  vector("list", length=3L)
-    names(res1) <- c("nag", "mer", "mev")
-    res1$cod <- 1 - exp((2 / n1) * (l0 - l1))
-    res1$mer <- 1 - exp((2 / ne1) * (l0 - l1))
-    res1$mev <- res1$mer / (res1$mer + pi^2 / 6 * (1 - res1$mer))
-    if (is.null(sigD)) return(res1)
-    res1 <- lapply(res1, function(N)
-                   as.numeric(formatC(signif(N, digits=sigD),
-                                      digits=sigD, format="fg",
-                                      flag="#")))
-}
 #' @rdname rsq
-#' @aliases rsq.survfit
-#' @method rsq survfit
+#' @export 
+#'
+rsq <- function(x, ...) UseMethod("rsq")
+#'
+#' @rdname rsq
 #' @export
+#' @method rsq coxph
+#' @aliases rsq.coxph
+#' @examples
+#' data("kidney", package="KMsurv")
+#' c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney)
+#' cbind(rsq(c1), rsq(c1, sigD=NULL))
+#'
+rsq.coxph <- function(x, ..., sigD=2){
+  stopifnot(inherits(x, "coxph"))
+  l0 <- x$loglik[1]
+  l1 <- x$loglik[2]
+  n1 <- x$n
+  ne1 <- x$nevent
+  res1 <- vector(mode="list", length = 3L)
+  names(res1) <- c("cod", "mer", "mev")
+  res1$cod <- 1 - exp((2 / n1) * (l0 - l1))
+  res1$mer <- 1 - exp((2 / ne1) * (l0 - l1))
+  res1$mev <- res1$mer / (res1$mer + pi^2 / 6 * (1 - res1$mer))
+  if (is.null(sigD)) return(res1)
+  res1 <- lapply(res1, function(N)
+                 as.numeric(formatC(signif(N, digits = sigD),
+                                    digits=sigD,
+                                    format="fg", flag="#")))
+  return(res1)
+}
+#'
+#' @rdname rsq
+#' @export
+#' @method rsq survfit
+#' @aliases rsq.survfit
 #' 
 rsq.survfit <- function(x, ..., sigD=2){
     c1 <- deparse(x$call)

@@ -14,10 +14,10 @@ rsq(x, ...)
 \arguments{
 \item{x}{A \code{survfit} or \code{coxph} object}
 
-\item{...}{Additional arguments (not implemented)}
+\item{sigD}{\bold{sig}nificant \bold{d}igits (for ease of display).
+If \code{sigD=NULL}, will return the original numbers.}
 
-\item{sigD}{\bold{Sig}nificant \bold{d}igits (for ease of display).
-If \code{sigD=NULL} will return the original numbers.}
+\item{...}{Additional arguments (not implemented).}
 }
 \value{
 A \code{list} with the following elements:
@@ -40,6 +40,15 @@ A \code{list} with the following elements:
 }
 \description{
 r^2 measures for a a \code{coxph} or \code{survfit} model
+
+
+
+
+}
+\examples{
+data("kidney", package="KMsurv")
+c1 <- coxph(Surv(time=time, event=delta) ~ type, data=kidney)
+cbind(rsq(c1), rsq(c1, sigD=NULL))
 }
 \references{
 Nagelkerke NJD, 1991.

@@ -1,34 +1,37 @@
 #' @name comp
-#' @title Compare survival curves
+#' @title compare survival curves
+#' 
+#' @include ten.R
+#' @include asWide.R
+#' @include COV.R
+#' @include predict.R
+#' @include sf.R
+#' @include print.R
+#' 
 #' @rdname comp
-#' @keywords htest
-#'
 #' @export comp
 #'
 comp <- function(x, ...) UseMethod("comp")
-#'
-#' @include tne.R
-#' @include print.R
-#' @include COV.R
-#' @include predict.R
 #'
 #' @param x A \code{tne} object
 #' @param p \eqn{p} for Fleming-Harrington test
 #' @param q \eqn{q} for Fleming-Harrington test
 #' @param scores scores for tests for trend
+#' @inheritParams sf.ten
 #' 
 #' @return The \code{tne} object is given
 #'  additional \code{attributes}.
 #'  \cr
 #' The following are always added:
 #' \item{lrt}{The \bold{l}og-\bold{r}ank family of \bold{t}ests}
-#' \item{wlr}{The \bold{w}eights used in calculating the \bold{l}og-\bold{r}ank tests}
+#' \item{lrw}{The \bold{l}og-\bold{r}ank \bold{w}eights (used in calculating the tests).}
 #' An additional item depends on the number of covariate groups.
 #' \cr
 #' If this is \eqn{=2}:
 #' \item{sup}{The \bold{sup}remum or Renyi family of tests}
 #' and if this is \eqn{>2}:
-#' \item{tft}{Tests for trend}
+#' \item{tft}{Tests for trend. This is given as a \code{list}, 
+#'  with the statistics and the scores used.}
 #' 
 #' @details
 #' The \bold{log-rank} tests are formed from the following elements,
@@ -70,28 +73,29 @@ comp <- function(x, ...) UseMethod("comp")
 #'                            (\frac{n_i - e_i}{n_i - 1}) e_i }}}}{
 #'        Q = sum(W[i] * (e1[i] - n1[i] * e[i] / n[i])) /
 #'           sqrt(sum(W[i]^2 * e1[i] / e[i] * (1 - n1[i] / n[i]) * (n[i] - e[i] / (n[i] - 1)) *e[i]))}
+#' Below, for the Fleming-Harrington weights, 
+#' \eqn{\hat{S}(t)}{S(t)} is the Kaplan-Meier (product-limit) estimator.
+#'  \cr
+#' Note that both \eqn{p} and \eqn{q} need to be \eqn{\geq 0}{>=0}.
+#'  \cr \cr
 #' The weights are given as follows:
 #' \tabular{cll}{
-#' \eqn{1} \tab log-rank \tab \cr
-#' \eqn{n_i}{n[i]} \tab Gehan-Breslow generalized Wilcoxon \tab \cr
-#' \eqn{\sqrt{n_i}}{sqrt(n[i])} \tab Tarone-Ware \tab \cr
-#' \eqn{S1_i}{S1[i]} \tab Peto-Peto's modified survival estimate \tab
+#'  \eqn{1} \tab log-rank \tab \cr
+#'  \eqn{n_i}{n[i]} \tab Gehan-Breslow generalized Wilcoxon \tab \cr
+#'  \eqn{\sqrt{n_i}}{sqrt(n[i])} \tab Tarone-Ware \tab \cr
+#'  \eqn{S1_i}{S1[i]} \tab Peto-Peto's modified survival estimate \tab
 #'                    \eqn{\bar{S}(t)=\prod{1 - \frac{e_i}{n_i + 1}}}{
-#'                             S(t) = cumprod( 1- e/(n+1))} \cr
-#' \eqn{S2_i}{S2[i]} \tab modified Peto-Peto (by Andersen) \tab
-#'                    \eqn{\bar{S}(t)=\prod{1 - \frac{e_i}{n_i + 1}}}{
-#'                              S(t) = cumprod(1 - e/(n + 1))} \cr
-#' \eqn{FH_i}{FH[i]} \tab Fleming-Harrington \tab
-#'                   weight at \eqn{t_0 = 1} and thereafter is:
-#'                   \eqn{\hat{S}(t_{i-1})^p [1-\hat{S}(t_{i-1})^q]}{
-#'                        S(t[i - 1])^p * (1 - S(t)[i - 1]^q)}
+#'                             S1(t) = cumprod(1 - e / (n + 1))} \cr
+#'  \eqn{S2_i}{S2[i]} \tab modified Peto-Peto (by Andersen) \tab
+#'                     \eqn{\tilde{S}(t)=\bar{S} - \frac{n_i}{n_i + 1}}{
+#'                               S2(t) = S1[i] * n[i] / (n[i] + 1) } \cr
+#'  \eqn{FH_i}{FH[i]} \tab Fleming-Harrington \tab
+#'                   The weight at \eqn{t_0 = 1} and thereafter is:
+#'                    \eqn{\hat{S}(t_{i-1})^p [1-\hat{S}(t_{i-1})^q]}{
+#'                         S(t[i - 1])^p * (1 - S(t)[i - 1]^q)}
 #' }
-#' Here, \eqn{\hat{S}(t)}{S(t)} is the Kaplan-Meier (product-limit) estimator.
-#' \cr
-#' Note that both \eqn{p} and \eqn{q} need to be \eqn{\geq 0}{>=0}
-#' \cr \cr
 #' The \bold{supremum (Renyi)} family of tests are designed
-#'  to detect differences in survival curves which cross.
+#'  to detect differences in survival curves which \emph{cross}.
 #' \cr
 #' That is, an early difference in survival in favor of one group
 #'  is balanced by a later reversal.
@@ -106,7 +110,8 @@ comp <- function(x, ...) UseMethod("comp")
 #' \cr
 #' and it's variance:
 #' \deqn{\sigma^2(\tau) = \sum_{t_k \leq \tau} W(t_k)^2 \frac{n1_k n2_k (n_k-e_k) e_k}{n_k^2 (n_k-1)} }{
-#'       simga^2(tau) = SUM(k=1,2,...,tau) W(t[k]) [ n1[k].n2[k].(n[k]-e[k]).e[k] / n[k]^2.(n[k]-1) ] }
+#'       simga^2(tau) = sum(k=1, 2, ..., tau) W(t[k]) (n1[k] * n2[k] * (n[k] - e[k]) * 
+#'                                              e[k] / n[k]^2 * (n[k] - 1) ] }
 #' where \eqn{\tau}{tau} is the largest \eqn{t}
 #' where both groups have at least one subject at risk.
 #' \cr \cr
@@ -134,24 +139,28 @@ comp <- function(x, ...) UseMethod("comp")
 #' Scores used to construct the test are typically \eqn{s = 1,2,...,K},
 #' but may be given as a vector representing a numeric characteristic of the group.
 #' \cr
-#' They are calculated by finding
-#' \deqn{ Z_j(t_i) = \sum_{t_i \leq \tau} W(t_i)[e_{ji} - n_{ji} \frac{e_i}{n_i}], \quad j=1,2,...,K}{
-#'       Z[t(i)] = SUM W[t(i)] [e[j](i) - n[j](i).e(i)/n(i) ]}
-#' The test statistic is
+#' They are calculated by finding:
+#' \deqn{ Z_j(t_i) = \sum_{t_i \leq \tau} W(t_i)[e_{ji} - n_{ji} \frac{e_i}{n_i}], 
+#'                    \quad j=1,2,...,K}{
+#'       Z[t(i)] = sum(W[t(i)] * (e[j](i) - n[j](i) * e(i) / n(i)))}
+#' The test statistic is:
 #' \deqn{Z = \frac{ \sum_{j=1}^K s_jZ_j(\tau)}{\sqrt{\sum_{j=1}^K \sum_{g=1}^K s_js_g \sigma_{jg}}} }{
-#'       Z = SUM(j=1...K) s[j]Z[j] / SUM(j=1..K) SUM(g=1..K) s[j]s[g]sigma[jg]}
+#'       Z = sum(j=1, ..., K) s[j] * Z[j] / sum(j=1, ..., K) sum(g=1, ..., K) 
+#'                                          s[j] * s[g] * sigma[jg]}
 #' where \eqn{\sigma}{sigma} is the the appropriate element in the
-#' variance-covariance matrix (as in \code{\link{covMatSurv}}).
+#' variance-covariance matrix (see \code{\link{COV}}).
 #' \cr
-#' If ordering is present, the statistic \eqn{Z} will be greater than the upper \eqn{\alpha}{alpha}th
+#' If ordering is present, the statistic \eqn{Z} will be greater than the 
+#' upper \eqn{\alpha}{alpha}-th
 #' percentile of a standard normal distribution.
 #'
-#' @note Regarding the Fleming-Harrington weights: \itemize{
-#' \item \eqn{p = q = 0} gives the log-rank test, i.e. \eqn{W=1}
-#' \item \eqn{p=1, q=0} gives a version of the Mann-Whitney-Wilcoxon test
-#' (tests if populations distributions are identical)
-#' \item \eqn{p=0, q>0} gives more weight to differences later on
-#' \item \eqn{p>0, q=0} gives more weight to differences early on
+#' @note Regarding the Fleming-Harrington weights: 
+#' \itemize{
+#'  \item \eqn{p = q = 0} gives the log-rank test, i.e. \eqn{W=1}
+#'  \item \eqn{p=1, q=0} gives a version of the Mann-Whitney-Wilcoxon test
+#'   (tests if populations distributions are identical)
+#'  \item \eqn{p=0, q>0} gives more weight to differences later on
+#'  \item \eqn{p>0, q=0} gives more weight to differences early on
 #' }
 #' The example using \code{alloauto} data illustrates this.
 #' Here the log-rank statistic
@@ -160,6 +169,8 @@ comp <- function(x, ...) UseMethod("comp")
 #' is offset by the high early mortality. However using
 #' Fleming-Harrington weights of \eqn{p=0, q=0.5},
 #' emphasising differences later in time, gives a p-value of 0.04.
+#'  \cr
+#' Stratified models (\code{stratTen}) are \emph{not} yet supported.
 #'
 #' @references Gehan A.
 #' A Generalized Wilcoxon Test for Comparing Arbitrarily
@@ -187,267 +198,208 @@ comp <- function(x, ...) UseMethod("comp")
 #' ## Two covariate groups
 #' ## K&M 2nd ed. Example 7.2, Table 7.2, pp 209--210.
 #' data("kidney", package="KMsurv")
-#' tne1 <- tne(Surv(time=time, event=delta) ~ type, data=kidney, shape="long")
-#' comp(tne1)
+#' t1 <- ten(Surv(time=time, event=delta) ~ type, data=kidney)
+#' comp(t1, p=c(0, 1, 1, 0.5, 0.5), q=c(1, 0, 1, 0.5, 2))
+#' ## see the weights used
+#' attributes(t1)$lrw
 #' ## supremum (Renyi) test; two-sided; two covariate groups
 #' ## K&M 2nd ed. Example 7.9, pp 223--226.
 #' data("gastric", package="survMisc")
-#' tne1 <- tne(Surv(time, event) ~ group, data=gastric)
-#' comp(tne1)
+#' g1 <- ten(Surv(time, event) ~ group, data=gastric)
+#' comp(g1)
 #' ## Three covariate groups
 #' ## K&M 2nd ed. Example 7.4, pp 212-214.
 #' data("bmt", package="KMsurv")
-#' tne1 <- tne(Surv(time=t2, event=d3) ~ group, data=bmt)
-#' comp(tne1)
+#' b1 <- ten(Surv(time=t2, event=d3) ~ group, data=bmt)
+#' comp(b1, p=c(1, 0, 1), q=c(0, 1, 1))
 #' ## Tests for trend
 #' ## K&M 2nd ed. Example 7.6, pp 217-218.
 #' data("larynx", package="KMsurv")
-#' tne1 <- tne(Surv(time, delta) ~ stage, data=larynx)
-#' comp(tne1, scores=c(4, 2, 3, 1))
-#' attr(tne1, "tft")
-#' ### see effect of FH test
+#' l1 <- ten(Surv(time, delta) ~ stage, data=larynx)
+#' comp(l1)
+#' attr(l1, "tft")
+#' ### see effect of F-H test
 #' data("alloauto", package="KMsurv")
-#' tne1 <- tne(Surv(time, delta) ~ type, data=alloauto)
-#' comp(tne1, p=c(0, 1), q=c(1, 1))
-#'
-#'
+#' a1 <- ten(Surv(time, delta) ~ type, data=alloauto)
+#' comp(a1, p=c(0, 1), q=c(1, 1))
+#' 
 #' @rdname comp
-#' @aliases comp.tne
-#' @method comp tne
+#' @aliases comp.ten
+#' @method comp ten
 #' @export
-comp.tne <- function(x,
+#'
+comp.ten <- function(x,
+                     ...,
                      p=1,
                      q=1,
-                     scores=seq.int(attr(x, "ncg"))){
-    stopifnot(inherits(x, "tne"))
+                     scores=seq.int(attr(x, "ncg")),
+                     reCalc=FALSE){
+    if (!reCalc & !is.null(attr(x, "lrt"))) {
+        print(attr(x, "lrt"))
+        print(if (!is.null(attr(x, "sup"))) attr(x, "sup") else attr(x, "tft"))
+        return(invisible())
+    }
     stopifnot(attr(x, "ncg") >= 2)
-    stopifnot(all(c(p, q) >= 0))
-    stopifnot(all(c(p, q) <= 1))
     stopifnot(length(p)==length(q))
     ## number of F-H tests
     fh1 <- length(p)
+    if (!attr(x, "sorted")=="t") data.table::setkey(x, t)
+    ## times with at least one event
+    t1 <- x[e>0, t, by=t][, t]
     ## WEIGHTS
-    data.table::setkey(x, t)
-    wt1 <- data.table::data.table(matrix(rep(1, x[, length(unique(t))] * (5 + fh1)),
-                                         ncol=5 + fh1))
+    wt1 <- data.table::data.table(
+        array(data=1, dim=c(length(t1), 5L + fh1)))
+    ## names for F-H tests
     FHn <- paste("FH_p=", p, "_q=", q, sep="")
-    n1 <- c("lrt", "n", "sqrtN", "S1", "S2", FHn)
+    ## names for weights
+    n1 <- c("1", "n", "sqrtN", "S1", "S2", FHn)
     data.table::setnames(wt1, n1)
     ## Gehan-Breslow generalized Wilcoxon, weight = n
-    data.table::set(wt1, j=2L, value=x[, max(n), by=t][, V1])
+    data.table::set(wt1, j="n",
+                    value=x[e>0, max(n), by=t][, V1])
     ## Tarone-Ware, weight = sqrt(n)
-    data.table::set(wt1, j=3L, value=wt1[, sqrt(.SD), .SDcols=2])
+    data.table::set(wt1, j="sqrtN",
+                    value=wt1[, sqrt(.SD), .SDcols="n"])
     ## Peto-Peto, weight = S(t) = modified estimator of survival function
-    data.table::set(wt1, j=4L, value=x[, cumprod((1 - (sum(e) / (max(n) + 1)))), by=t][, V1])
+    data.table::set(wt1, j="S1",
+                    value=cumprod(x[e > 0, 1 - sum(e) / (max(n) + 1), by=t][, V1]))
     ## modified Peto-Peto (by Andersen), weight = S(t)n / n+1
-    data.table::set(wt1, j=5L, value=wt1[, S1] * x[, max(n) / (max(n) + 1), by=t][, V1])
+    data.table::set(wt1, j="S2",
+                    value=wt1[, S1] * x[e > 0, max(n) / (max(n) + 1), by=t][, V1])
     ## Fleming-Harrington
-    S3 <- x[, cumprod((max(n) - sum(e)) / max(n)), by=t][, V1]
+    S3 <- sf(x=x[e>0, sum(e), by=t][, V1], n=x[e>0, max(n), by=t][, V1], what="S")
     ## weight of first 1st element is 1 as depends on [i-1]
     S3 <- c(1, S3[seq.int(length(S3) - 1L)])
-    ## Fleming-Harrington
-    ## easier to read as a loop here
-    for (j1 in seq.int(fh1)){
-        data.table::set(wt1, j=5L + j1,
-                        value=S3^p[j1] * ((1 - S3)^q[j1]))
-    }
-    ## hold results for log-rank tests
-    res <- data.table::data.table(matrix(0, nrow=5 + fh1, ncol=8))
-    data.table::setnames(res, c("W", "Q", "Var", "Z", "pNorm", "chiSq", "df", "pChisq"))
-    data.table::set(res, j=1L, value=n1)
+    ## assign to names
+    ##  SIMPLIFY = FALSE returns list rather than matrix
+    wt1[, (FHn) := mapply(function(p, q) S3^p * ((1 - S3)^q),
+                          p, q, SIMPLIFY=FALSE)]
+    ## Hold results:
+    ##  if 2 groups res1 = log-rank tests
+    ##  if >2 groups, res1 = tests for trend
+    n2 <- c("W", "Q", "Var", "Z",
+            "pNorm", "chiSq", "df", "pChisq")
+    res1 <- data.table::data.table(matrix(0, nrow=ncol(wt1), ncol=length(n2)))
+    data.table::setnames(res1, n2)
+    data.table::set(res1, j=1L, value=n1)
+    predict(x)
     ## events minus predicted
-    if (!"pred" %in% names(attributes(x))) predict(x)
-    eMP1 <- x[, sum(e) - (max(ncg) * sum(e) / max(n)), by=list(t, cg)]
-    rbindlist(split(eMP1, eMP1[, cg])), by="t"), alllow.cartesian=TRUE)
-    merge(eMP1[, sum(V1), by=t], eMP1[, list(cg,t)], by="t", allow.cartesian=T)
-    x1 <- copy(x[, list(t, cg)])
-    x1[, "eMP" := attr(x, "pred")[, "eMP"]]
-    t1 <- x[, sort(unique(t))]
-    y1 <- x[, unique(cg)]
-    ## get no. at risk for each unique time and covariate group
-    n1 <- lapply(t1, FUN=function(t1) (setkey(x1[t==t1, sum(eMP), by=cg][y1], cg)))
-    apply(x1, 1, print)
-    n1 <- t(sapply(n1, function(x) x[, V1]))
-
-    y1 <- x[, unique(cg)]
-    x1[, sum(eMP), by=t]
+    eMP1 <- attr(x, "pred")
+    eMP1 <- eMP1[rowSums(eMP1) > 0, ]
     ## covariance
-    if (!"COV" %in% names(attributes(x))) COV(x)
+    COV(x)
     cov1 <- attr(x, "COV")
+    if (is.null(dim(cov1))) {
+        cov1 <- cov1[names(cov1) %in% t1]
+    } else {
+        ## 3rd dimension = times
+        cov1 <- cov1[, , dimnames(cov1)[[3]] %in% t1]
+    }
     ## number of covariate groups
     ncg1 <- attr(x, "ncg")
 ### 2 groups only:
-    if (ncg1==2){
+    if (ncg1==2) {
 ### log-rank family
-        ## make observed - expected for group 1
-        eMP1 <- eMP1[, .SD, .SDcols=(ncol(eMP1) - 1)]
-        ## log-rank, weight = 1
-        res[1, "Q" := sum(eMP1)]
-        res[1, "Var" := sum(cov1)]
-        ## weight = n
-        res[2, "Q" := sum(eMP1 * wt1[, n])]
-        res[2, "Var" := sum(cov1 * wt1[, n^2])]
-        res[3, "Q" := sum(eMP1 * wt1[, sqrtN])]
-        res[3, "Var" := sum(cov1 * wt1[, n])]
-        res[4, "Q" := sum(eMP1 * wt1[, S1])]
-        res[4, "Var" := sum(cov1 * wt1[, S1^2])]
-        res[5, "Q" := sum(eMP1 * wt1[, S2])]
-        res[5, "Var" := sum(cov1 * wt1[, S2^2])]
-        for (i in seq.int(fh1)){
-            res[5L + i, "Q" := sum(eMP1 * wt1[, .SD, .SDcols=5L + i])]
-            res[5L + i, "Var" := sum(cov1 * wt1[, .SD, .SDcols=5L + i]^2)]
-        }
+        ## make observed - expected for one group
+        eMP1 <- unlist(eMP1[, .SD, .SDcols=length(eMP1)])
+        data.table::set(res1, j="Q",
+                        value=colSums(wt1 * eMP1))
+        data.table::set(res1, j="Var",
+                        value=colSums(wt1^2 * cov1))
 ### supremum tests
-### aka Renyi statistics
-### (analagous to 2-sample Kolmogorov-Smirnov test)
-        res1 <- data.table::data.table(matrix(0, nrow=5 + fh1, ncol=5))
-        data.table::setnames(res1, c("W", "maxAbsZ", "Var", "Q", "pSupBr"))
-        data.table::set(res1, j=1L, value=c("1", "n", "sqrt(n)", "S1", "S2", FHn))
-        ## log-rank weights
-        res1[1, "maxAbsZ" := max(abs(cumsum(eMP1)))]
-        res1[2, "maxAbsZ" := max(abs(cumsum(eMP1 * wt1[, n])))]
-        res1[3, "maxAbsZ" := max(abs(cumsum(eMP1 * wt1[, sqrtN])))]
-        res1[4, "maxAbsZ" := max(abs(cumsum(eMP1 * wt1[, S1])))]
-        res1[5, "maxAbsZ" := max(abs(cumsum(eMP1 * wt1[, S2])))]
-        for (i in seq.int(fh1)){
-            res1[5L + i, "maxAbsZ" :=  max(abs(cumsum(eMP1 * wt1[, .SD, .SDcols=5L + i])))]
-        }
-        ## results
-        res1[, Var := res1[, Var]]
-        res1[, "Q" := maxAbsZ / sqrt(Var)]
-        res1[, "pSupBr" := sapply(Q, probSupBr)]
-        data.table::setattr(res1, "class", c("sup", class(res1)))
+###  aka Renyi statistics
+###  (analagous to 2-sample Kolmogorov-Smirnov test)
+        n3 <- c("W", "maxAbsZ", "Var", "Q", "pSupBr")
+        res2 <- data.table::data.table(matrix(0, nrow=5 + fh1, ncol=length(n3)))
+        data.table::setnames(res2, n3)
+        data.table::set(res2, j=1L, value=n1)
+        data.table::set(res2, j="maxAbsZ",
+                        value=sapply(abs(cumsum(eMP1 * wt1)), max))
+        data.table::set(res2, j="Var",
+                        value=res1[, Var])
+        res2[, "Q" := maxAbsZ / sqrt(Var)]
+        res2[, "pSupBr" := sapply(Q, probSupBr)]
+        data.table::setattr(res2, "class", c("sup", class(res2)))
     }
 ### >2 groups
-    if (ncg1 > 2){
+    if (ncg1 > 2) {
+        ## degrees of freedom
         df1 <- seq.int(ncg1 - 1L)
-        eMP1 <- eMP1[, .SD, .SDcols=seq.int(ncg1 + 1L, ncol(eMP1))]
+        ## Subset - reduce to df1 degrees of freedom
+        eMP1 <- eMP1[, .SD, .SDcols=grep("eMP_", names(eMP1))]
         ## hold results
-        res2 <- data.table::data.table(matrix(0, nrow=5 + fh1, ncol=4))
-        data.table::setnames(res2, c("W", "chiSq", "df", "pChisq"))
-        data.table::set(res2, j=1L, value=n1)
-        ## we save results below as these are also used by
-        ## tests for trend
-        ## log-rank, weight = 1
-        eMP1cs <- colSums(eMP1)
-        cov1rs <- rowSums(cov1, dims=2)
-        res2[1, "chiSq" := eMP1cs[df1] %*% solve(cov1rs[df1, df1]) %*% eMP1cs[df1]]
-        eMP1n <- colSums(sweep(eMP1, MARGIN=1, STATS=wt1[, n], FUN="*"))
-        ## do this in two steps the first time as easier to read
-        cov1n <- sweep(cov1, MARGIN=3, STATS=wt1[, n^2], FUN="*")
-        cov1n <- rowSums(cov1n, dims=2)
-        res2[2, "chiSq" := eMP1n[df1] %*% solve(cov1n[df1, df1]) %*% eMP1n[df1]]
-        eMP1sn <- colSums(sweep(eMP1, MARGIN=1, STATS=wt1[, sqrtN], FUN="*"))
-        cov1sn <- rowSums(sweep(cov1, MARGIN=3, STATS=wt1[, n], FUN="*"), dims=2)
-        res2[3, "chiSq" := eMP1sn[df1] %*% solve(cov1sn[df1, df1]) %*% eMP1sn[df1]]
-        eMP1S1 <- colSums(sweep(eMP1, MARGIN=1, STATS=wt1[, S1], FUN="*"))
-        cov1S1 <- rowSums(sweep(cov1, MARGIN=3, STATS=wt1[, S1^2], FUN="*"), dims=2)
-        res2[4, "chiSq" := eMP1S1[df1] %*% solve(cov1S1[df1, df1]) %*% eMP1S1[df1]]
-        eMP1S2 <- colSums(sweep(eMP1, MARGIN=1, STATS=wt1[, S2], FUN="*"))
-        cov1S2 <- rowSums(sweep(cov1, MARGIN=3, STATS=wt1[, S2^2], FUN="*"), dims=2)
-        res2[5, "chiSq" := eMP1S2[df1] %*% solve(cov1S2[df1, df1]) %*% eMP1S2[df1]]
-        ## Fleming-Harrington
-        for (i in seq.int(fh1)){
-            eMP1FH <- colSums(sweep(eMP1,
-                                    MARGIN=1,
-                                    STATS=wt1[, unlist(.SD, use.names=FALSE), .SDcols=5L + i],
-                                    FUN="*"))
-            cov1FH <- rowSums(sweep(cov1,
-                                    MARGIN=3,
-                                    STATS=wt1[, unlist(.SD, use.names=FALSE), .SDcols=5L + i],
-                                    FUN="*"),
-                              dims=2)
-            res2[5 + i, "chiSq" := eMP1FH[df1] %*% solve(cov1FH[df1, df1]) %*% eMP1FH[df1]]
-        }
+        res3 <- data.table::data.table(array(0, dim=c(ncol(wt1), 4L)))
+        data.table::setnames(res3, c("W", "chiSq", "df", "pChisq"))
+        data.table::set(res3, j=1L, value=n1)
+        ## We save results below as these are also used by
+        ##  the tests for trend
+        ## Take each column of weight, multiply by each column of eMP
+        ##  then get sum of these values
+        eMP1w <- apply(wt1, MARGIN=2,
+                       FUN=function(wt)
+                           colSums(sweep(eMP1, MARGIN=1, STATS=wt, FUN="*")))
+        ## Same as above but use weight^2; then 
+        cov1w <- apply(wt1, MARGIN=2,
+                       FUN=function(wt)
+                           rowSums(sweep(cov1, MARGIN=3, STATS=wt^2, FUN="*"),
+                                   dims=2))
+        dim(cov1w) <- c(ncg1, ncg1, ncol(cov1w))
+        ## Subset - reduce to df1 degrees of freedom before solving
+        cov1ws <- cov1w[df1, df1, ]
+        cov1ws <- apply(cov1ws, MARGIN=3, FUN=solve)
+        dim(cov1ws) <- c(max(df1), max(df1), length(n1))
+        eMP1ss <- eMP1w[df1, ]
+        ## only need subset for this calculation
+        data.table::set(res3, j="chiSq",
+                        value=
+                            sapply(
+                                seq.int(length(n1)),
+                                function(i)
+                                    eMP1ss[, i] %*% cov1ws[, , i] %*% eMP1ss[, i]))
         ## results
-        res2[, "df" := attr(x, "ncg") - 1L]
-        res2[, "pChisq" := 1 - stats::pchisq(chiSq, df)]
-        data.table::setattr(res2, "class", c("lrt", class(res2)))
+        res3[, "df" := max(df1)]
+        res3[, "pChisq" := 1 - stats::pchisq(chiSq, df)]
+        data.table::setattr(res3, "class", c("lrt", class(res3)))
 ### Tests for trend 
-        if (is.null(scores)) scores <- seq.int(ncg1)
         ## scores - all combinations
         sAC1 <- as.matrix(expand.grid(scores, scores))
         ## scores - product of all combinations
-        scoProd1 <- apply(sAC1, 1, prod)
-        ## Log-rank
-        res[1, "Q" := sum(eMP1cs * scores)]
-        res[1, "Var" := sum(cov1rs * scoProd1)]
-        res[2, "Q" := sum(eMP1n * scores)]
-        res[2, "Var" := sum(cov1n * scoProd1)]
-        res[3, "Q" := sum(eMP1sn * scores)]
-        res[3, "Var" := sum(cov1sn * scoProd1)]
-        res[4, "Q" := sum(eMP1S1 * scores)]
-        res[4, "Var" := sum(cov1S1 * scoProd1)]
-        res[5, "Q" := sum(eMP1S2 * scores)]
-        res[5, "Var" := sum(cov1S2 * scoProd1)]
-        ## Fleming-Harrington
-        for (i in seq.int(fh1)){
-            eMP1FH <- colSums(sweep(eMP1,
-                                    MARGIN=1,
-                                    STATS=wt1[, unlist(.SD, use.names=FALSE), .SDcols=5L + i],
-                                    FUN="*"))
-            cov1FH <- rowSums(sweep(cov1,
-                                    MARGIN=3,
-                                    STATS=wt1[, unlist(.SD, use.names=FALSE), .SDcols=5L + i],
-                                    FUN="*"),
-                              dims=2)
-            res[5 + i, "Q" := sum(eMP1FH * scores)]
-            res[5 + i, "Var" := sum(cov1FH * scoProd1)]
-        }
+        scoProd1 <- apply(sAC1, MARGIN=1, FUN=prod)
+        data.table::set(res1, j="Q",
+                        value=colSums(eMP1w * scores))
+        data.table::set(res1, j="Var",
+                        value=abs(apply(cov1w * scoProd1, MARGIN=3, sum)))
     }
     ## results
-    res[, "Z" := Q / sqrt(Var)]
-    res[, "pNorm" := 2 * (1 - stats::pnorm(abs(Z)))]
-    res[, "chiSq" := Q^2 / Var]
-    res[, "df" := 1]
-    res[, "pChisq" := 1 - stats::pchisq(chiSq, df)]
-    data.table::setattr(res, "class", c("lrt", class(res)))
+    res1[, "Z" := Q / sqrt(Var)]
+    res1[, "pNorm" := 2 * (1 - stats::pnorm(abs(Z)))]
+    res1[, "chiSq" := Q^2 / Var]
+    res1[, "df" := 1]
+    res1[, "pChisq" := 1 - stats::pchisq(chiSq, df)]
+    data.table::setattr(res1, "class", c("lrt", class(res1)))
+    ## add column for times
+    ## these are unique times with at least one event
+    data.table::set(wt1, j="t", value=t1)
     data.table::setattr(x, "lrw", wt1)
-    if (ncg1==2){
-        data.table::setattr(x, "lrt", res)
-        data.table::setattr(x, "sup", res1)
+    if (ncg1==2) {
+        data.table::setattr(x, "lrt", res1)
+        data.table::setattr(x, "sup", res2)
     } else {
-        data.table::setattr(x, "lrt", res2)
-        data.table::setattr(x, "tft", res)
+        data.table::setattr(x, "lrt", res3)
+        res1 <- list("tft"=res1, scores=scores)
+        data.table::setattr(x, "tft", res1)
     }
-    return(attr(x, "lrt"))
+    print(attr(x, "lrt"))
+    print(if (!is.null(attr(x, "sup"))) attr(x, "sup") else attr(x, "tft"))
+    return(invisible())
 }
 ### Helper functions
 ## Probability of supremum of absolute value of
-## standard Brownian motion process B(t)
-## 1e4 is good enough for all practical purposes for k
-probSupBr <- function(x){
+##  standard Brownian motion process B(t)
+## For k, 1e4 is good enough for all practical purposes
+probSupBr <- function(x) {
     k <- c(0L, seq.int(1e4))
     1 - (4 / pi) * (sum(((( - 1)^k) / (2 * k + 1)) * exp(-(((pi^2) * (2 * k + 1)^2) / (8 * x^2)))))
 }
-
-
-          P_1       P_2      eMP_1      eMP_2
- 1: 2.1680672 3.8319328  2.1680672 -2.1680672
- 2: 0.4174757 0.5825243 -0.5825243  0.5825243
- 3: 0.8571429 1.1428571  0.8571429 -0.8571429
- 4: 0.8988764 1.1011236 -0.1011236  0.1011236
- 5: 0.9113924 1.0886076 -1.0886076  1.0886076
- 6: 0.4520548 0.5479452 -0.5479452  0.5479452
- 7: 0.4696970 0.5303030  0.4696970 -0.4696970
- 8: 0.0000000 0.0000000  0.0000000  0.0000000
- 9: 0.9090909 1.0909091 -1.0909091  1.0909091
-10: 0.4489796 0.5510204 -0.5510204  0.5510204
-11: 0.4444444 0.5555556 -0.5555556  0.5555556
-12: 0.4500000 0.5500000 -0.5500000  0.5500000
-13: 0.0000000 0.0000000  0.0000000  0.0000000
-14: 0.0000000 0.0000000  0.0000000  0.0000000
-15: 0.0000000 0.0000000  0.0000000  0.0000000
-16: 0.8800000 1.1200000 -0.1200000  0.1200000
-17: 0.4347826 0.5652174 -0.5652174  0.5652174
-18: 0.4500000 0.5500000 -0.5500000  0.5500000
-19: 0.0000000 0.0000000  0.0000000  0.0000000
-20: 0.0000000 0.0000000  0.0000000  0.0000000
-21: 0.0000000 0.0000000  0.0000000  0.0000000
-22: 0.0000000 0.0000000  0.0000000  0.0000000
-23: 0.4444444 0.5555556 -0.5555556  0.5555556
-24: 0.0000000 0.0000000  0.0000000  0.0000000
-25: 0.0000000 0.0000000  0.0000000  0.0000000
-26: 0.4000000 0.6000000 -0.6000000  0.6000000
-27: 0.0000000 0.0000000  0.0000000  0.0000000
-28: 0.0000000 0.0000000  0.0000000  0.0000000
+## for R CMD check
+S1 <- Var <- maxAbsZ <- chiSq <- Z <- df <- NULL

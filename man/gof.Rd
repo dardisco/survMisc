@@ -2,7 +2,7 @@
 \name{gof}
 \alias{gof}
 \alias{gof.coxph}
-\title{Goodness of fit test for \code{coxph} models}
+\title{\bold{g}oodness \bold{o}f \bold{f}it test for a \code{coxph} object}
 \source{
 Method and example are from: \cr
 May S, Hosmer DW 1998.
@@ -23,8 +23,8 @@ gof(x, ...)
 
 \item{G}{Number of \bold{g}roups into which to divide risk score.
 If \code{G=NULL} (the default), uses closest integer to
-\deqn{G = \max(2, \quad \min(10, \quad \frac{ne}{40}))}{
- G = max(2, min(10, ne/40))}
+ \deqn{G = \max(2, \quad \min(10, \quad \frac{ne}{40}))}{
+       G = max(2, min(10, ne/40))}
 where \eqn{ne} is the number of events overall.}
 }
 \value{
@@ -40,11 +40,11 @@ The columns are \describe{
               for each observation \eqn{i}}
   \item{z}{\eqn{Z} score, calculated as
     \deqn{ Z = \frac{e - exp}{\sqrt{exp}}}{
-           Z = (e-exp)/exp^0.5}
+           Z = (e - exp) / exp^0.5}
  }
   \item{p}{\eqn{p}-value for \eqn{Z}, which is
      \deqn{ p = 2. \code{pnorm}(-|z|)}{
-            p = 2*pnorm(-|z|)}
+            p = 2 * pnorm(-|z|)}
    where \code{pnorm} is the normal distribution function
  with mean \eqn{\mu =0}{0} and standard deviation \eqn{\sigma =1}{1}
 and \eqn{|z|} is the absolute value.}
@@ -56,7 +56,9 @@ This is done with \code{survival:::anova.coxph}.
 The test is distributed as chi-square with \eqn{G-1} degrees of freedom}
 }
 \description{
-Goodness of fit test for \code{coxph} models
+\bold{g}oodness \bold{o}f \bold{f}it test for a \code{coxph} object
+
+
 }
 \details{
 In order to verify the overall goodness of fit,
@@ -65,16 +67,16 @@ the risk score \eqn{r_i}{r[i]} for each observation \eqn{i} is given by
 where \eqn{\hat{\beta}}{B} is the vector of fitted coefficients
 and \eqn{X_i}{X[i]} is the vector of predictor variables for
 observation \eqn{i}.
-\cr
+ \cr
 This risk score is then sorted and 'lumped' into
 a grouping variable with \eqn{G} groups,
 (containing approximately equal numbers of observations).
-\cr
+ \cr
 The number of observed (\eqn{e}) and expected (\eqn{exp}) events in
 each group are used to generate a \eqn{Z} statistic for each group,
 which is assumed to follow a normal distribution with
 \eqn{Z \sim N(0,1)}.
-\cr
+ \cr
 The indicator variable \code{indicG} is added to the
 original model and the two models are compared to determine the
 improvement in fit via the likelihood ratio test.
@@ -82,28 +84,28 @@ improvement in fit via the likelihood ratio test.
 \note{
 The choice of \eqn{G} is somewhat arbitrary but rarely should
 be \eqn{> 10}.
-\cr
+ \cr
 As illustrated in the example, a larger value for
 \eqn{G} makes the \eqn{Z} test for each group more likely to be significant.
 This does \emph{not} affect the significance of adding the
 indicator variable \code{indicG} to the original model.
-\cr \cr
+ \cr \cr
 The \eqn{Z} score is chosen for simplicity, as for large sample sizes
 the Poisson distribution approaches the normal. Strictly speaking,
 the Poisson would be more appropriate for \eqn{e} and \eqn{exp}{exp} as
 per Counting Theory.
-\cr
+ \cr
 The \eqn{Z} score may be somewhat conservative as the expected events
 are calculated using the martingale residuals from the overall model,
 rather than by group. This is likely to bring the expected events
 closer to the observed events.
-\cr \cr
+ \cr \cr
 This test is similar to the Hosmer-Lemeshow test for logistic regression.
 }
 \examples{
 data("pbc", package="survival")
 pbc <- pbc[!is.na(pbc$trt), ]
-### make corrections as per Fleming
+## make corrections as per Fleming
 pbc[pbc$id==253, "age"] <-  54.4
 pbc[pbc$id==107, "protime"] <-  10.7
 ### misspecified; should be log(bili) and log(protime) instead

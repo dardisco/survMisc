@@ -14,24 +14,32 @@ gastric cancer trial data
 \details{
 Data from a trial of locally unresectable gastic cancer.
 \cr
-Patients (45 in each group) were randomized to one of two groups:
+Patients (\eqn{n=45} in each group) were randomized to one of two groups:
 chemotheapy vs. chemotherapy + radiotherapy.
 \cr
 Columns are:
 \describe{
-  \item{time}{Time in days}
-  \item{event}{Death}
-  \item{group}{Treatment \describe{
-    \item{0}{chemotherapy}
-    \item{1}{chemotherapy + radiotherapy}
-    }}
+ \item{time}{Time, in days}
+ \item{event}{Death}
+ \item{group}{Treatment
+  \describe{
+   \item{0}{chemotherapy}
+   \item{1}{chemotherapy + radiotherapy}
+  }
  }
+}
+}
+\examples{
+data("gastric", package="survMisc", verbose=TRUE)
+head(gastric)
 }
 \references{
 Gastrointestinal Tumor Study Group, 1982.
 A comparison of combination chemotherapy and
 combined modality therapy for locally advanced gastric carcinoma.
-\emph{Cancer}. \bold{49}(9):1771-7. \href{http://www.ncbi.nlm.nih.gov/pubmed/6176313}{Pubmed}.
+\emph{Cancer}. \bold{49}(9):1771-7.
+\href{http://dx.doi.org/10.1002/1097-0142(19820501)49:9<1771::AID-CNCR2820490907>3.0.CO;2-M}{
+ Wiley (free)}.
 
 Stablein DM, Koutrouvelis IA, 1985.
 A two-sample test sensitive to crossing hazards in uncensored and singly censored data.
@@ -39,6 +47,6 @@ A two-sample test sensitive to crossing hazards in uncensored and singly censore
 \href{http://www.jstor.org/stable/2531284}{JSTOR}.
 }
 \seealso{
-\code{\link{comp}}
+Examples in \code{\link{comp}}
 }
 
