@@ -1,7 +1,7 @@
 Package: survMisc
 Type: Package
-Version: 0.5.0
-Date: 2016-02-22
+Version: 0.5.1
+Date: 2016-05-11
 Depends:
     survival
 Imports:
@@ -44,5 +44,6 @@ Collate:
     'gof.R'
     'onAttach.R'
     'plotSurv.R'
+    'profLik.R'
     'rsq.R'
     'survMisc_package.R'

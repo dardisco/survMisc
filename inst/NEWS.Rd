@@ -1,6 +1,10 @@
 \name{NEWS}
 \title{NEWS file for the survMisc package}
 
+\section{5/11/16: Version 0.5.1}{
+  Have 'added back' \code{profLik} function from version 0.4.6. Also
+  have re-named the vignette}
+
 \section{2/16/16: Version 0.5.0}{
   \itemize{ 
     \item This is a re-write 'from the ground up'. A more 'oject-oriented'

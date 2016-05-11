@@ -12,7 +12,7 @@ rsq(x, ...)
 \method{rsq}{survfit}(x, ..., sigD = 2)
 }
 \arguments{
-\item{x}{A \code{survfit} or \code{coxph} object}
+\item{x}{A \code{survfit} or \code{coxph} object.}
 
 \item{sigD}{\bold{sig}nificant \bold{d}igits (for ease of display).
 If \code{sigD=NULL}, will return the original numbers.}

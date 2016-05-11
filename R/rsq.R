@@ -1,7 +1,7 @@
 #' @name rsq
 #' @title r^2 measures for a a \code{coxph} or \code{survfit} model
 #'
-#' @param x A \code{survfit} or \code{coxph} object
+#' @param x A \code{survfit} or \code{coxph} object.
 #' @param sigD \bold{sig}nificant \bold{d}igits (for ease of display).
 #' If \code{sigD=NULL}, will return the original numbers.
 #' @inheritParams sf.ten

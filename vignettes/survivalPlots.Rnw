@@ -1,6 +1,6 @@
 \documentclass{article}
 
-% \VignetteIndexEntry{plotGlm}
+% \VignetteIndexEntry{survivalPlots}
 % \VignetteEngine{knitr::knitr}
 
 \usepackage[]{graphicx}
@@ -47,10 +47,10 @@ opts_chunk$set(eval=TRUE,
    fig.keep=c('high', 'none', 'all', 'first', 'last')[1],
    fig.align=c('center', 'left', 'right', 'default')[1],
    fig.show=c('hold', 'asis', 'animate', 'hide')[1],
-   dev=c('pdf', 'png', 'tikz')[1],
-   fig.width=5, fig.height=5, #inches
+   dev=c('pdf', 'png', 'tikz')[2],
+   fig.width=7, fig.height=7, #inches
    fig.env=c('figure', 'marginfigure')[1],
-   fig.pos=c('', 'h', 't', 'b', 'p', 'H')[1])
+   fig.pos=c('', 'h', 't', 'b', 'p', 'H')[3])
 ### Set R options
 options(formatR.arrow=TRUE, width=60)
 @
@@ -109,10 +109,12 @@ a1 <- autoplot(t1)
 suppressMessages(a1$plot <- a1$plot +
                      ggplot2::scale_y_continuous(limits=c(0.8, 1), name="Survival"))
 a1
-## or we can assign within an environment
+## or we can assign them as follows
 a1 <- autoplot(t1)
 ls(a1$plot$scales$scales[[3]]$super$super)
-assign("limits", value=c(0.8, 1), envir=a1$plot$scales$scales[[3]]$super)
+is.environment(a1$plot$scales$scales[[3]]$super$super$limits)
+is.null(a1$plot$scales$scales[[3]]$super$super$limits)
+a1$plot$scales$scales[[3]]$super$super$limits <- c(0.8, 1)
 a1
 @ 
 
@@ -151,16 +153,15 @@ A number of options for plotting a line with just one group.
 t2 <- ten(survfit(Surv(time=time, event=delta) ~ 1, data=kidney))
 autoplot(t2, legLabs="")$plot
 autoplot(t2, legend=FALSE)
-data("rectum.dat", package="km.ci")
-t3 <- ten(survfit(Surv(time, status) ~ 1, data=rectum.dat))
 @ 
 
 \subsection{Using confidence bands}
 
 Here we change the default pointwise confidence intervals to bands.
-This uses the ten object generated above.
 
 <<p10>>=
+data("rectum.dat", package="km.ci")
+t3 <- ten(survfit(Surv(time, status) ~ 1, data=rectum.dat))
 ## change confidence intervals to confidence bands
 ci(t3, how="nair", tL=1, tU=40)
 autoplot(t3, type="fill", alpha=0.6, legend=FALSE)
@@ -192,6 +193,17 @@ data("pbc", package="survival")
 t1 <- ten(Surv(time, status==2) ~ trt + strata(edema), data=pbc, abbNames=FALSE)
 suppressWarnings(str(a1 <- autoplot(t1), max.level=1))
 a1
+@ 
+
+\section{profLik}
+
+Plotting profile likelihood.
+
+<<p40>>=
+data("pbc", package="survival")
+c1 <- survival::coxph(formula = Surv(time, status == 2) ~ age + edema + log(bili) +
+                          log(albumin) + log(protime), data = pbc)
+profLik(c1, col="red", devNew=FALSE)
 @ 
 
 \end{document}
