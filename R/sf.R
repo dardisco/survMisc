@@ -146,9 +146,9 @@ sf.ten <- function(x, ...,
                                     by=eval(cg)])))
   }
   res1[, (what) := x[which(t %in% res1$t),
-                  fun1(e, n), by=eval(cg)]$V1]
+                  fun1(e, ncg), by=eval(cg)]$V1]
   res1[, (nv1) := x[which(t %in% res1$t),
-                 fun1v(e, n), by=eval(cg)]$V1]
+                 fun1v(e, ncg), by=eval(cg)]$V1]
   if (SCV) res1[, "SCV" := Sv / S^2]
   data.table::setattr(x, "sf", res1)
   return(attr(x, "sf"))
