@@ -62,7 +62,7 @@ comp <- function(x, ...) UseMethod("comp")
 #' For \eqn{2} covariate groups, we can use:
 #' \itemize{
 #'  \item \eqn{e_i}{e[i]} the number of events (per time).
-#'  \item \eqn{n_i}{e[i]} the number at risk overall.
+#'  \item \eqn{n_i}{n[i]} the number at risk overall.
 #'  \item \eqn{e1_i}{e1[i]} the number of events in group \eqn{1}.
 #'  \item \eqn{n1_i}{n1[i]} the number at risk in group \eqn{1}.
 #' } 
