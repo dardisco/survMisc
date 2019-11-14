@@ -322,7 +322,7 @@ autoplot.ten <- function(object,
     if (yScale=="frac") {
         g1 <- g1 + scale_y_continuous(yLab)
     } else {
-        y1 <- ggplot_build(g1)$panel$ranges[[1L]]$y.major_source
+        y1 <- ggplot_build(g1)$layout$panel_params[[1L]]$y.major_source
         g1 <- g1 + scale_y_continuous(yLab,
                                       breaks=y1,
                                       labels=paste0(y1 * 100, "%"))
@@ -332,8 +332,8 @@ autoplot.ten <- function(object,
     timeTicks <- match.arg(timeTicks)
     x1 <- get("range", envir=get("range", envir=layer_scales(g1)$x))
     times1 <- switch(EXPR=timeTicks,
-                     major=ggplot_build(g1)$panel$ranges[[1]]$x.major_source,
-                     minor=ggplot_build(g1)$panel$ranges[[1]]$x.minor_source,
+                     major=ggplot_build(g1)$layout$panel_params[[1]]$x.major_source,
+                     minor=ggplot_build(g1)$layout$panel_params[[1]]$x.minor_source,
                      custom=NaN,
                      days=seq(from=min(x1), to=max(x1), by=7L),
                      months=seq(from=min(x1), to=max(x1), by=12L))
@@ -676,7 +676,7 @@ autoplot.survfit <- function(object,
     if (yScale=="frac") {
         g1 <- g1 + scale_y_continuous(yLab)
     } else {
-        y1 <- ggplot_build(g1)$panel$ranges[[1L]]$y.major_source
+        y1 <- ggplot_build(g1)$layout$panel_params[[1L]]$y.major_source
         g1 <- g1 + scale_y_continuous(yLab,
                                       breaks=y1,
                                       labels=paste0(y1 * 100, "%"))
@@ -685,8 +685,8 @@ autoplot.survfit <- function(object,
     timeTicks <- match.arg(timeTicks)
     x1 <- get("range", envir=get("range", envir=layer_scales(g1)$x))
     times1 <- switch(EXPR=timeTicks,
-                     major=ggplot_build(g1)$panel$ranges[[1]]$x.major_source,
-                     minor=ggplot_build(g1)$panel$ranges[[1]]$x.minor_source,
+                     major=ggplot_build(g1)$layout$panel_params[[1]]$x.major_source,
+                     minor=ggplot_build(g1)$layout$panel_params[[1]]$x.minor_source,
                      custom=NaN,
                      weeks=seq(from=min(x1), to=max(x1), by=7L),
                      months=seq(from=min(x1), to=max(x1), by=12L))
