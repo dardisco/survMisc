@@ -151,8 +151,8 @@ cutp.coxph <- function(x, ...,
             "U"=abs(unlist(l1)))
         data.table::setnames(res2, old="u1", new=names(d1[i]))
         data.table::setorder(res2, -U)
-        s2 <- findS2(sum(x$nevent))
-        res2[, "Q" := U / (sqrt(s2) * sqrt(sum(x$nevent) - 1))]
+        s2 <- findS2(sum(ten(x$y ~ 0)$e>0))
+        res2[, "Q" := U / (sqrt(s2) * sqrt(sum(ten(x$y ~ 0)$e>0) - 1))]
         res2[, "p" := unlist(lapply(Q, findP))]
         return(res2)
     })
